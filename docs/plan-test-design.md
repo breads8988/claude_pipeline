@@ -1,6 +1,6 @@
 # Plan: BABOK in write-ac, ISTQB in gen-testcase
 
-Status: proposed 2026-11-07 · Waiting for review · Blocks the pilot
+Status: proposed 2026-11-07 · Decisions 1, 2, 4, 5 agreed 2026-11-08 · Decision 3 pending · Blocks the pilot
 
 ## Why
 - `write-ac` and `gen-testcase` define format only. They do not say how to analyse a requirement or how to design tests.
@@ -84,9 +84,12 @@ New IDs make each coverage item traceable:
 3. Phase C → commit, run lint and tests on the example.
 4. Pilot on one real ticket (existing `docs/plan.md`).
 
-## Decisions needed
-1. **Criticality → priority:** AC has 4 levels, TC has 3. Map 1:1 with P1–P4, or Critical→P1, High→P2, Medium/Low→P3?
-2. **Implementation-free AC (A5):** AC states behaviour only; clicks and screens move to TCs. Agree?
-3. **Depth defaults:** accept the table above?
-4. **Non-functional AC:** keep in AC; TCs typed `Non-functional` and run only when they can be checked manually on staging?
-5. **`gen-ac-from-jira`:** keep it for its current project and port a generic copy here, or retire it after the port?
+## Decisions
+
+| # | Decision |
+|---|---|
+| 1 | One scale for AC criticality and TC priority, with icons: 🔴 Critical · 🟠 High · 🟡 Medium · ⚪ Low. TC priority = criticality of the AC it covers (highest one). `P1`–`P3` is retired everywhere (templates, naming, run file, smoke scope = 🔴). |
+| 2 | AC are implementation-free. Clicks and screens live in TCs only. |
+| 3 | Depth by risk: pending explanation and review. |
+| 4 | Non-functional AC stay in AC. Their TCs are typed `Non-functional` and run only when they can be checked manually on staging. |
+| 5 | Keep `gen-ac-from-jira` for its current project. Port a generic copy into `write-ac`. |
