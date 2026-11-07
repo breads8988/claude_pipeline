@@ -1,0 +1,10 @@
+{
+  "_comment": "Disabled: Atlassian is enabled as an account connector (mcp__Atlassian_Rovo__*). To use a project-level server instead, move the block under _disabled_mcpServers into mcpServers.",
+  "mcpServers": {},
+  "_disabled_mcpServers": {
+    "atlassian": {
+      "type": "sse",
+      "url": "https://mcp.atlassian.com/v1/sse"
+    }
+  }
+}
