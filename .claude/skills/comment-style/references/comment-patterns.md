@@ -19,8 +19,9 @@ Applies to every Jira comment. Not a suggestion.
 | Whole comment | ≤ 15 rendered lines |
 | Headline | ≤ 15 words |
 | Outside the table | Headline + `Next` bullet + max 3 judgement bullets |
-| Sentence | ≤ 20 words |
 | Table cell | ≤ 15 words |
+
+Sentence length follows `.claude/rules/writing-style.md`.
 
 ## Skeleton
 
