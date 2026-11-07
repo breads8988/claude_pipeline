@@ -9,6 +9,13 @@ Replace the generic checklist with domain terms, limits, states and compliance i
 - Key business rules: <fill in>
 - Compliance or regulation: <fill in>
 
+## Entities
+| Entity | Meaning | Features that use it |
+| --- | --- | --- |
+| <entity> | <one line> | <feature codes> |
+
+- `write-ac` searches other features by entity to find impacted existing behaviour.
+
 ## Glossary
 | Term | Meaning |
 | --- | --- |

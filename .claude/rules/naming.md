@@ -7,12 +7,21 @@
 | Acceptance criteria | `AC-<CODE>-<NNN>` | `AC-USR-001` |
 | Test case | `TC-<CODE>-<NNN>` | `TC-USR-014` |
 | Open question | `OQ-<CODE>-<NNN>` | `OQ-USR-002` |
+| Business rule | `BR-<CODE>-<NNN>` | `BR-USR-001` |
+| Data constraint (field) | `FLD-<CODE>-<NN>` | `FLD-USR-01` |
+| Decision table / rule | `DT-<CODE>-<NN>` / `.R<n>` | `DT-USR-01.R3` |
+| State model / transition | `ST-<CODE>-<NN>` / `.T<n>` | `ST-USR-01.T2` |
 | Bug draft file | `qa/tickets/BUG-<jira-key>.md` | `BUG-ABC-123.md` |
 | Task draft file | `qa/tickets/TASK-<jira-key>.md` | `TASK-ABC-124.md` |
 
-- Numbers have 3 digits, sequential per Feature Code, never reused.
+- AC, TC, OQ, BR use 3 digits; FLD, DT, ST use 2 digits. Sequential per Feature Code, never reused.
 - Do not renumber. Mark removed items `Status: Deprecated`.
 - Feature Codes are listed in `.claude/rules/project.md`. Add new codes there first.
+
+## Criticality and priority
+- One scale for AC, rules, models and TC: 🔴 Critical · 🟠 High · 🟡 Medium · ⚪ Low.
+- A TC's priority = the highest criticality among the items it covers.
+- AC `Type`: Functional | Non-functional | Transition. AC `Likelihood`: Normal | High.
 
 ## Folders
 - Feature folder: lowercase kebab-case (`user-invitation`, `order-history`).
@@ -25,7 +34,7 @@
 
 ## TC fields
 - `Role`: a role from `.claude/rules/project.md`.
-- `Priority`: P1 | P2 | P3.
+- `Priority`: 🔴 | 🟠 | 🟡 | ⚪.
 - `Type`: Functional | Negative | Boundary | Regression | Smoke.
 - `Automation`: Not yet | Candidate | Done.
 - `Status`: Active | Blocked | Deprecated. `Blocked` needs `Blocked by: OQ-<CODE>-<NNN>`.
