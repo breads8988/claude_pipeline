@@ -12,7 +12,7 @@ Status: proposed 2026-11-07 · Decisions 1, 2, 4, 5 agreed 2026-11-08 · Decisio
 |---|---|---|
 | IIBA BABOK Guide | v3 (current guide). The Business Analysis Standard (2025) complements it, same 6 knowledge areas and 30 tasks | Requirement analysis, AC quality, business rules, decision and state models |
 | IIBA "9 quality criteria for requirements" | — | AC quality gate |
-| ISTQB CTFL syllabus | v4.0.1, chapter 4 (test analysis and design), chapter 5 (risk, defect reports) | Test techniques, coverage items, risk-based depth, defect report fields |
+| ISTQB CTFL syllabus | v4.0.1, 2024-09-15, official PDF; chapter 4 (test analysis and design), chapter 5 (risk, defect reports) | Test techniques, coverage items, risk-based depth, defect report fields |
 | Existing skill `gen-ac-from-jira` (user's) | — | Ported: analysis checklist, scenario classes, GWT rules, criticality, final gate |
 
 ## Core idea: AC models feed test techniques
@@ -62,13 +62,37 @@ New IDs make each coverage item traceable:
 | B8 | `tc-reviewer` checks: every coverage item has a TC, technique fits the model, depth matches risk | `tc-reviewer.md` |
 | B9 | Defect report fields (ISTQB ch. 5): `Severity` (tester) separate from `Priority to fix` (PO); context: TC, technique, test data | `qa/_templates/bug.md` |
 
-### Depth by risk (proposed defaults)
+### Depth by risk
 
-| Risk | EP | BVA | Decision table | State transition |
+Source: ISTQB CTFL v4.0.1 (2024-09-15), read in full for chapters 4 and 5.
+
+What the syllabus states:
+
+| Section | Statement |
+|---|---|
+| 5.2.3 | Product risk analysis determines "the test techniques to be employed and the coverage to be achieved" and may influence thoroughness. |
+| 5.2 | Risk level = likelihood × impact (quantitative), or a risk matrix (qualitative). |
+| 4.2.1 | EP: one test per partition is sufficient; 100% = every valid and invalid partition covered. *Each Choice* coverage for several fields, no combinations. |
+| 4.2.2 | 3-value BVA is "more rigorous than 2-value BVA" and may detect defects 2-value misses. |
+| 4.2.3 | Decision table: coverage items = feasible columns. Tables may be minimised (merge columns where a condition does not change the outcome). With many conditions, a minimised table or a risk-based approach may reduce the rules. |
+| 4.2.4 | Valid transitions (0-switch) is "the most widely used" criterion. All transitions (valid + invalid) "should be a minimum requirement for mission and safety-critical software". One invalid transition per test case, to avoid defect masking. |
+| 4.4 | Checklists hold no automatically checkable items and are updated regularly. Error guessing and exploratory testing complement formal techniques. |
+| 4.5 | ATDD order: positive, negative, then non-functional. Cover every story characteristic, nothing beyond it, no two tests for the same characteristic. |
+| 5.1.5 | Execution order may be risk-based, coverage-based or requirements-based; dependencies can override it. |
+
+Internal convention built on 5.2.3 (the syllabus does not map risk levels to techniques; this table is ours):
+
+| AC criticality | EP | BVA | Decision table | State transition |
 |---|---|---|---|---|
-| High (Critical AC, or High + likely) | All partitions | 3-value | All feasible rules | All transitions, valid and invalid |
-| Medium | All partitions | 2-value | All feasible rules | Valid transitions (0-switch) |
-| Low | Valid + main invalid | 2-value on main field | Merge same-outcome rules | All states |
+| 🔴 Critical | All partitions | 3-value | All feasible columns | All transitions (valid + invalid) |
+| 🟠 High | All partitions | 2-value | All feasible columns | Valid transitions |
+| 🟡 Medium | All partitions | 2-value | All feasible columns | Valid transitions |
+| ⚪ Low | All partitions | 2-value | Minimised table | Valid transitions |
+
+- EP stays at 100% at every level: one test per partition is cheap.
+- 🔴 uses the strongest criteria named in 4.2.2 and 4.2.4. Payment amounts, limits and transaction states are typically 🔴.
+- Likelihood (5.2): when an AC is new, complex, recently changed or has defect history, raise its depth one level. Recorded per AC as `Likelihood: High`.
+- Each invalid transition gets its own TC (4.2.4).
 
 ## Phase C · Examples, lint, validator
 
@@ -90,6 +114,6 @@ New IDs make each coverage item traceable:
 |---|---|
 | 1 | One scale for AC criticality and TC priority, with icons: 🔴 Critical · 🟠 High · 🟡 Medium · ⚪ Low. TC priority = criticality of the AC it covers (highest one). `P1`–`P3` is retired everywhere (templates, naming, run file, smoke scope = 🔴). |
 | 2 | AC are implementation-free. Clicks and screens live in TCs only. |
-| 3 | Depth by risk: pending explanation and review. |
+| 3 | Depth by risk: pending review of the sourced table above. |
 | 4 | Non-functional AC stay in AC. Their TCs are typed `Non-functional` and run only when they can be checked manually on staging. |
 | 5 | Keep `gen-ac-from-jira` for its current project. Port a generic copy into `write-ac`. |
