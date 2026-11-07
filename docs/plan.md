@@ -20,7 +20,7 @@ Status: agreed 2026-11-07 · Not started
 | D7 | Default execution is Mode B: an agent runs TCs in Claude in Chrome on staging. |
 | D8 | The agent logs in by itself through the app's login form, with one test account per role. TCs carry a `Role` field. |
 | D9 | Report is exported as one HTML file. Screenshots are taken and embedded for failed TCs only. |
-| D10 | An agent Pass is final (`Pass`); no separate verify step, because expected results are approved at the TC gate. A Fail is always confirmed by the user before a bug goes to Jira. |
+| D10 | An agent Pass is final (`Pass`); no mandatory verify step, because expected results are approved at the TC gate. When time allows, the user may re-check P1 passes (optional). A Fail is always confirmed by the user before a bug goes to Jira. |
 
 ## Pipeline
 
@@ -65,7 +65,7 @@ OQ answered → /resolve-oq → update AC → TC Blocked → Active → 🔔
 | 3.2 | `test-runner` agent (Mode B): log in per role on the staging URL only, run steps, compare with expected, record `Pass` · `Fail` · `Blocked` · `Skip` | `.claude/agents/test-runner.md` | Stops and notifies on OTP or an unknown URL |
 | 3.3 | Screenshot on Fail only, saved under the run's `evidence/` | `test-runner.md` | No screenshots for non-failed TCs |
 | 3.4 | Fail → `log-ticket` drafts the bug. User verifies before Jira. | `log-ticket/SKILL.md` | Bug draft links TC, AC, run and evidence |
-| 3.5 | `/end-run`: summary, HTML report (fail screenshots embedded), notification | `.claude/commands/`, report script | One self-contained HTML file per run |
+| 3.5 | `/end-run`: summary, HTML report (fail screenshots embedded, P1 passes listed as optional re-check), notification | `.claude/commands/`, report script | One self-contained HTML file per run |
 
 ### Phase 4 · Enforcement
 
@@ -77,7 +77,7 @@ OQ answered → /resolve-oq → update AC → TC Blocked → Active → 🔔
 
 ### Pilot
 - After phases 1–3, run one real ticket end to end.
-- Record: lint hits, false positives, reviewer findings, agent Pass/Fail accuracy (spot-check passes in the first cycles), time spent.
+- Record: lint hits, false positives, reviewer findings, agent Pass/Fail accuracy (from optional P1 re-checks), time spent.
 - Adjust rules and vocabulary from the results before phase 4.
 
 ## Backlog (later)
