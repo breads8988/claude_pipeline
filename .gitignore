@@ -6,3 +6,8 @@ CLAUDE.local.md
 .DS_Store
 __pycache__/
 *.pyc
+
+# Local test data and run output
+qa/test-accounts.local.md
+qa/runs/*/evidence/
+qa/reports/*.html

@@ -24,6 +24,18 @@
 - When automation exists, scripts carry the tag `@TC-<CODE>-<NNN>`.
 
 ## TC fields
+- `Role`: a role from `.claude/rules/project.md`.
 - `Priority`: P1 | P2 | P3.
 - `Type`: Functional | Negative | Boundary | Regression | Smoke.
 - `Automation`: Not yet | Candidate | Done.
+- `Status`: Active | Blocked | Deprecated. `Blocked` needs `Blocked by: OQ-<CODE>-<NNN>`.
+
+## File status (header of `ac.md` and `tc.md`)
+- `Draft` → `Approved` (via `/approve`) or `Changes requested` (via `/reject`).
+- Any edit to an `Approved` file sets it back to `Draft`.
+
+## Runs
+- Run file: `qa/runs/<YYYY-MM-DD>-<feature>-<build>.md`.
+- Evidence: `qa/runs/<run>/evidence/<TC-ID>.png` (failed TCs only, git-ignored).
+- Report: `qa/reports/<run>.html` (git-ignored).
+- Examples live in `_example/` folders and are never edited per project.

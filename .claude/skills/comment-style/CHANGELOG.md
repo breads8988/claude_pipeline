@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0 — 2026-11-07
+- `blocked` narrowed to `is/are/was blocked`: `Blocked` is now a TC and run status.
+- AC header field renamed `Open OQ` → `Open questions` (false hit on the `Open <Page>` rule).
+
 ## 2.0.0 — 2026-11-07: shared, project-independent version
 
 Source: the comment-style skill of one earlier project (SKILL.md, `references/vocabulary.md`, `scripts/lint.py`).

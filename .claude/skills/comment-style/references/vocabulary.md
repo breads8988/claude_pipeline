@@ -72,7 +72,7 @@ Technical words for AC and TC text. `scripts/lint.py` reads every table whose fi
 | Banned | Use | Level | Example |
 |---|---|---|---|
 | refused | rejected with `ERR-…` | error | rejected with `ERR-<CODE>-NN`: `<copy>` |
-| blocked | rejected · disabled · not permitted | warn | |
+| is blocked, are blocked, was blocked | rejected · disabled · not permitted (`Blocked` is reserved for TC and run status) | warn | |
 | cannot | is not permitted (role) · disabled (UI) | warn | the `<Toggle>` toggle is disabled |
 | does not respond | times out · returns HTTP 5xx | error | the `<service>` returns HTTP 503 |
 | not allowed | not permitted | error | |
