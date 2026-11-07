@@ -47,6 +47,7 @@ Skills read this table. Keep it up to date.
 - Jira writes (create, comment, transition) need user confirmation first.
 - Domain-specific checks live in `.claude/rules/domain.md`. Skills must not hardcode a domain.
 - Run the `comment-style` lint on AC and TC files before saving. Exit 1 or 2 blocks the save.
+- Shared files stay generic for all projects. Put project-specific content only in the per-project files listed in `README.md`.
 
 ## Commands
 - Lint AC/TC: `python3 .claude/skills/comment-style/scripts/lint.py <file.md>`
