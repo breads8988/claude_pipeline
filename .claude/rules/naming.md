@@ -3,10 +3,10 @@
 ## IDs
 | Item | Format | Example |
 | --- | --- | --- |
-| Feature Code | 3-4 uppercase letters | `TRF`, `FX`, `KYC` |
-| Acceptance criteria | `AC-<CODE>-<NNN>` | `AC-TRF-001` |
-| Test case | `TC-<CODE>-<NNN>` | `TC-TRF-014` |
-| Open question | `OQ-<CODE>-<NNN>` | `OQ-TRF-002` |
+| Feature Code | 3-4 uppercase letters | `USR`, `ORD`, `RPT` |
+| Acceptance criteria | `AC-<CODE>-<NNN>` | `AC-USR-001` |
+| Test case | `TC-<CODE>-<NNN>` | `TC-USR-014` |
+| Open question | `OQ-<CODE>-<NNN>` | `OQ-USR-002` |
 | Bug draft file | `qa/tickets/BUG-<jira-key>.md` | `BUG-ABC-123.md` |
 | Task draft file | `qa/tickets/TASK-<jira-key>.md` | `TASK-ABC-124.md` |
 
@@ -15,7 +15,7 @@
 - Feature Codes are listed in `.claude/rules/project.md`. Add new codes there first.
 
 ## Folders
-- Feature folder: lowercase kebab-case (`transfer`, `fx-rate`).
+- Feature folder: lowercase kebab-case (`user-invitation`, `order-history`).
 - One `ac.md` and one `tc.md` per feature folder.
 
 ## Traceability

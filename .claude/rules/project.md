@@ -16,7 +16,7 @@ Skills read this file. Keep it up to date. Everything project-specific that is n
 
 | Code | Feature | Folder |
 | --- | --- | --- |
-| <3-4 chars, e.g. TRF> | <feature name> | <kebab-case, e.g. transfer> |
+| <3-4 chars, e.g. USR> | <feature name> | <kebab-case, e.g. user-invitation> |
 
 ## Test environment
 

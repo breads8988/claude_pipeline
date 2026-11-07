@@ -1,6 +1,6 @@
 # Plan: approval, open questions and test execution
 
-Status: agreed 2026-11-07 · Not started
+Status: agreed 2026-11-07 · Phases 1–3 built · Next: pilot on one real ticket
 
 ## Scope
 - Pre-launch: one user runs and approves everything.

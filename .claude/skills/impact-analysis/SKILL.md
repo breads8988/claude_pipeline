@@ -18,8 +18,8 @@ description: Find AC and TC affected by a change request or ticket update using 
 ## Output (table)
 | Item | ID | Impact | Action |
 | --- | --- | --- | --- |
-| AC | AC-TRF-003 | Rule changed | Update |
-| TC | TC-TRF-009 | Expected result changed | Update and re-run |
+| AC | AC-USR-003 | Rule changed | Update |
+| TC | TC-USR-009 | Expected result changed | Update and re-run |
 
 - Add a short list of risks and open questions.
 - Order rows by priority.

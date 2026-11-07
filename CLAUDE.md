@@ -20,7 +20,7 @@ Per-project vs shared files: `README.md`.
 
 ## ID convention
 - Feature Code: 3-4 uppercase letters, listed in `.claude/rules/project.md`.
-- AC: `AC-<CODE>-NNN`. TC: `TC-<CODE>-NNN`. Example: `AC-TRF-001`.
+- AC: `AC-<CODE>-NNN`. TC: `TC-<CODE>-NNN`. Example: `AC-USR-001`.
 - IDs are never reused or renumbered. Retire with `Status: Deprecated`.
 - Details: `.claude/rules/naming.md`.
 
