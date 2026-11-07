@@ -35,7 +35,9 @@
 ## TC fields
 - `Role`: a role from `.claude/rules/project.md`.
 - `Priority`: 🔴 | 🟠 | 🟡 | ⚪.
-- `Type`: Functional | Negative | Boundary | Regression | Smoke.
+- `Type`: Functional | Non-functional.
+- `Technique`: Scenario | EP | BVA | Decision table | State transition | Checklist | Error guessing.
+- `Coverage items`: notation in `gen-testcase` › `references/test-design-techniques.md` §4.
 - `Automation`: Not yet | Candidate | Done.
 - `Status`: Active | Blocked | Deprecated. `Blocked` needs `Blocked by: OQ-<CODE>-<NNN>`.
 

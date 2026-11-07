@@ -20,7 +20,7 @@ A run is one test cycle: one feature, one build, one scope. TCs are specs and ar
 
 | Scope | TCs |
 |---|---|
-| `smoke` | `Type: Smoke`, or `Priority: P1` |
+| `smoke` | `Priority: 🔴` |
 | `regression` | TCs picked by `impact-analysis` for the change; no change given → all active TCs |
 | `all` | Every active and blocked TC |
 | `retest` | TCs failed in the latest run of the feature, or the TC IDs given |
@@ -28,7 +28,7 @@ A run is one test cycle: one feature, one build, one scope. TCs are specs and ar
 3. Create the run file. Same name exists → add `-2`, `-3`.
 4. One row per TC: ID, title, role, priority. Result `⬜`.
 5. `Status: Blocked` TCs → Result `⛔ Blocked`, Note `<OQ-ID>`. They are never executed.
-6. Order rows by role, then priority, so the agent logs in once per role.
+6. Order rows by role, then priority (🔴 first, risk-based), so the agent logs in once per role.
 
 ## 2. Execute
 - Run the `test-runner` agent with the run file path.
@@ -42,6 +42,6 @@ A run is one test cycle: one feature, one build, one scope. TCs are specs and ar
 5. Send the **Run finished** notification (`comment-style` › `references/notifications.md`).
 
 ## Rules
-- An agent `Pass` is final. The report lists P1 passes for an optional re-check.
+- An agent `Pass` is final. The report lists 🔴 passes for an optional re-check.
 - A `Fail` is confirmed by the user before a bug goes to Jira.
 - Results are written as `✅ Pass` · `❌ Fail` · `⛔ Blocked` · `⏭ Skip` · `⬜`.

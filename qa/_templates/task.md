@@ -4,7 +4,7 @@
 | --- | --- |
 | Jira | <KEY-123 or TBD> |
 | Type | QA / Test design / Automation / Investigation |
-| Priority | P1 / P2 / P3 |
+| Priority | 🔴 / 🟠 / 🟡 / ⚪ |
 | Linked | <ticket, AC or TC IDs> |
 | Due | <YYYY-MM-DD or —> |
 

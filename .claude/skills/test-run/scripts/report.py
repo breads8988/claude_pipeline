@@ -7,7 +7,7 @@ Usage:
 - Reads the header table (Field | Value) and the Results table of the run file.
 - Recounts results and rewrites the Summary table in the run file (skip with --no-update).
 - Embeds screenshots for failed TCs only, from qa/runs/<run>/evidence/<TC-ID>.png.
-- Lists P1 passes as an optional re-check.
+- Lists 🔴 Critical passes as an optional re-check.
 
 Exit codes: 0 report written · 2 usage, file or format error.
 """
@@ -153,6 +153,11 @@ def md(text):
     return re.sub(r'`([^`]+)`', r'<code>\1</code>', html.escape(text))
 
 
+def is_critical(pri):
+    p = pri.strip()
+    return p.startswith('🔴') or p.lower().startswith('critical')
+
+
 def cls(state):
     return 's-' + state.replace(' ', '').replace('Notrun', 'NotRun')
 
@@ -181,9 +186,9 @@ def render(run_path, title, meta, results):
             f'<td>{e(r.get("role", ""))}</td>', f'<td>{e(r.get("pri", ""))}</td>',
             f'<td class="s {cls(r["state"])}">{e(r["state"])}</td>',
             f'<td class="nw">{e(r.get("bug", ""))}</td>', f'<td>{md(r.get("note", ""))}{ev}</td>']) + '</tr>')
-    recheck = [r for r in results if r['state'] == 'Pass' and r.get('pri', '').upper() == 'P1']
+    recheck = [r for r in results if r['state'] == 'Pass' and is_critical(r.get('pri', ''))]
     recheck_html = ('<ul>' + ''.join(f'<li>{e(r.get("tc", ""))} · {e(r.get("title", ""))} · {e(r.get("role", ""))}</li>'
-                                     for r in recheck) + '</ul>') if recheck else '<p class="muted">No P1 passes.</p>'
+                                     for r in recheck) + '</ul>') if recheck else '<p class="muted">No 🔴 passes.</p>'
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(title)}</title><style>{CSS}</style></head>
@@ -195,7 +200,7 @@ def render(run_path, title, meta, results):
 <h2>Results</h2>
 <div class="wrap"><table><thead><tr><th>TC</th><th>Title</th><th>Role</th><th>Pri</th><th>Result</th><th>Bug</th><th>Note / evidence</th></tr></thead>
 <tbody>{''.join(rows)}</tbody></table></div>
-<h2>Optional re-check: P1 passes ({len(recheck)})</h2>
+<h2>Optional re-check: 🔴 passes ({len(recheck)})</h2>
 {recheck_html}
 </main></body></html>
 """

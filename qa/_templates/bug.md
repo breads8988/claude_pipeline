@@ -3,11 +3,15 @@
 | Field | Value |
 | --- | --- |
 | Jira | <KEY-123 or TBD> |
-| Severity | Critical / Major / Minor / Trivial |
+| Severity | 🔴 Critical / 🟠 High / 🟡 Medium / ⚪ Low (impact, set by QA) |
+| Priority to fix | <set by PO; urgency> |
+| Status | Open |
 | Environment | <env, build, browser or device> |
 | Linked TC | TC-<CODE>-001 |
 | Linked AC | AC-<CODE>-001 |
 | Linked run | `qa/runs/<run>.md` or — |
+| Context | <technique, coverage item, test data used> |
+| Reporter | <name, role> · <YYYY-MM-DD> |
 
 **Preconditions**
 - <account, data, state>

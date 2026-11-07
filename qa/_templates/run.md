@@ -15,7 +15,7 @@
 
 | TC | Title | Role | Pri | Result | Bug | Evidence | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| TC-<CODE>-001 | <title> | <role> | P1 | ⬜ | — | — | |
+| TC-<CODE>-001 | <title> | <role> | 🔴 | ⬜ | — | — | |
 
 Result values: ⬜ Not run · ✅ Pass · ❌ Fail · ⛔ Blocked · ⏭ Skip.
 

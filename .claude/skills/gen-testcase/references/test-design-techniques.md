@@ -1,0 +1,88 @@
+# Test design techniques (ISTQB-aligned)
+
+Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and design) and §5.2 (risk). Section numbers below refer to it.
+
+## 1. Test analysis → test design
+
+1. **Test conditions** ("what to test", §4.1): list every item in `ac.md` that a test must exercise.
+2. **Coverage items**: derive them per technique (table §2).
+3. **Test cases** ("how to test"): one TC exercises one or more coverage items, with preconditions, inputs and expected results.
+4. **Coverage** = coverage items exercised ÷ coverage items identified, per technique.
+
+## 2. Model → technique → coverage items
+
+| `ac.md` item | Technique | Coverage items | Syllabus |
+|---|---|---|---|
+| `FLD` data constraint | Equivalence partitioning (EP) | Every valid and invalid partition; one test per partition is sufficient | §4.2.1 |
+| `FLD` with min or max | Boundary value analysis (BVA) | 2-value: boundary + nearest neighbour outside. 3-value: boundary + both neighbours | §4.2.2 |
+| `DT` decision table (incl. role × action) | Decision table testing | Every feasible column (`DT-…R<n>`) | §4.2.3 |
+| `ST` state model | State transition testing | Valid transitions; with *all transitions*, also each invalid transition | §4.2.4 |
+| `AC` GWT scenario | Scenario test (ATDD) | Each scenario | §4.5.3 |
+| `BR` business rule | Covered through the TC that applies the rule | Each rule at least once | §4.5.2 |
+| `domain.md` checklist | Checklist-based testing | Each applicable checklist item | §4.4.3 |
+| Tester experience | Error guessing | Each anticipated defect type (fault attack) | §4.4.1 |
+
+### Equivalence partitioning (§4.2.1)
+- Split each field's values into partitions the system treats the same way: valid and invalid.
+- Typical invalid partitions: below min, above max, wrong type, wrong format, empty when required.
+- Several fields → *Each Choice*: every partition of every field at least once; combinations are not required.
+- Combine valid partitions of several fields in one TC; give each invalid partition its own TC, so one failure cannot hide another.
+
+### Boundary value analysis (§4.2.2)
+- Only for ordered partitions (numbers, lengths, dates).
+- Range 1–100, 2-value: `0, 1, 100, 101`. 3-value: `0, 1, 2, 99, 100, 101`.
+- 3-value is "more rigorous" and catches defects 2-value misses (e.g. `x ≤ 10` coded as `x = 10`).
+
+### Decision table testing (§4.2.3)
+- Columns = combinations of conditions; the last row is the outcome.
+- Remove infeasible columns. A minimised table merges columns where a condition does not change the outcome.
+- With many conditions, the number of columns grows exponentially; minimise or select by risk.
+
+### State transition testing (§4.2.4)
+| Criterion | Coverage items | Strength |
+|---|---|---|
+| All states | Each state | Weakest |
+| Valid transitions (0-switch) | Each valid transition | "Most widely used"; implies all states |
+| All transitions | Each valid transition and each invalid transition | Implies both above; "minimum requirement for mission and safety-critical software" |
+
+- Test **one invalid transition per TC**, to avoid defect masking.
+
+### Scenario test / ATDD (§4.5.3)
+- Order: positive, then negative, then non-functional.
+- Cover every characteristic of the story, nothing beyond it.
+- No two TCs for the same characteristic.
+
+### Checklist-based and error guessing (§4.4)
+- Checklist items are not automatically checkable; keep the `domain.md` checklist current.
+- Error guessing ideas: double submission, session expiry mid-flow, back button after submit, stale data in a second tab, special characters, very long input, concurrent edits.
+
+## 3. Depth by risk (internal convention on §5.2.3)
+
+The syllabus states that product risk determines "the test techniques to be employed and the coverage to be achieved". It does not map levels to techniques; this table is our convention.
+
+| Item criticality | EP | BVA | Decision table | State transition |
+|---|---|---|---|---|
+| 🔴 Critical | All partitions | 3-value | All feasible columns | All transitions (valid + invalid) |
+| 🟠 High | All partitions | 2-value | All feasible columns | Valid transitions |
+| 🟡 Medium | All partitions | 2-value | All feasible columns | Valid transitions |
+| ⚪ Low | All partitions | 2-value | Minimised table | Valid transitions |
+
+- Criticality comes from the item itself (`FLD`, `DT`, `ST` row or header), else from the AC it covers.
+- `Likelihood: High` on the AC raises the depth one level (risk = likelihood × impact, §5.2).
+
+## 4. Coverage item notation in a TC
+
+| Item | Notation |
+|---|---|
+| AC scenario | `AC-USR-002` |
+| Business rule | `BR-USR-001` |
+| EP partition | `FLD-USR-01 EP: invalid, empty` |
+| BVA value | `FLD-USR-01 BVA: max+1 = 255` |
+| Decision table column | `DT-USR-01.R2` |
+| Transition | `ST-USR-01.T4` |
+| Checklist item | `CHK: double submission` |
+| Error guess | `EG: back button after submit` |
+
+## 5. Priority and execution order (§5.1.5)
+- TC priority = highest criticality among its coverage items.
+- Runs execute risk-based: 🔴 first. Dependencies can override the order.

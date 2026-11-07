@@ -33,11 +33,11 @@ RUN = textwrap.dedent('''\
 
     | TC | Title | Role | Pri | Result | Bug | Evidence | Note |
     | --- | --- | --- | --- | --- | --- | --- | --- |
-    | TC-USR-001 | Invite valid email | Admin | P1 | ✅ Pass | — | — | |
-    | TC-USR-002 | Reject duplicate | Admin | P1 | ❌ Fail | BUG-TBD | TC-USR-002.png | no error displayed |
-    | TC-USR-003 | Viewer hidden button | Viewer | P2 | ✅ Pass | — | — | |
-    | TC-USR-004 | Link expiry | Admin | P2 | ⛔ Blocked | — | — | OQ-USR-001 |
-    | TC-USR-005 | <script>x</script> | Admin | P3 | ⬜ | | | |
+    | TC-USR-001 | Invite valid email | Admin | 🔴 | ✅ Pass | — | — | |
+    | TC-USR-002 | Reject duplicate | Admin | 🔴 | ❌ Fail | BUG-TBD | TC-USR-002.png | no error displayed |
+    | TC-USR-003 | Viewer hidden button | Viewer | 🟠 | ✅ Pass | — | — | |
+    | TC-USR-004 | Link expiry | Admin | 🟡 | ⛔ Blocked | — | — | OQ-USR-001 |
+    | TC-USR-005 | <script>x</script> | Admin | ⚪ | ⬜ | | | |
 
     ## Summary
     | Total | Pass | Fail | Blocked | Skip | Not run |
@@ -89,7 +89,7 @@ class ReportTest(unittest.TestCase):
         _, _, _, html = self.go()
         self.assertLess(html.index('TC-USR-002'), html.index('TC-USR-001'))
 
-    def test_p1_passes_listed_for_recheck(self):
+    def test_critical_passes_listed_for_recheck(self):
         _, _, _, html = self.go()
         section = html[html.index('Optional re-check'):]
         self.assertIn('TC-USR-001', section)
