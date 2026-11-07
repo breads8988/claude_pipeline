@@ -6,7 +6,7 @@
 | Covers AC | AC-<CODE>-001 |
 | Type | Functional / Negative / Boundary / Regression / Smoke |
 | Priority | P1 / P2 / P3 |
-| Automation | Not yet / Candidate / Done |
+| Automation | `Not yet` / `Candidate` / `Done` |
 | Status | Active / Deprecated |
 
 **Precondition**

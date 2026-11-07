@@ -11,13 +11,13 @@ description: Generate manual test cases from acceptance criteria with preconditi
 ## Steps
 1. Read the config table in `CLAUDE.md`.
 2. Read `qa/specs/<feature>/ac.md`.
-3. Read `.claude/rules/naming.md`, `writing-style.md` and `domain.md`.
+3. Read `.claude/rules/naming.md` and `domain.md`. Load the `comment-style` skill for wording.
 4. Read existing `qa/testcases/<feature>/tc.md`. Continue its numbering.
 5. For each AC, write positive, negative and boundary TCs where they apply.
 6. Fill every field of `qa/_templates/tc.md`.
 7. Set `Priority` from AC criticality (Critical -> P1, High -> P1/P2, others -> P2/P3).
 8. Set `Automation`: Candidate for stable, high-value or data-driven flows. Otherwise Not yet.
-9. Add TC IDs to `qa/traceability/matrix.md`.
+9. Run the `comment-style` lint on `tc.md`; fix until exit 0. Add TC IDs to `qa/traceability/matrix.md`.
 10. Report any AC with no TC and any gaps found.
 
 ## Quality bar

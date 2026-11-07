@@ -9,6 +9,13 @@ Replace the generic checklist with domain terms, limits, states and compliance i
 - Key business rules: <fill in>
 - Compliance or regulation: <fill in>
 
+## Glossary
+| Term | Meaning |
+| --- | --- |
+| <term> | <one-line meaning> |
+
+- If a term collides with a banned word, add it to the `Allow` table in `vocabulary.project.md`.
+
 ## Generic checklist (use to find missing AC and TC)
 
 ### Input and validation

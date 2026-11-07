@@ -6,7 +6,9 @@
 | Feature Code | 3-4 uppercase letters | `TRF`, `FX`, `KYC` |
 | Acceptance criteria | `AC-<CODE>-<NNN>` | `AC-TRF-001` |
 | Test case | `TC-<CODE>-<NNN>` | `TC-TRF-014` |
-| Bug draft file | `BUG-<jira-key>.md` | `BUG-ABC-123.md` |
+| Open question | `OQ-<CODE>-<NNN>` | `OQ-TRF-002` |
+| Bug draft file | `qa/tickets/BUG-<jira-key>.md` | `BUG-ABC-123.md` |
+| Task draft file | `qa/tickets/TASK-<jira-key>.md` | `TASK-ABC-124.md` |
 
 - Numbers have 3 digits, sequential per Feature Code, never reused.
 - Do not renumber. Mark removed items `Status: Deprecated`.

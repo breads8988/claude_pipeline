@@ -23,7 +23,7 @@ Base principles live in `.claude/rules/writing-style.md`. This skill adds two pa
 |---|---|
 | Comment caps | `Comment caps` rows in the `CLAUDE.md` config table |
 | Extra or allowed words | `.claude/rules/vocabulary.project.md` |
-| Domain terms (never linted as plain words) | `Glossary` in `.claude/rules/domain.md` |
+| Domain terms that collide with banned words | `Allow` table in `vocabulary.project.md` (define them in the `domain.md` Glossary) |
 
 The project value wins. Do not copy these rules into other skills; reference this skill.
 

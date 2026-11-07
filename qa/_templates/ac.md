@@ -18,6 +18,6 @@
 | BR-<CODE>-001 | <rule> | <ticket or doc> |
 
 ## Open questions
-| # | Question | Owner | Status |
-| --- | --- | --- | --- |
-| 1 | <question> | BA/PO | Open |
+| OQ | Risk | Question | Blocks | Owner | Status |
+| --- | --- | --- | --- | --- | --- |
+| OQ-<CODE>-001 | 🔴 / 🟠 / 🟡 | <closed-ended question> | <ID or —> | BA/PO | Open |
