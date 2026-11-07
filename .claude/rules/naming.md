@@ -12,7 +12,7 @@
 
 - Numbers have 3 digits, sequential per Feature Code, never reused.
 - Do not renumber. Mark removed items `Status: Deprecated`.
-- Feature Codes are listed in the CLAUDE.md config table. Add new codes there first.
+- Feature Codes are listed in `.claude/rules/project.md`. Add new codes there first.
 
 ## Folders
 - Feature folder: lowercase kebab-case (`transfer`, `fx-rate`).

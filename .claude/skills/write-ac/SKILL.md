@@ -10,7 +10,7 @@ description: Write acceptance criteria from a Jira ticket as Given/When/Then plu
 - Feature Code and folder (ask only if unclear).
 
 ## Steps
-1. Read the config table in `CLAUDE.md`.
+1. Read `.claude/rules/project.md` (Jira key, Feature Codes).
 2. Read the ticket with the Atlassian MCP. Read linked Confluence pages if any.
 3. Read `.claude/rules/naming.md` and `domain.md`. Load the `comment-style` skill for wording.
 4. Read existing `qa/specs/<feature>/ac.md` if present. Continue its numbering.

@@ -12,7 +12,7 @@ Applies to every Jira comment. Not a suggestion.
 | Bullets | Every line outside the table is a bullet or numbered step. Only the bold headline stands alone. |
 | Never include | Ticket recap, source restatement, process narration, "I have completed…", pasted artifact bodies, diagrams. |
 
-## Caps (defaults; override in the `CLAUDE.md` config table)
+## Caps (defaults; override in `.claude/rules/project.md`)
 
 | Item | Default |
 |---|---|

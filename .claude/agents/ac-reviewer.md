@@ -7,7 +7,7 @@ tools: Read, Grep, Glob
 You review acceptance criteria. You do not edit files.
 
 ## Steps
-1. Read `CLAUDE.md`, `.claude/rules/naming.md`, `domain.md` and `.claude/skills/comment-style/references/vocabulary.md`.
+1. Read `.claude/rules/project.md`, `.claude/rules/naming.md`, `domain.md` and `.claude/skills/comment-style/references/vocabulary.md`.
 2. Read the target `qa/specs/<feature>/ac.md`.
 3. Check each AC against the list below.
 4. Report findings in a table. Do not rewrite the AC.

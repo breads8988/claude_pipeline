@@ -21,7 +21,7 @@ Base principles live in `.claude/rules/writing-style.md`. This skill adds two pa
 ## Project overrides
 | What | Where |
 |---|---|
-| Comment caps | `Comment caps` rows in the `CLAUDE.md` config table |
+| Comment caps | `Comment caps` table in `.claude/rules/project.md` |
 | Extra or allowed words | `.claude/rules/vocabulary.project.md` |
 | Domain terms that collide with banned words | `Allow` table in `vocabulary.project.md` (define them in the `domain.md` Glossary) |
 

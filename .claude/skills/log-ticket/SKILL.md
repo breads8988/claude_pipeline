@@ -18,7 +18,7 @@ Style: `.claude/rules/writing-style.md`. Comment layout: `comment-style` skill.
 Use `TBD` as `<key>` until Jira assigns one, then rename the file.
 
 ## Steps
-1. Read the config table in `CLAUDE.md` (Jira project key, Feature Codes).
+1. Read `.claude/rules/project.md` (Jira project key, Feature Codes).
 2. Collect the facts. Bug: actual, expected, steps, environment, evidence. Task: goal, scope, done checklist.
 3. Link the related AC and TC IDs when known.
 4. Write the draft from the template, or the comment from `comment-style`.

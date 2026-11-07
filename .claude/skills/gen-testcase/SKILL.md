@@ -9,7 +9,7 @@ description: Generate manual test cases from acceptance criteria with preconditi
 - Feature folder or AC IDs.
 
 ## Steps
-1. Read the config table in `CLAUDE.md`.
+1. Read `.claude/rules/project.md` (Feature Codes).
 2. Read `qa/specs/<feature>/ac.md`.
 3. Read `.claude/rules/naming.md` and `domain.md`. Load the `comment-style` skill for wording.
 4. Read existing `qa/testcases/<feature>/tc.md`. Continue its numbering.

@@ -7,7 +7,7 @@ One copy per project. Shared files stay identical across projects; only per-proj
 
 | File | What to fill in |
 |---|---|
-| `CLAUDE.md` → *Project config* table only | Project name, domain, Jira key, Feature Codes, caps |
+| `.claude/rules/project.md` | Project name, domain, Jira key, Feature Codes, comment caps |
 | `.claude/rules/domain.md` | Domain entities, rules, compliance, Glossary, checklist |
 | `.claude/rules/vocabulary.project.md` | Extra banned words, Allow list for domain terms |
 | `.claude/settings.json` | Permissions, MCP tool names of the project's connectors |
@@ -20,7 +20,7 @@ One copy per project. Shared files stay identical across projects; only per-proj
 
 | File | Purpose |
 |---|---|
-| `CLAUDE.md` → everything except the config table | Layout, IDs, workflow, rules |
+| `CLAUDE.md` | Layout, IDs, workflow, rules |
 | `.claude/rules/writing-style.md` | Always-on writing principles |
 | `.claude/rules/naming.md` | ID and file naming |
 | `.claude/skills/**` | write-ac, gen-testcase, log-ticket, impact-analysis, comment-style |

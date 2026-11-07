@@ -1,17 +1,7 @@
-# QA Project: <PROJECT NAME>
+# QA workspace (shared, generic)
 
-## Project config (fill in once per project)
-| Field | Value |
-| --- | --- |
-| Project name | <name> |
-| Domain | <e.g. payments, e-commerce, HR> |
-| Jira project key | <e.g. ABC> |
-| Feature codes | <3-4 chars each, e.g. TRF, FX, KYC> |
-| Doc language | English |
-| Automation stack | None yet |
-| Comment caps | Default (see `comment-style`): 15 lines, headline 15 words, cell 15 words |
-
-Skills read this table. Keep it up to date.
+This file is identical in every project. Project values live in `.claude/rules/project.md`.
+Per-project vs shared files: `README.md`.
 
 ## Repo layout
 - `qa/specs/<feature>/ac.md`: acceptance criteria per feature.
@@ -23,10 +13,10 @@ Skills read this table. Keep it up to date.
 - `.claude/skills/`: write-ac, gen-testcase, log-ticket, impact-analysis, comment-style.
 - `.claude/agents/`: ac-reviewer, tc-reviewer (read-only reviewers).
 - `.claude/commands/`: /gen-ac, /gen-tc, /impact (shortcuts that call the skills).
-- `.claude/rules/`: naming, writing-style (always on), domain, vocabulary.project. Read before writing AC or TC.
+- `.claude/rules/`: project (config), naming, writing-style, domain, vocabulary.project. Read before writing AC or TC.
 
 ## ID convention
-- Feature Code: 3-4 uppercase letters (`TRF`, `FX`, `KYC`).
+- Feature Code: 3-4 uppercase letters, listed in `.claude/rules/project.md`.
 - AC: `AC-<CODE>-NNN`. TC: `TC-<CODE>-NNN`. Example: `AC-TRF-001`.
 - IDs are never reused or renumbered. Retire with `Status: Deprecated`.
 - Details: `.claude/rules/naming.md`.

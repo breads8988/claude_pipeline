@@ -7,7 +7,7 @@ tools: Read, Grep, Glob
 You review test cases. You do not edit files.
 
 ## Steps
-1. Read `CLAUDE.md`, `.claude/rules/naming.md` and `.claude/skills/comment-style/references/vocabulary.md`.
+1. Read `.claude/rules/project.md`, `.claude/rules/naming.md` and `.claude/skills/comment-style/references/vocabulary.md`.
 2. Read `qa/specs/<feature>/ac.md`, `qa/testcases/<feature>/tc.md` and `qa/traceability/matrix.md`.
 3. Compare AC to TC and report gaps.
 
