@@ -12,7 +12,8 @@ One copy per project. Shared files stay identical across projects; only per-proj
 | `.claude/rules/vocabulary.project.md` | Extra banned words, Allow list for domain terms |
 | `.claude/settings.json` | Permissions, MCP tool names of the project's connectors |
 | `.mcp.json` | Project-level MCP servers (disabled by default) |
-| `qa/specs/`, `qa/testcases/`, `qa/tickets/`, `qa/reports/` | Project artifacts |
+| `qa/specs/`, `qa/testcases/`, `qa/tickets/`, `qa/runs/`, `qa/reports/` | Project artifacts (except `_example/`) |
+| `qa/test-accounts.local.md` | Test account passwords, local only, git-ignored |
 | `qa/traceability/matrix.md` | Project traceability rows |
 | `automation/` (later) | Project test code and config |
 
@@ -23,10 +24,12 @@ One copy per project. Shared files stay identical across projects; only per-proj
 | `CLAUDE.md` | Layout, IDs, workflow, rules |
 | `.claude/rules/writing-style.md` | Always-on writing principles |
 | `.claude/rules/naming.md` | ID and file naming |
-| `.claude/skills/**` | write-ac, gen-testcase, log-ticket, impact-analysis, comment-style |
-| `.claude/agents/**` | ac-reviewer, tc-reviewer |
-| `.claude/commands/**` | /gen-ac, /gen-tc, /impact |
-| `qa/_templates/**` | AC, TC, bug, task templates |
+| `.claude/skills/**` | write-ac, gen-testcase, log-ticket, impact-analysis, comment-style, test-run |
+| `.claude/agents/**` | ac-reviewer, tc-reviewer, test-runner |
+| `.claude/commands/**` | /gen-ac, /approve, /reject, /resolve-oq, /gen-tc, /start-run, /end-run, /impact |
+| `qa/_templates/**` | AC, TC, bug, task, run, test-account templates |
+| `qa/**/_example/` | Golden examples |
+| `docs/plan.md` | Template roadmap and decisions |
 | `README.md`, `.gitignore` | Repo docs and ignores |
 
 - Change a shared file here first, then copy it to each project.
@@ -34,8 +37,8 @@ One copy per project. Shared files stay identical across projects; only per-proj
 
 ## New project
 1. Copy this repo (or use it as a GitHub template).
-2. Fill the per-project files above.
-3. Run `python3 -m unittest discover -s .claude/skills/comment-style/scripts/tests`.
+2. Fill the per-project files above. Copy `qa/_templates/test-accounts.local.md` to `qa/test-accounts.local.md`.
+3. Run both test suites (see `CLAUDE.md` › Commands).
 
 ## Update an existing project
 - Copy only the shared files. Per-project files are never overwritten.

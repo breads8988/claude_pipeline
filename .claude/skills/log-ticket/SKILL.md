@@ -20,9 +20,9 @@ Use `TBD` as `<key>` until Jira assigns one, then rename the file.
 ## Steps
 1. Read `.claude/rules/project.md` (Jira project key, Feature Codes).
 2. Collect the facts. Bug: actual, expected, steps, environment, evidence. Task: goal, scope, done checklist.
-3. Link the related AC and TC IDs when known.
+3. Link the related AC and TC IDs when known. From a run: also link the run file and the evidence path; take steps and expected result from the TC.
 4. Write the draft from the template, or the comment from `comment-style`.
-5. Show the draft to the user. Ask before creating or commenting in Jira.
+5. Show the draft to the user. Ask before creating or commenting in Jira. A bug from a run needs the user to confirm the failure first.
 6. After approval, create the issue or post the comment with the Atlassian MCP. Rename the draft to the real key.
 
 ## Do not

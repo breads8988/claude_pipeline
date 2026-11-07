@@ -7,6 +7,7 @@
 | Environment | <env, build, browser or device> |
 | Linked TC | TC-<CODE>-001 |
 | Linked AC | AC-<CODE>-001 |
+| Linked run | `qa/runs/<run>.md` or — |
 
 **Preconditions**
 - <account, data, state>
