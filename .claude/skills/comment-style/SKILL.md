@@ -1,6 +1,6 @@
 ---
 name: comment-style
-description: Layout for every Jira comment (table-first, hard length cap) and technical wording for AC and TC text, with a vocabulary lint. Use whenever you write a Jira comment, AC or TC.
+description: Layout for every Jira comment and Claude notification (table-first, hard length cap) and technical wording for AC and TC text, with a vocabulary lint. Use whenever you write a Jira comment, a notification, AC or TC.
 ---
 
 # comment-style
@@ -11,6 +11,7 @@ Base principles live in `.claude/rules/writing-style.md`. This skill adds two pa
 |---|---|---|
 | 1. Comment layout | Every Jira comment and hand-off message | `references/comment-patterns.md` |
 | 2. Technical wording | AC and TC text, and comments | `references/vocabulary.md` + `scripts/lint.py` |
+| 3. Notifications | Claude notifications sent by skills and commands | `references/notifications.md` |
 
 ## Scope rules
 - A comment is a digest. The artifact file is the full record.

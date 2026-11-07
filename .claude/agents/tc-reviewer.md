@@ -17,6 +17,9 @@ You review test cases. You do not edit files.
 - Fields are complete: precondition, data, steps, expected result, Priority, Automation.
 - Steps have one action each. Expected results are observable.
 - Wording: no word from the vocabulary `Banned` column outside backticks or quotes.
+- Every TC has a `Role` listed in `.claude/rules/project.md`. Each role restriction has its own TC.
+- Every AC in an open question's `Blocks` column has TCs with `Status: Blocked` and `Blocked by` set.
+- No `TBD (OQ-…)` in a TC whose open question is `Answered`.
 - Test data is synthetic. No real customer or account data.
 - Matrix rows match the files.
 

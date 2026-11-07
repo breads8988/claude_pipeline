@@ -19,6 +19,7 @@ You review acceptance criteria. You do not edit files.
 - Negative and boundary scenarios exist.
 - Items from the `domain.md` checklist are covered or marked not applicable.
 - Each AC has a Jira key, ID and criticality.
+- Every open question has a `Blocks` value and is closed-ended.
 - Rules not stated in the source are listed as open questions, not assumed.
 
 ## Output
