@@ -27,7 +27,7 @@ Method: `references/ac-techniques.md`. Format: `qa/_templates/ac.md`. Reference:
 12. Set the header: `Status: Draft`, `Open questions: <n>`, `Last updated`. Save to `qa/specs/<feature>/ac.md`.
 13. Run the `comment-style` lint on the saved file; fix until exit 0.
 14. Run the `ac-reviewer` agent. Fix its findings, then re-run the lint.
-15. Add rows to `qa/traceability/matrix.md` (Ticket and AC columns).
+15. Add one row per AC to `qa/traceability/matrix.md` (Ticket, Feature, AC, Criticality; TC `—`).
 16. Last: send the **AC ready for review** notification (`comment-style` › `references/notifications.md`). Add one line each for: impacted behaviour result, counts by type and criticality, reviewer findings left open.
 
 ## Open questions: answer first, then Jira

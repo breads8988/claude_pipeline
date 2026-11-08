@@ -3,9 +3,17 @@
 Channel: the `Notifications` field in `.claude/rules/project.md`.
 
 ## How to send a Claude notification
-- Use the session's push-notification tool when it has one.
-- Otherwise end the turn with the notification block as the final message.
-- One notification per event. Same layout as a comment (`comment-patterns.md`): headline, one table, `Next` line.
+Every notification has two parts.
+
+| Part | Where | Content |
+|---|---|---|
+| Push | Push-notification tool, when the session has one | The headline only, one line, no table, no Markdown |
+| Chat block | Final message of the turn | Headline, one table, `Next` line (`comment-patterns.md`) |
+
+- Push text: `<item> · <state> — <counts> · <action>`. Max 120 characters.
+- No push tool → send the chat block only.
+- One notification per event.
+- Row caps of `comment-patterns.md` do not apply to the AC-ready table: list every open question.
 
 ## Events
 
@@ -22,6 +30,8 @@ Channel: the `Notifications` field in `.claude/rules/project.md`.
 
 ### AC ready for review
 
+Push: `AC-<CODE> ready · <n> AC · <n> OQ open · reply in chat`
+
 ```markdown
 **AC-<CODE> · ⚠️ review** — <n> AC · <n> OQ · `qa/specs/<feature>/ac.md`
 
@@ -37,6 +47,8 @@ Channel: the `Notifications` field in `.claude/rules/project.md`.
 
 ### Run finished
 
+Push: `Run <feature> <b> done · <n> ✅ · <n> ❌ · <n> ⛔ · confirm fails in chat`
+
 ```markdown
 **Run <feature> · build <b> · ✅ done** — <n> TC · <n> ✅ · <n> ❌ · <n> ⛔
 
@@ -48,3 +60,64 @@ Channel: the `Notifications` field in `.claude/rules/project.md`.
 ```
 
 - Rows: failed TCs first, then blocked. Passed TCs are counted in the headline only.
+
+### TC ready for review
+
+Push: `TC-<CODE> ready · <n> TC · <n> blocked · /approve <feature> --tc`
+
+```markdown
+**TC-<CODE> · ⚠️ review** — <n> TC · <n> 🔴 · <n> 🟠 · <n> 🟡 · <n> ⚪ · <n> blocked · `qa/testcases/<feature>/tc.md`
+
+| Technique | Items | Covered | Blocked | Coverage |
+|---|---|---|---|---|
+| <technique> | <n> | <n> | <n> | <n>% |
+
+- **Next:** review, then `/approve <feature> --tc`. Reviewer findings left open: <n>.
+```
+
+- Table: the `## Coverage summary` of `tc.md`, unchanged.
+
+### Lint failed
+
+Push: `<AC|TC>-<CODE> lint failed · <n> errors · fix needed`
+
+```markdown
+**<file> · ❌ lint failed** — <n> errors · <n> warnings
+
+| Line | Word | Use |
+|---|---|---|
+| <n> | <word> | <replacement> |
+
+- **Next:** reply `fix` to let Claude reword, or edit the file and re-run the lint.
+```
+
+- Sent only when errors remain after the skill rewords the file. Errors first.
+
+### OQ resolved
+
+Push: `<OQ-ID> resolved · <n> AC · <n> TC changed · re-approve`
+
+```markdown
+**<OQ-ID> · ✅ resolved** — <n> AC · <n> TC changed · <n> TC unblocked
+
+| Item | Change |
+|---|---|
+| AC-<CODE>-010 | <one line> |
+| TC-<CODE>-020 | Blocked → Active |
+
+- **Next:** `/approve <feature>`, then `/approve <feature> --tc`. Post the answer to Jira? (yes / no)
+```
+
+### Run paused
+
+Push: `Run <feature> paused at <TC-ID> · <reason>`
+
+```markdown
+**Run <feature> · build <b> · ⏸ paused** — <n> done · <n> left
+
+| TC | Role | Reason |
+|---|---|---|
+| TC-<CODE>-014 | <role> | <OTP not in accounts file · unknown host <host> · login failed twice · staging down> |
+
+- **Next:** fix the cause, then reply `resume`. Or `/end-run` to stop here.
+```

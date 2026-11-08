@@ -32,7 +32,7 @@ Method: `references/test-design-techniques.md`. Format: `qa/_templates/tc.md`. R
     - `python3 .claude/skills/gen-testcase/scripts/coverage.py qa/specs/<feature>/ac.md qa/testcases/<feature>/tc.md --summary`
 14. Run the lint; fix until it exits 0: `python3 .claude/skills/comment-style/scripts/lint.py qa/testcases/<feature>/tc.md`
 15. Run the `tc-reviewer` agent. Fix its findings, then re-run steps 13–14.
-16. Add TC IDs to `qa/traceability/matrix.md`.
+16. In `qa/traceability/matrix.md`, fill the TC and Automation cells of each AC row (rules in the file header).
 17. Last: send the **TC ready for review** notification: TC count by priority, coverage % per technique, blocked count, reviewer findings left open.
 
 ## Do not
