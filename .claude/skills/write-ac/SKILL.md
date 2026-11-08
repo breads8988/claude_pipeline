@@ -16,14 +16,14 @@ Method: `references/ac-techniques.md`. Format: `qa/_templates/ac.md`. Reference:
 1. Read `.claude/rules/project.md` (Jira key, Feature Codes, roles, notifications) and `.claude/rules/domain.md` (entities, glossary, checklist).
 2. Read the ticket with the Atlassian MCP: summary, description, type, comments, linked pages. An Epic → read every child issue; trace each AC to the child it came from.
 3. Read `references/ac-techniques.md` and `qa/specs/_example/ac.md`.
-4. **Analyse** (§1): fill the analysis items, write the user story, check INVEST.
-5. **Impacted existing behaviour** (§6): search other features by entity, cite real IDs, report the result.
+4. **Analyse** (sec. 1): fill the analysis items, write the user story, check INVEST.
+5. **Impacted existing behaviour** (sec. 6): search other features by entity, cite real IDs, report the result.
 6. Read existing `qa/specs/<feature>/ac.md` if present. Continue every numbering (AC, BR, FLD, DT, ST, OQ). A Feature Code missing from `project.md`: propose the row (code, feature, folder) and add it after the user confirms.
-7. **Model**: write data constraints, decision tables (including role × action) and state models wherever the requirement has them (§3, §4). A state model lists every state × event pair.
-8. **Scenarios**: write GWT AC for each scenario class that applies (§4, §5). Set `Type`, `Criticality`, `Likelihood` (§2, §7).
+7. **Model**: write data constraints, decision tables (including role × action) and state models wherever the requirement has them (sec. 3, sec. 4). A state model lists every state × event pair.
+8. **Scenarios**: write GWT AC for each scenario class that applies (sec. 4, sec. 5). Set `Type`, `Criticality`, `Likelihood` (sec. 2, sec. 7).
 9. **Business rules**: one row per rule, with an example value.
-10. **Open questions** (§8): every assumption and ambiguity, closed-ended, with `Blocks`.
-11. **Gate**: run the BABOK quality gate and final checklist (§9, §11). Fix every miss. Fill `## Coverage notes` (checklist items not applicable, scenario classes skipped and why).
+10. **Open questions** (sec. 8): every assumption and ambiguity, closed-ended, with `Blocks`.
+11. **Gate**: run the BABOK quality gate and final checklist (sec. 9, sec. 11). Fix every miss. Fill `## Coverage notes` (checklist items not applicable, scenario classes skipped and why).
 12. Set the header: `Status: Draft`, `Open questions: <n>`, `Last updated`. Save to `qa/specs/<feature>/ac.md`.
 13. Run the `comment-style` lint on the saved file; fix and re-run, max 3 attempts. Errors left → list them in the notification.
 14. Run the `ac-reviewer` agent. Fix its findings, then re-run the lint.

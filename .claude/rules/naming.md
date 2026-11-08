@@ -38,7 +38,7 @@
 - `Priority`: 🔴 | 🟠 | 🟡 | ⚪.
 - `Type`: Functional | Non-functional.
 - `Technique`: one or more of Scenario, EP, BVA, Decision table, State transition, Checklist, Error guessing.
-- `Coverage items`: notation in `gen-testcase` › `references/test-design-techniques.md` §4.
+- `Coverage items`: notation in `gen-testcase` › `references/test-design-techniques.md` sec. 4.
 - `Automation`: Not yet | Candidate | Done.
 - `Status`: Active | Blocked | Deprecated. Only a TC that contains `TBD (OQ-…)` is `Blocked`, with `Blocked by` set to that question. Other TCs of the same AC stay `Active`.
 - Data-driven TC: several test data rows, steps run once per row; each row is one execution.

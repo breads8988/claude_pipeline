@@ -15,16 +15,16 @@ Method: `references/test-design-techniques.md`. Format: `qa/_templates/tc.md`. R
 1. Read `.claude/rules/project.md` (Feature Codes, roles, notifications) and `.claude/rules/domain.md` (checklist).
 2. Read `qa/specs/<feature>/ac.md`, `references/test-design-techniques.md` and `qa/testcases/_example/tc.md`.
 3. Read existing `qa/testcases/<feature>/tc.md`. Continue its numbering.
-4. **Test analysis** (§1, §2): list test conditions from every active AC, BR, FLD, DT column, ST transition and applicable checklist item. Write the EP partitions and BVA values into `## Test analysis` of `tc.md`.
-5. **Depth** (§3): set each item's depth from its criticality; raise one level for `Likelihood: High`.
+4. **Test analysis** (sec. 1, sec. 2): list test conditions from every active AC, BR, FLD, DT column, ST transition and applicable checklist item. Write the EP partitions and BVA values into `## Test analysis` of `tc.md`.
+5. **Depth** (sec. 3): set each item's depth from its criticality; raise one level for `Likelihood: High`.
 6. **Coverage items**: derive them per technique and depth: partitions, boundary values, DT columns, transitions (invalid ones for 🔴), scenarios, checklist items, error guesses.
 7. **Design TCs**:
    - Order: positive, negative, non-functional (ATDD).
    - Combine valid partitions in one TC; one invalid partition per TC; one invalid transition per TC.
    - No two TCs for the same coverage item and characteristic.
    - Steps use real element names and run as the TC's `Role`.
-8. Fill every field of `qa/_templates/tc.md`, including `Technique` and `Coverage items` (notation §4).
-9. Set `Priority` = highest criticality among the TC's coverage items (§5).
+8. Fill every field of `qa/_templates/tc.md`, including `Technique` and `Coverage items` (notation sec. 4).
+9. Set `Priority` = highest criticality among the TC's coverage items (sec. 5).
 10. Content that depends on an open question → write the TC anyway with `TBD (<OQ-ID>): <unknown part>`, `Status: Blocked`, `Blocked by: <OQ-ID>`. TCs that do not depend on it stay `Active`.
 11. Set `Automation`: `Candidate` for stable, high-value or data-driven flows; else `Not yet`. `Type: Non-functional` TCs run only when they can be checked manually on staging.
 12. Set the header: `Status: Draft`, `Last updated`. Save `tc.md`.

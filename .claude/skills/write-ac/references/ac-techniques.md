@@ -4,8 +4,8 @@ How to turn a requirement into acceptance criteria. Apply every technique that f
 
 Sources:
 - IIBA BABOK Guide v3. Techniques: Acceptance and Evaluation Criteria, Business Rules Analysis, Decision Modelling, State Modelling, Data Dictionary, Glossary, Non-Functional Requirements Analysis, User Stories, Use Cases and Scenarios, Reviews. Tasks: 7.2 Verify Requirements, 7.3 Validate Requirements, 5.5 Approve Requirements.
-- Quality criteria: BABOK v3 §7.2.4.1 *Characteristics of Requirements and Designs Quality*.
-- ISTQB CTFL v4.0.1 §4.5 (acceptance criteria, ATDD).
+- Quality criteria: BABOK v3 sec. 7.2.4.1 *Characteristics of Requirements and Designs Quality*.
+- ISTQB CTFL v4.0.1 sec. 4.5 (acceptance criteria, ATDD).
 - Common practice, not BABOK: INVEST, Gherkin (Given/When/Then), specification by example.
 
 ## 1. Analyse before writing
@@ -23,8 +23,8 @@ This step drives most AC quality. Identify:
 | State changes | What persists or transitions? |
 | Data | Which input fields, and what are their type, range and format? |
 | External dependencies | Which services, APIs or integrations take part? |
-| Impacted existing behaviour | Which existing rules or flows can this change break? (§6) |
-| Assumptions | What did you have to assume? Each one becomes an open question (§8). |
+| Impacted existing behaviour | Which existing rules or flows can this change break? (sec. 6) |
+| Assumptions | What did you have to assume? Each one becomes an open question (sec. 8). |
 
 Restate the requirement as a user story: **As a** `<role>`, **I want** `<capability>`, **so that** `<benefit>`. Check it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable; common practice).
 
@@ -40,8 +40,8 @@ Restate the requirement as a user story: **As a** `<role>`, **I want** `<capabil
 
 | Form | Use for | Feeds test technique |
 |---|---|---|
-| Given / When / Then scenario (scenario-oriented AC, CTFL §4.5.2) | Observable behaviour and flows | Scenario test (ATDD) |
-| Business rule (`BR-`) (rule-oriented AC, CTFL §4.5.2) | A policy reused by several scenarios: validation, calculation, authorisation, time-based, configuration, regulatory, data integrity | Covered through scenarios and models |
+| Given / When / Then scenario (scenario-oriented AC, CTFL sec. 4.5.2) | Observable behaviour and flows | Scenario test (ATDD) |
+| Business rule (`BR-`) (rule-oriented AC, CTFL sec. 4.5.2) | A policy reused by several scenarios: validation, calculation, authorisation, time-based, configuration, regulatory, data integrity | Covered through scenarios and models |
 | Data constraints (`FLD-`) | Every input field with a type, range, length or format | Equivalence partitioning, boundary value analysis |
 | Decision table (`DT-`) | An outcome that depends on a combination of conditions, including role × action permissions | Decision table testing |
 | State model (`ST-`) | An entity with a lifecycle | State transition testing |
@@ -101,7 +101,7 @@ One scale for AC and TC.
 - Every assumption and every ambiguity becomes an open question with an ID and a `Blocks` value.
 - An AC built on an unconfirmed assumption names that open question.
 
-## 9. Quality gate (BABOK v3 §7.2.4.1, 9 characteristics)
+## 9. Quality gate (BABOK v3 sec. 7.2.4.1, 9 characteristics)
 
 Reject an AC, rule or model that fails any.
 
@@ -114,7 +114,7 @@ Reject an AC, rule or model that fails any.
 | Complete | No gap a reader must fill by assuming. |
 | Testable | A pass/fail check exists for every Then. |
 | Prioritized | Criticality set. |
-| Consistent | No conflict with other AC, rules or features (§6). |
+| Consistent | No conflict with other AC, rules or features (sec. 6). |
 | Unambiguous | No "fast", "appropriate", "etc."; values quantified. |
 
 ## 10. Coverage, both directions
@@ -125,15 +125,15 @@ Reject an AC, rule or model that fails any.
 
 ## 11. Final gate before review
 
-- [ ] Every requirement has at least one AC (§10)
-- [ ] Every AC is testable and atomic (§9)
-- [ ] Business rules kept out of GWT (§3)
-- [ ] No implementation detail (§5)
-- [ ] Error codes or copy specified for every rejection (§5)
-- [ ] Every input field has a data constraint row (§3)
-- [ ] Condition combinations written as decision tables (§4)
-- [ ] Permissions written as a role × action decision table (§4)
-- [ ] Every lifecycle written as a state model, forbidden transitions included (§4)
-- [ ] Non-functional aspects covered where they apply (§4)
-- [ ] Impacted existing behaviour reported (§6)
-- [ ] Every assumption is an open question (§8)
+- [ ] Every requirement has at least one AC (sec. 10)
+- [ ] Every AC is testable and atomic (sec. 9)
+- [ ] Business rules kept out of GWT (sec. 3)
+- [ ] No implementation detail (sec. 5)
+- [ ] Error codes or copy specified for every rejection (sec. 5)
+- [ ] Every input field has a data constraint row (sec. 3)
+- [ ] Condition combinations written as decision tables (sec. 4)
+- [ ] Permissions written as a role × action decision table (sec. 4)
+- [ ] Every lifecycle written as a state model, forbidden transitions included (sec. 4)
+- [ ] Non-functional aspects covered where they apply (sec. 4)
+- [ ] Impacted existing behaviour reported (sec. 6)
+- [ ] Every assumption is an open question (sec. 8)

@@ -232,7 +232,7 @@ def parse_ac(path):
             break
         if not found:
             raise FormatError(f'{path}: {sid} has no transition rows (T1…Tn)')
-    # Depth (test-design-techniques §3): max(item, covered AC) + one level if a covered AC has
+    # Depth (test-design-techniques sec. 3): max(item, covered AC) + one level if a covered AC has
     # Likelihood High, capped at 🔴. Links: the model's `Covers` bullet plus AC that cite the item ID.
     def depth(item_id, crit):
         acs = {a for a in links.get(item_id, set()) | {a for a, v in ac.items() if item_id in v['text']}
