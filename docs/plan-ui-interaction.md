@@ -1,6 +1,6 @@
 # Plan: UI interaction testing (hover, collapse, expand, tooltip …)
 
-Status: proposed 2026-11-08 · Waiting for review
+Status: proposed 2026-11-08 · Decisions 2, 3 agreed · 1, 4 pending
 
 ## Problem
 - AC and TC cover business behaviour well, but UI component behaviour has no model: default state, triggers (mouse, keyboard, focus), dismissal, persistence.
@@ -70,8 +70,11 @@ Available actions (verified in the tool schema): `hover`, `key` (Enter, Space, E
 | Touch gestures (no hover on touch) | Staging runs in desktop Chrome |
 | Full WCAG audit | Only the interaction criteria above unless decided otherwise |
 
-## Decisions needed
-1. **Accessibility scope:** only the interaction criteria (1.4.13, 2.1.1, 2.4.7, 4.1.2), or full WCAG 2.2 AA?
-2. **Viewports:** desktop only, or desktop + tablet + mobile breakpoints?
-3. **Design source:** screenshots attached per ticket, or connect a design tool (e.g. Figma) to read designs directly?
-4. **Heuristic evaluation (Nielsen):** add as an optional review command, or skip?
+## Decisions
+
+| # | Decision |
+|---|---|
+| 1 | Accessibility scope: pending (interaction criteria only, or full WCAG 2.2 A + AA = 55 criteria). |
+| 2 | Viewports: desktop is active. Tablet and mobile rows are kept in `project.md`, commented out, for later. |
+| 3 | Design source: Figma connector (to connect); Claude Design artifacts read when shared by link. Screenshots remain the fallback. |
+| 4 | Heuristic evaluation: pending explanation. |
