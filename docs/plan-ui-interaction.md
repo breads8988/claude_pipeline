@@ -82,6 +82,21 @@ Available actions (verified in the tool schema): `hover`, `key` (Enter, Space, E
 | U5.2 | Output: findings table (heuristic, location, issue, severity 🔴🟠🟡⚪, suggestion) saved to `qa/reports/heuristic-<feature>-<date>.md`; serious findings can become open questions or tickets | command, `log-ticket` |
 | U5.3 | Runs on staging through Claude in Chrome, or on designs from the design sources | command |
 
+## Phase U6 · Design check (separate from functional TCs)
+
+Why separate: the source of truth is the design (not the AC), it runs when a screen is new or its UI changes (not every regression), the audience is designers and frontend developers, and the result is a list of deviations with tolerances. Mixing it into TCs would bloat the suite and tie AC to pixels.
+
+| # | Item | Files |
+|---|---|---|
+| U6.1 | `/design-check <screen or feature>` on staging through Claude in Chrome | `.claude/commands/design-check.md` |
+| U6.2 | Spec from the design sources, design repo first (token JSON is cheapest), then Figma variables and frames | command, `project.md` (`Design sources`) |
+| U6.3 | **CSS vs token comparison** per component: color, font family, size, weight, line height, padding, margin, gap, radius, border, width and height. Values read from the computed style of the element | command |
+| U6.4 | Tolerances in `project.md` (`Design tolerances`): color exact hex, font exact, size ±1 px, spacing ±2 px | `project.md` |
+| U6.5 | Optional side-by-side: staging screenshot next to the design frame, Claude lists visible differences (missing element, wrong layout). Used only when the CSS check passes but the screen still looks wrong | command |
+| U6.6 | Report `qa/reports/design-<feature>-<date>.md`: component, property, design value, actual value, deviation, severity. Real deviations → `log-ticket` UI bug with a link to the design frame | command, `log-ticket` |
+
+Not in this phase: pixel diff regression (new build vs previous screenshot). It belongs to automation (e.g. visual snapshots) and is in the backlog.
+
 ## Phase U4 · Example
 - Add to `_example`: a disclosure (invitation details row) and a tooltip (role info icon) with UIC rows, TCs for each trigger and checklist items, and the validator at 100%.
 
@@ -89,7 +104,7 @@ Available actions (verified in the tool schema): `hover`, `key` (Enter, Space, E
 
 | Item | Why |
 |---|---|
-| Pixel-perfect visual comparison | Needs visual-regression automation |
+| Pixel diff regression (new build vs previous) | Needs visual-regression automation; design-vs-build comparison is covered by U6 |
 | Screen-reader output | The agent reads ARIA attributes, not spoken output |
 | Touch gestures (no hover on touch) | Staging runs in desktop Chrome |
 | Full WCAG audit | Only the interaction criteria above unless decided otherwise |
@@ -102,3 +117,4 @@ Available actions (verified in the tool schema): `hover`, `key` (Enter, Space, E
 | 2 | Viewports: desktop is active. Tablet and mobile rows are kept in `project.md`, commented out, for later. |
 | 3 | Design sources in order: design repo → Figma connector → Claude Design link → screenshots. Repo first to save tokens. |
 | 4 | Heuristic review: added as an optional command (`/heuristic-review`). |
+| 5 | Design comparison: separate `/design-check` (CSS vs token, tolerances, optional side-by-side). Pixel diff regression goes to automation later. |
