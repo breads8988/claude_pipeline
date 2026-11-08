@@ -18,10 +18,10 @@ Style: `.claude/rules/writing-style.md`. Comment layout: `comment-style` skill.
 After Jira assigns a key, rename the file `BUG-<key>.md` or `TASK-<key>.md` (`naming.md`).
 
 ## Steps
-1. Read `.claude/rules/project.md` (Jira project key, Feature Codes).
+1. Read `.claude/rules/project.md`: Jira project key, Atlassian site, Feature Codes, Jira mapping (issue types, priority, severity, component, required fields, bug or task rule).
 2. Collect the facts. Bug: actual, expected, steps, environment, evidence. Task: goal, scope, done checklist.
 3. Link the related AC and TC IDs when known. From a run: also link the run file and the evidence path; take steps and expected result from the TC.
-4. Write the draft from the template, or the comment from `comment-style`.
+4. Write the draft from the template, or the comment from `comment-style`. Map priority 🔴🟠🟡⚪ to the project's Jira values. A Jira mapping value `—` or missing → ask the user once.
 5. Show the draft to the user. Ask before creating or commenting in Jira. A bug from a run needs the user to confirm the failure first.
 6. After approval, create the issue or post the comment with the Atlassian MCP. Rename the draft to the real key.
 7. From a run: write the key in the run row's `Bug` cell.

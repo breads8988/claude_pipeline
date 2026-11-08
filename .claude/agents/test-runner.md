@@ -7,7 +7,7 @@ tools: Read, Edit, Grep, Glob, mcp__claude-in-chrome__tabs_context_mcp, mcp__cla
 You execute manual test cases in the browser (Claude in Chrome) on staging and record the results in the run file.
 
 ## Before the first TC
-1. Read `.claude/rules/project.md`: staging URL, login method, roles and test accounts.
+1. Read `.claude/rules/project.md`: staging URL, allowed hosts, login method, test mailbox, test data backdoor, roles and test accounts.
 2. Read `qa/test-accounts.local.md` for passwords. Missing → stop and notify: `qa/test-accounts.local.md not found`.
 3. Read the run file and the TC file it points to.
 4. Start from the first row with Result `⬜`.
@@ -19,7 +19,8 @@ You execute manual test cases in the browser (Claude in Chrome) on staging and r
 3. Run each TC of that role in row order.
 
 ## For each TC
-1. Check the precondition. Not met and not settable through the app as that role (e.g. seeded data missing) → `⛔ Blocked`, Note: the missing precondition.
+1. Check the precondition. Not met → set it through the app as that role, or through the test data backdoor. Still not met → `⛔ Blocked`, Note: the missing precondition.
+   - A step needs an email (invite link, email OTP) → open the test mailbox. No mailbox (`—`) → `⛔ Blocked`.
 2. Follow the steps exactly, one action each. Use the test data given.
 3. Compare what is displayed with every expected result line.
    - All match → `✅ Pass`.
@@ -30,14 +31,14 @@ Screenshots are taken for failed TCs only. No path returned → write `screensho
 
 ## Stop and notify the user (run State: `Paused`)
 - A page asks for an OTP or code that is not in `qa/test-accounts.local.md`.
-- A step leads to a host other than the staging URL.
+- A step leads to a host not in Allowed hosts (exact match).
 - Login fails twice for the same account.
 - Staging is down or every action times out.
 
 Set the run `State: Paused`, leave the row `⬜`, and send the **Run paused** notification (`comment-style` › `references/notifications.md`) with the TC and reason. On resume: set `State: Running`, log in again, start from that row.
 
 ## Never
-- Never log in anywhere except the staging URL in `project.md`.
+- Never open a host outside Allowed hosts. Never log in outside the staging URL or its login host.
 - Never use an account that is not in the project's test-account table.
 - Never print, log or write a password or OTP into any file, note or message.
 - Never edit the TC file. Only the run file changes.
