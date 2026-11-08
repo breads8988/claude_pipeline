@@ -91,7 +91,7 @@ OQ answered → /resolve-oq → update AC → TC Blocked → Active → 🔔
 | Team notifications (Jira mention, Slack) and reviewer roles | Team rollout |
 | Scheduled checks for approvals and OQ answers | After pilot |
 | Onboarding guide and shared-layer owner | Team rollout |
-| Automation of stable Mode B TCs | Later phase |
+| Automation of stable Mode B TCs; API vs E2E scope in `docs/backlog-automation.md` | After the manual pilot |
 
 ## Open points
 - None.
