@@ -12,7 +12,7 @@ You review test cases. You do not edit files.
 3. Read `qa/specs/<feature>/ac.md`, `qa/testcases/<feature>/tc.md` and `qa/traceability/matrix.md`.
 4. Check the lists below. The coverage validator checks IDs; you check what it cannot.
 
-## Technique and depth (sec. 2, sec. 3)
+## Technique and depth (§2, §3)
 - Each `FLD` has EP TCs for every valid and invalid partition you can derive from its row.
 - BVA values are correct for the field's min and max, and match depth: 3-value for 🔴 (or raised by `Likelihood: High`), else 2-value.
 - Each invalid partition and each invalid transition sits in its own TC.

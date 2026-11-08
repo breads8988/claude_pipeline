@@ -13,8 +13,8 @@ Status: all decisions agreed 2026-11-08 · Ready to build
 | W3C WAI-ARIA Authoring Practices Guide (APG) | Expected behaviour per component pattern: keyboard keys, roles, states. Disclosure: Enter/Space toggles; `aria-expanded` true/false. Accordion: Enter/Space expand/collapse; single vs multiple open; `aria-disabled` when a panel cannot collapse. Tooltip: shows on hover or focus after a small delay; Escape dismisses; stays while the pointer is over trigger or tooltip; `role=tooltip`, `aria-describedby`. The tooltip pattern is marked work in progress (no consensus yet). |
 | WCAG 2.2 SC 1.4.13 Content on Hover or Focus (AA) | Content shown on hover or focus must be **dismissible** (e.g. Esc, without moving pointer or focus), **hoverable** (pointer can move onto it), **persistent** (stays until trigger removed, dismissed or invalid). Failures F95, F114. Browser `title` tooltips are excepted. |
 | WCAG 2.2 SC 2.1.1, 2.4.7, 4.1.2 | Keyboard operable; focus visible; name, role, value (state) exposed. |
-| ISTQB CTFL v4.0.1 | sec. 4.2.4 state transition testing (component states), sec. 4.2.1–4.2.2 EP/BVA (viewport breakpoints), sec. 4.4.3 checklist-based testing. |
-| ISTQB CT-UT v1.0 (usability) | sec. 4.2.3 heuristic evaluation with Nielsen's 10 heuristics; sec. 3.2.2 WCAG levels, AA recommended; sec. 3.1 UI guidelines as low-level rules. |
+| ISTQB CTFL v4.0.1 | §4.2.4 state transition testing (component states), §4.2.1–4.2.2 EP/BVA (viewport breakpoints), §4.4.3 checklist-based testing. |
+| ISTQB CT-UT v1.0 (usability) | §4.2.3 heuristic evaluation with Nielsen's 10 heuristics; §3.2.2 WCAG levels, AA recommended; §3.1 UI guidelines as low-level rules. |
 
 ## Core idea
 A UI component is a small state machine with a known pattern. Write it as a model in AC, test it with state transition + a pattern checklist in TC.
@@ -22,10 +22,10 @@ A UI component is a small state machine with a known pattern. Write it as a mode
 | Layer | Item | Technique |
 |---|---|---|
 | AC (behaviour, still implementation-free) | `UIC-<CODE>-NN` UI component model: pattern, default state, states, triggers, rules | — |
-| TC | Each valid state change per trigger (click, Enter, Space, Escape, hover in/out, focus/blur) | State transition (sec. 4.2.4) |
-| TC | Pattern checklist items (APG keys and states, WCAG 1.4.13, 2.1.1, 2.4.7, 4.1.2) | Checklist-based (sec. 4.4.3) |
-| TC | Viewport breakpoints where layout or component changes (e.g. 767 / 768 px) | EP + BVA (sec. 4.2.1–4.2.2) |
-| Review (optional) | Nielsen's 10 heuristics on the screen | Heuristic evaluation (CT-UT sec. 4.2.3) |
+| TC | Each valid state change per trigger (click, Enter, Space, Escape, hover in/out, focus/blur) | State transition (§4.2.4) |
+| TC | Pattern checklist items (APG keys and states, WCAG 1.4.13, 2.1.1, 2.4.7, 4.1.2) | Checklist-based (§4.4.3) |
+| TC | Viewport breakpoints where layout or component changes (e.g. 767 / 768 px) | EP + BVA (§4.2.1–4.2.2) |
+| Review (optional) | Nielsen's 10 heuristics on the screen | Heuristic evaluation (CT-UT §4.2.3) |
 
 ## Phase U1 · Model in AC
 
@@ -78,7 +78,7 @@ Available actions (verified in the tool schema): `hover`, `key` (Enter, Space, E
 
 | # | Item | Files |
 |---|---|---|
-| U5.1 | `/heuristic-review <screen or feature>`: optional review of a screen against Nielsen's 10 heuristics (ISTQB CT-UT sec. 4.2.3). Findings only linked to a heuristic; no invented heuristics | `.claude/commands/heuristic-review.md` |
+| U5.1 | `/heuristic-review <screen or feature>`: optional review of a screen against Nielsen's 10 heuristics (ISTQB CT-UT §4.2.3). Findings only linked to a heuristic; no invented heuristics | `.claude/commands/heuristic-review.md` |
 | U5.2 | Output: findings table (heuristic, location, issue, severity 🔴🟠🟡⚪, suggestion) saved to `qa/reports/heuristic-<feature>-<date>.md`; serious findings can become open questions or tickets | command, `log-ticket` |
 | U5.3 | Runs on staging through Claude in Chrome, or on designs from the design sources | command |
 
