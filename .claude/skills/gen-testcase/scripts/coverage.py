@@ -467,6 +467,9 @@ def check(spec, tcs, analysis):
                     errors.append(f'{tid}: BVA label "{key}" is not required for {f}')
                     continue
                 want = req[key]
+                tbd_oq = TBD_RE.search(v['min'] if key.startswith('min') else v['max'])
+                if tbd_oq and tid in active:
+                    errors.append(f'{tid}: {f} {key[:3]} is TBD ({tbd_oq.group(1)}); this TC must be Blocked by it')
                 have = number(m.group(3) or '')
                 if want is not None and have is not None and abs(have - want) > 1e-9:
                     errors.append(f'{tid}: {f} BVA {key} = {m.group(3).strip()}, expected {want:g}')
@@ -490,6 +493,9 @@ def check(spec, tcs, analysis):
     for tid, t in sorted(tcs.items()):
         for i in sorted(t['ids'] - known):
             errors.append(f'{tid}: cites {i}, which is not in ac.md')
+        if tid in active:
+            for i in sorted(x for x in t['ids'] if x in spec['st'] and spec['st'][x]['valid'] is None):
+                errors.append(f'{tid}: cites {i}, whose Valid is TBD; this TC must be Blocked by that open question')
         crits = [spec['ac'].get(i, {}).get('crit', 0) if i.startswith('AC-') else
                  spec['br'].get(i, 0) if i.startswith('BR-') else
                  spec['dt'].get(i, 0) if i.startswith('DT-') else

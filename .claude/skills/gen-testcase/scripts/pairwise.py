@@ -10,9 +10,11 @@ Exit codes: 0 table printed · 2 usage error.
 """
 import argparse
 import itertools
+import random
 import sys
 
-MAX_CANDIDATES = 20_000
+MAX_CANDIDATES = 5_000  # full search below this; AETG-style above
+CANDIDATES = 30
 MAX_ROWS = 99
 
 
@@ -61,18 +63,31 @@ def generate(params):
             rows.append(best)
             todo -= pairs_of(best)
         return rows
-    # Large spaces: build each row value by value, picking the value that covers most pairs.
+    # Large spaces (AETG-style): per row, build CANDIDATES rows greedily from an uncovered pair in a
+    # shuffled parameter order and keep the one that covers most uncovered pairs. Fixed seed: deterministic.
+    rng = random.Random(7)
+    n = len(values)
+
+    def covers(row, k, v):
+        return sum(1 for m in range(n) if row[m] is not None and m != k and
+                   ((m, row[m], k, v) if m < k else (k, v, m, row[m])) in todo)
+
     while todo:
-        i, a, j, b = min(todo)
-        row = [None] * len(values)
-        row[i], row[j] = a, b
-        for k in range(len(values)):
-            if row[k] is None:
-                row[k] = max(values[k], key=lambda v: sum(
-                    1 for m in range(len(values)) if row[m] is not None and m != k and
-                    ((m, row[m], k, v) if m < k else (k, v, m, row[m])) in todo))
-        rows.append(tuple(row))
-        todo -= pairs_of(row)
+        best, best_gain = None, -1
+        pool = sorted(todo)
+        for _ in range(CANDIDATES):
+            i, a, j, b = pool[rng.randrange(len(pool))]
+            row = [None] * n
+            row[i], row[j] = a, b
+            order = [k for k in range(n) if row[k] is None]
+            rng.shuffle(order)
+            for k in order:
+                row[k] = max(values[k], key=lambda v: (covers(row, k, v), -values[k].index(v)))
+            gain = len(pairs_of(row) & todo)
+            if gain > best_gain:
+                best, best_gain = tuple(row), gain
+        rows.append(best)
+        todo -= pairs_of(best)
     return rows
 
 

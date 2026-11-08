@@ -845,7 +845,8 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 
 **Expected result**
 - Response status = 403 and error code = `ERR-USR-03`.
-- No side effects: no invitation created; the response does not reveal that the user exists.
+- Response message = `You do not have permission to invite users.`
+- No side effects: no invitation created.
 
 ## TC-USR-027: Expiry has no effect on an expired invitation
 | Field | Value |
@@ -875,7 +876,6 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 
 **Expected result**
 - The row displays status = `Expired`.
-- No side effects: no second expiry event in the row history.
 
 ## Review log
 | Date | Action | By | Note |

@@ -17,7 +17,7 @@ Method: `references/test-design-techniques.md`. Format: `qa/_templates/tc.md`. R
 3. Read existing `qa/testcases/<feature>/tc.md`. Continue its numbering.
 4. **Test analysis** (§1, §2): list test conditions from every active AC, BR, FLD, DT column, ST transition and applicable checklist item. Write the EP partitions and BVA values into `## Test analysis` of `tc.md`.
 5. **Depth** (§3): set each item's depth by the rule in §3.
-6. **Coverage items**: derive them per technique and depth: partitions, boundary values, DT columns, transitions (invalid ones for 🔴), scenarios, checklist items, error guesses.
+6. **Coverage items**: derive them per technique and depth: partitions, boundary values, DT columns, transitions (invalid ones at 🔴 depth, §3), scenarios, checklist items, error guesses.
    - 3+ parameters whose combinations matter → pairwise rows with `pairwise.py` (references §Pairwise).
    - Thin spec or 🔴 area → add exploratory charters (`CH-<CODE>-NN`).
 7. **Design TCs**:

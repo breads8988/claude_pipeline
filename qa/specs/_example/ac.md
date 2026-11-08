@@ -119,7 +119,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Likelihood: Normal
 - Status: Active
 - Given: an invitation with status = `Accepted` or `Expired`
-- When: the expiry time passes (OQ-USR-001)
+- When: the expiry time passes (any value of OQ-USR-001)
 - Then: status unchanged
 
 ## Business rules
@@ -173,7 +173,7 @@ States: `Invited`, `Accepted`, `Expired`. Events: Admin sends invitation, invite
 ## Open questions
 | OQ | Risk | Question | Blocks | Owner | Status |
 | --- | --- | --- | --- | --- | --- |
-| OQ-USR-001 | 🔴 | Is the invitation expiry 24 h or 72 h? | AC-USR-005, AC-USR-011 | BA/PO | Posted |
+| OQ-USR-001 | 🔴 | Is the invitation expiry 24 h or 72 h? | AC-USR-005 | BA/PO | Posted |
 | OQ-USR-002 | 🟠 | Re-inviting a pending or expired invitation: resend the same invitation, create a new one, or reject? | AC-USR-010, ST-USR-01.T8, ST-USR-01.T9 | BA/PO | Open |
 
 ## Review log

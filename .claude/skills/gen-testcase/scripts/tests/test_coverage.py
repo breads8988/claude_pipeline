@@ -131,6 +131,16 @@ class CoverageTest(unittest.TestCase):
         code, out, _ = self.go(AC, drop_tc(TC, 'TC-USR-020'))
         self.assertIn('ST-USR-01.T8: TBD transition not covered', out)
 
+    def test_active_tc_on_tbd_transition(self):
+        tc = sub(TC, '`AC-USR-001`, `DT-USR-01.R1`, `ST-USR-01.T1`', '`AC-USR-001`, `DT-USR-01.R1`, `ST-USR-01.T1`, `ST-USR-01.T8`')
+        code, out, _ = self.go(AC, tc)
+        self.assertIn('TC-USR-001: cites ST-USR-01.T8, whose Valid is TBD', out)
+
+    def test_active_tc_on_tbd_limit(self):
+        ac = sub(AC, '| Yes | 6 | 254 | 1 |', '| Yes | 6 | TBD (OQ-USR-002) | 1 |')
+        code, out, _ = self.go(ac, TC)
+        self.assertIn('TC-USR-002: FLD-USR-01 max is TBD (OQ-USR-002); this TC must be Blocked by it', out)
+
     def test_tbd_limit_is_not_a_number(self):
         ac = sub(AC, '| Yes | 6 | 254 | 1 |', '| Yes | 6 | TBD (OQ-USR-002) | 1 |')
         code, out, _ = self.go(ac, TC)

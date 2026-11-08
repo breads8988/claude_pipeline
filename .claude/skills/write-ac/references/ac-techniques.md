@@ -113,7 +113,7 @@ Reject an AC, rule or model that fails any.
 | Understandable | Clear, short sentences in domain terms (`domain.md` Glossary). |
 | Concise | No extra information. |
 | Feasible | Buildable within known constraints; otherwise an open question. |
-| Atomic | One outcome per AC. |
+| Atomic | BABOK: self-contained and understood on its own. Internal convention: one behaviour per AC; its Then lists the observable results of that behaviour, joined with `And`. |
 | Complete | No gap a reader must fill by assuming. |
 | Testable | A pass/fail check exists for every Then. |
 | Prioritized | Criticality set. |
