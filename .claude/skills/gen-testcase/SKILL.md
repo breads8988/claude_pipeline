@@ -28,9 +28,9 @@ Method: `references/test-design-techniques.md`. Format: `qa/_templates/tc.md`. R
 10. Content that depends on an open question → write the TC anyway with `TBD (<OQ-ID>): <unknown part>`, `Status: Blocked`, `Blocked by: <OQ-ID>`. TCs that do not depend on it stay `Active`.
 11. Set `Automation`: `Candidate` for stable, high-value or data-driven flows; else `Not yet`. `Type: Non-functional` TCs run only when they can be checked manually on staging.
 12. Set the header: `Status: Draft`, `Last updated`. Save `tc.md`.
-13. Run the validator with `--summary`, paste its table into `## Coverage summary`, run it again; fix until it exits 0:
+13. Run the validator with `--summary`, paste its table into `## Coverage summary`, run it again; fix and re-run, max 3 attempts. Errors left → list them in the notification:
     - `python3 .claude/skills/gen-testcase/scripts/coverage.py qa/specs/<feature>/ac.md qa/testcases/<feature>/tc.md --summary`
-14. Run the lint; fix until it exits 0: `python3 .claude/skills/comment-style/scripts/lint.py qa/testcases/<feature>/tc.md`
+14. Run the lint; fix and re-run, max 3 attempts. Errors left → list them in the notification: `python3 .claude/skills/comment-style/scripts/lint.py qa/testcases/<feature>/tc.md`
 15. Run the `tc-reviewer` agent. Fix its findings, then re-run steps 13–14.
 16. In `qa/traceability/matrix.md`, fill the TC and Automation cells of each AC row (rules in the file header).
 17. Last: send the **TC ready for review** notification: TC count by priority, coverage % per technique, blocked count, reviewer findings left open.

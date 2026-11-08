@@ -12,6 +12,6 @@ Resolve: $ARGUMENTS
    - Set `Status: Active`, `Blocked by: —`.
 4. Update `Open questions: <n>` in the AC header.
 5. Edited files go back to `Draft`: the AC file, and the TC file of the feature (`naming.md` › File status).
-6. Run the lint on both files and the coverage validator with `--summary` (paste the new summary); fix until all exit 0.
-7. Send the **OQ resolved** notification: AC and TC changed, files waiting for `/approve` again.
+6. Run the lint on both files and the coverage validator with `--summary` (paste the new summary); fix and re-run, max 3 attempts.
+7. Reply in chat: table of AC and TC changed, TCs unblocked, errors left, then `Next: /approve <feature>` and `/approve <feature> --tc`.
 8. Posted questions: offer one Jira comment on the ticket with the answer (ask first).

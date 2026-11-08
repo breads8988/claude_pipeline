@@ -25,7 +25,7 @@ Method: `references/ac-techniques.md`. Format: `qa/_templates/ac.md`. Reference:
 10. **Open questions** (§8): every assumption and ambiguity, closed-ended, with `Blocks`.
 11. **Gate**: run the IIBA quality gate and final checklist (§9, §11). Fix every miss. Fill `## Coverage notes` (checklist items not applicable, scenario classes skipped and why).
 12. Set the header: `Status: Draft`, `Open questions: <n>`, `Last updated`. Save to `qa/specs/<feature>/ac.md`.
-13. Run the `comment-style` lint on the saved file; fix until exit 0.
+13. Run the `comment-style` lint on the saved file; fix and re-run, max 3 attempts. Errors left → list them in the notification.
 14. Run the `ac-reviewer` agent. Fix its findings, then re-run the lint.
 15. Add one row per AC to `qa/traceability/matrix.md` (Ticket, Feature, AC, Criticality; TC `—`).
 16. Last: send the **AC ready for review** notification (`comment-style` › `references/notifications.md`). Add one line each for: impacted behaviour result, counts by type and criticality, reviewer findings left open.

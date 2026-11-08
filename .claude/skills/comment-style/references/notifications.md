@@ -13,6 +13,8 @@ Every notification has two parts.
 - Push text: `<item> · <state> — <counts> · <action>`. Max 120 characters.
 - No push tool → send the chat block only.
 - One notification per event.
+- No notification for lint or validator errors: the skill fixes them (max 3 attempts). Errors left after 3 attempts go in the `Next` line of the ready notification.
+- No notification for a command the user just ran (`/approve`, `/resolve-oq`): reply in chat.
 - Row caps of `comment-patterns.md` do not apply to the AC-ready table: list every open question.
 
 ## Events
@@ -21,8 +23,6 @@ Every notification has two parts.
 |---|---|---|---|
 | AC ready for review | `write-ac` | All open questions (table 2), or none | Only OQ the user replies `skip` to |
 | TC ready for review | `gen-testcase` | Hand-off (table 1) + blocked TC count | No |
-| Lint failed and not fixable | any skill | File, line, word | No |
-| OQ resolved | `/resolve-oq` | AC and TC changed | No |
 | Run paused | `test-runner` | TC, reason (OTP, unknown host, page down) | No |
 | Run finished | `/end-run` | Run summary + failed TCs | No |
 
@@ -76,37 +76,6 @@ Push: `TC-<CODE> ready · <n> TC · <n> blocked · /approve <feature> --tc`
 ```
 
 - Table: the `## Coverage summary` of `tc.md`, unchanged.
-
-### Lint failed
-
-Push: `<AC|TC>-<CODE> lint failed · <n> errors · fix needed`
-
-```markdown
-**<file> · ❌ lint failed** — <n> errors · <n> warnings
-
-| Line | Word | Use |
-|---|---|---|
-| <n> | <word> | <replacement> |
-
-- **Next:** reply `fix` to let Claude reword, or edit the file and re-run the lint.
-```
-
-- Sent only when errors remain after the skill rewords the file. Errors first.
-
-### OQ resolved
-
-Push: `<OQ-ID> resolved · <n> AC · <n> TC changed · re-approve`
-
-```markdown
-**<OQ-ID> · ✅ resolved** — <n> AC · <n> TC changed · <n> TC unblocked
-
-| Item | Change |
-|---|---|
-| AC-<CODE>-010 | <one line> |
-| TC-<CODE>-020 | Blocked → Active |
-
-- **Next:** `/approve <feature>`, then `/approve <feature> --tc`. Post the answer to Jira? (yes / no)
-```
 
 ### Run paused
 
