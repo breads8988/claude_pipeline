@@ -4,7 +4,7 @@ Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and de
 
 ## 1. Test analysis → test design
 
-1. **Test conditions** ("what to test", §4.1): list every item in `ac.md` that a test must exercise.
+1. **Test conditions** ("what to test", §1.4.1): list every item in `ac.md` that a test must exercise. Write the EP partitions and BVA values in the `## Test analysis` section of `tc.md`.
 2. **Coverage items**: derive them per technique (table §2).
 3. **Test cases** ("how to test"): one TC exercises one or more coverage items, with preconditions, inputs and expected results.
 4. **Coverage** = coverage items exercised ÷ coverage items identified, per technique.
@@ -23,7 +23,7 @@ Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and de
 | Tester experience | Error guessing | Each anticipated defect type (fault attack) | §4.4.1 |
 
 ### Equivalence partitioning (§4.2.1)
-- Split each field's values into partitions the system treats the same way: valid and invalid.
+- Split each field's values into partitions the system treats the same way: valid and invalid. List them in the `Test analysis` table (FLD, partition, kind, example). The validator counts this table: every partition needs a TC.
 - Typical invalid partitions: below min, above max, wrong type, wrong format, empty when required.
 - Several fields → *Each Choice*: every partition of every field at least once; combinations are not required.
 - Combine valid partitions of several fields in one TC; give each invalid partition its own TC, so one failure cannot hide another.
@@ -31,6 +31,8 @@ Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and de
 ### Boundary value analysis (§4.2.2)
 - Only for ordered partitions (numbers, lengths, dates).
 - Range 1–100, 2-value: `0, 1, 100, 101`. 3-value: `0, 1, 2, 99, 100, 101`.
+- The neighbour is one `Step` away (FLD column): 1 for integers and lengths, 0.01 for amounts with 2 decimals, the currency's minor unit for money, 1 day for dates.
+- Label each value `min-1`, `min`, `min+1`, `max-1`, `max`, `max+1` with its number: `FLD-…-01 BVA: max+1 = 255`. The validator checks the number.
 - 3-value is "more rigorous" and catches defects 2-value misses (e.g. `x ≤ 10` coded as `x = 10`).
 
 ### Decision table testing (§4.2.3)
@@ -53,7 +55,8 @@ Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and de
 - No two TCs for the same characteristic.
 
 ### Checklist-based and error guessing (§4.4)
-- Checklist items are not automatically checkable; keep the `domain.md` checklist current.
+- A checklist should not contain items that can be checked automatically; keep the `domain.md` checklist current.
+- An `EG:` or `CHK:` TC still needs a `Covers AC`. A case that no AC describes becomes an AC or an open question first.
 - Error guessing ideas: double submission, session expiry mid-flow, back button after submit, stale data in a second tab, special characters, very long input, concurrent edits.
 
 ## 3. Depth by risk (internal convention on §5.2.3)
@@ -76,7 +79,7 @@ The syllabus states that product risk determines "the test techniques to be empl
 |---|---|
 | AC scenario | `AC-USR-002` |
 | Business rule | `BR-USR-001` |
-| EP partition | `FLD-USR-01 EP: invalid, empty` |
+| EP partition | `FLD-USR-01 EP: empty` (name from the Test analysis table) |
 | BVA value | `FLD-USR-01 BVA: max+1 = 255` |
 | Decision table column | `DT-USR-01.R2` |
 | Transition | `ST-USR-01.T4` |
@@ -84,5 +87,9 @@ The syllabus states that product risk determines "the test techniques to be empl
 | Error guess | `EG: back button after submit` |
 
 ## 5. Priority and execution order (§5.1.5)
-- TC priority = highest criticality among its coverage items.
+- TC priority: rule in `.claude/rules/naming.md` (highest of `Covers AC` and coverage items).
 - Runs execute risk-based: 🔴 first. Dependencies can override the order.
+
+## 6. Blocked TCs and coverage
+- Only a TC whose content depends on an open question (it contains `TBD (OQ-…)`) is `Blocked`. Other TCs of that AC stay `Active`.
+- Items covered only by blocked TCs are reported in the `Blocked` column of the summary. They are not counted as covered.

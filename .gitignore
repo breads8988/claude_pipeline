@@ -2,6 +2,8 @@ CLAUDE.local.md
 .claude/settings.local.json
 .env
 .env.*
+secrets/
+automation/config/prod*
 *.log
 .DS_Store
 __pycache__/

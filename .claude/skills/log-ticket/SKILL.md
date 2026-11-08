@@ -11,11 +11,11 @@ Style: `.claude/rules/writing-style.md`. Comment layout: `comment-style` skill.
 
 | Request | Template | Draft file | Length cap |
 |---|---|---|---|
-| Bug | `qa/_templates/bug.md` | `qa/tickets/BUG-<key>.md` | None: fill every field |
-| Task | `qa/_templates/task.md` | `qa/tickets/TASK-<key>.md` | None: fill every field |
+| Bug | `qa/_templates/bug.md` | `qa/tickets/BUG-TBD-<TC-ID>.md` (no TC: `BUG-TBD-<slug>.md`) | None: fill every field |
+| Task | `qa/_templates/task.md` | `qa/tickets/TASK-TBD-<slug>.md` | None: fill every field |
 | Comment on a ticket | `comment-style` table (retest = table 6) | No file | `comment-style` caps |
 
-Use `TBD` as `<key>` until Jira assigns one, then rename the file.
+After Jira assigns a key, rename the file `BUG-<key>.md` or `TASK-<key>.md` (`naming.md`).
 
 ## Steps
 1. Read `.claude/rules/project.md` (Jira project key, Feature Codes).
@@ -24,6 +24,9 @@ Use `TBD` as `<key>` until Jira assigns one, then rename the file.
 4. Write the draft from the template, or the comment from `comment-style`.
 5. Show the draft to the user. Ask before creating or commenting in Jira. A bug from a run needs the user to confirm the failure first.
 6. After approval, create the issue or post the comment with the Atlassian MCP. Rename the draft to the real key.
+7. From a run: write the key in the run row's `Bug` cell.
+8. Evidence: no tool uploads attachments. List the evidence paths and ask the user to attach them.
+9. Retest comment: `comment-style` table 6, one per bug. Ask before posting and before any transition.
 
 ## Do not
 - Do not include real customer or account data. Mask it.

@@ -15,7 +15,7 @@ Method: `references/test-design-techniques.md`. Format: `qa/_templates/tc.md`. R
 1. Read `.claude/rules/project.md` (Feature Codes, roles, notifications) and `.claude/rules/domain.md` (checklist).
 2. Read `qa/specs/<feature>/ac.md`, `references/test-design-techniques.md` and `qa/testcases/_example/tc.md`.
 3. Read existing `qa/testcases/<feature>/tc.md`. Continue its numbering.
-4. **Test analysis** (§1, §2): list test conditions from every active AC, BR, FLD, DT column, ST transition and applicable checklist item.
+4. **Test analysis** (§1, §2): list test conditions from every active AC, BR, FLD, DT column, ST transition and applicable checklist item. Write the EP partitions and BVA values into `## Test analysis` of `tc.md`.
 5. **Depth** (§3): set each item's depth from its criticality; raise one level for `Likelihood: High`.
 6. **Coverage items**: derive them per technique and depth: partitions, boundary values, DT columns, transitions (invalid ones for 🔴), scenarios, checklist items, error guesses.
 7. **Design TCs**:
@@ -25,18 +25,18 @@ Method: `references/test-design-techniques.md`. Format: `qa/_templates/tc.md`. R
    - Steps use real element names and run as the TC's `Role`.
 8. Fill every field of `qa/_templates/tc.md`, including `Technique` and `Coverage items` (notation §4).
 9. Set `Priority` = highest criticality among the TC's coverage items (§5).
-10. AC listed in an open question's `Blocks` → write the TC anyway: `Status: Blocked`, `Blocked by: <OQ-ID>`, and `TBD (<OQ-ID>): <unknown part>`.
+10. Content that depends on an open question → write the TC anyway with `TBD (<OQ-ID>): <unknown part>`, `Status: Blocked`, `Blocked by: <OQ-ID>`. TCs that do not depend on it stay `Active`.
 11. Set `Automation`: `Candidate` for stable, high-value or data-driven flows; else `Not yet`. `Type: Non-functional` TCs run only when they can be checked manually on staging.
-12. Fill the **Coverage summary** in the header: per technique, items identified, covered, %.
-13. Set the header: `Status: Draft`, `Last updated`.
-14. Run the coverage validator and the lint; fix until both exit 0:
-    - `python3 .claude/skills/gen-testcase/scripts/coverage.py qa/specs/<feature>/ac.md qa/testcases/<feature>/tc.md`
-    - `python3 .claude/skills/comment-style/scripts/lint.py qa/testcases/<feature>/tc.md`
-15. Add TC IDs to `qa/traceability/matrix.md`.
-16. Send the **TC ready for review** notification: TC count by priority, coverage % per technique, blocked TC count.
+12. Set the header: `Status: Draft`, `Last updated`. Save `tc.md`.
+13. Run the validator with `--summary`, paste its table into `## Coverage summary`, run it again; fix until it exits 0:
+    - `python3 .claude/skills/gen-testcase/scripts/coverage.py qa/specs/<feature>/ac.md qa/testcases/<feature>/tc.md --summary`
+14. Run the lint; fix until it exits 0: `python3 .claude/skills/comment-style/scripts/lint.py qa/testcases/<feature>/tc.md`
+15. Run the `tc-reviewer` agent. Fix its findings, then re-run steps 13–14.
+16. Add TC IDs to `qa/traceability/matrix.md`.
+17. Last: send the **TC ready for review** notification: TC count by priority, coverage % per technique, blocked count, reviewer findings left open.
 
 ## Do not
 - Do not create a TC without a coverage item from `ac.md`.
-- Do not test beyond the AC; raise a missing case as an open question on the AC instead.
+- Do not test beyond the AC. Error guessing and checklist TCs need a `Covers AC`; a missing case becomes an AC or an open question first.
 - Do not use real customer or account data.
 - Do not set `Approved`. Only `/approve --tc` does that.

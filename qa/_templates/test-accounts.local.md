@@ -4,6 +4,7 @@ Copy this file to `qa/test-accounts.local.md`. That path is git-ignored.
 
 - Staging test accounts only. Never a personal or production account.
 - The test agent reads this file to log in. It never prints the values.
+- Values entered by the browser tool appear in the session transcript. Use low-privilege staging accounts. Rotate them when a team member exits.
 
 | Test account | Password | OTP code |
 | --- | --- | --- |

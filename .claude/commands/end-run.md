@@ -1,6 +1,6 @@
 ---
 description: Close a test cycle, export the HTML report and draft bugs for failures
-argument-hint: [run file] (default: the latest run in qa/runs/)
+argument-hint: "[run file] (default: the latest run in qa/runs/)"
 ---
 
 End the run: $ARGUMENTS

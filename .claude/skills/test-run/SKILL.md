@@ -10,12 +10,12 @@ A run is one test cycle: one feature, one build, one scope. TCs are specs and ar
 | Item | Path |
 |---|---|
 | Run file | `qa/runs/<YYYY-MM-DD>-<feature>-<build>.md` (from `qa/_templates/run.md`) |
-| Evidence | `qa/runs/<run>/evidence/<TC-ID>.png`, failed TCs only (git-ignored) |
+| Evidence | Path in the row's `Evidence` cell: the path the browser tool returned, or `qa/runs/<run>/evidence/<TC-ID>.png` (git-ignored). Failed TCs only |
 | Report | `qa/reports/<run>.html` (git-ignored) |
 | Report script | `python3 .claude/skills/test-run/scripts/report.py <run file>` |
 
 ## 1. Start
-1. The TC file header must be `Status: Approved`. Otherwise stop: `TC is <status>. Run /approve <feature> --tc first.`
+1. Both headers must be `Status: Approved`: `ac.md` and `tc.md`. Otherwise stop: `<AC|TC> is <status>. Run /approve <feature> [--tc] first.`
 2. Select TCs by scope. Never include `Deprecated`.
 
 | Scope | TCs |
@@ -38,10 +38,18 @@ A run is one test cycle: one feature, one build, one scope. TCs are specs and ar
 1. Every row has a result other than `⬜`, or the user ends the run early (rest stay `⬜`).
 2. Set `State: Done` and `Finished`.
 3. Run the report script. Exit 2 → fix the run file and run it again.
-4. Each `❌ Fail` → draft a bug with the `log-ticket` skill (run, TC, AC, evidence). Bugs go to Jira only after the user confirms the failure.
-5. Send the **Run finished** notification (`comment-style` › `references/notifications.md`).
+4. Send the **Run finished** notification (`comment-style` › `references/notifications.md`).
+5. Each `❌ Fail` → draft `qa/tickets/BUG-TBD-<TC-ID>.md` with `log-ticket` (run, TC, AC, evidence path). Show the drafts.
+6. The user confirms a failure → create the bug in Jira. Rename the draft `BUG-<key>.md` and write the key in the run row's `Bug` cell.
+7. Evidence files are not uploaded by any tool. Ask the user to attach them to the bug.
+
+## 4. Retest
+1. `/start-run <feature> --build <b> --scope retest` with the failed TC IDs.
+2. Per bug, draft one retest comment (`comment-style` table 6) with the result. Ask before posting.
+3. All its TCs pass → ask whether to transition the bug (e.g. to `Done`). Never transition without a yes.
 
 ## Rules
 - An agent `Pass` is final. The report lists 🔴 passes for an optional re-check.
 - A `Fail` is confirmed by the user before a bug goes to Jira.
+- A run never edits `ac.md` or `tc.md`.
 - Results are written as `✅ Pass` · `❌ Fail` · `⛔ Blocked` · `⏭ Skip` · `⬜`.

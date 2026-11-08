@@ -31,7 +31,7 @@ Per-project vs shared files: `README.md`.
 4. `/gen-tc <feature>` → TC `Draft`; AC blocked by an open question get `Blocked` TCs.
 5. `/approve <feature> --tc` → TC `Approved`.
 6. `/start-run <feature> --build <b> --scope <s>` → `test-runner` executes on staging → `/end-run` → HTML report + notification.
-7. Failed TC → user confirms → `log-ticket` → Jira.
+7. Failed TC → `log-ticket` draft → user confirms → Jira.
 8. `/resolve-oq <OQ-ID> "<answer>"` → AC and TC updated, blocked TCs become `Active`.
 9. Change request → `impact-analysis` → affected AC and TC.
 10. Update `qa/traceability/matrix.md` after every AC or TC change. Every Jira comment and notification follows `comment-style`.
@@ -42,11 +42,11 @@ Per-project vs shared files: `README.md`.
 - Use synthetic or masked data only. Never real customer or account data.
 - Never read or write `.env`, secrets or production config.
 - Jira writes (create, comment, transition) need user confirmation first. A `skip` reply to an open question is that confirmation.
-- Only `/approve` sets `Approved`. Any edit to an approved AC or TC file sets it back to `Draft`.
-- `gen-testcase` needs an approved AC. A run needs an approved TC file.
+- Only `/approve` sets `Approved`. Any edit to an approved AC file sets it and its TC file back to `Draft`. Any edit to an approved TC file sets it back to `Draft`.
+- `gen-testcase` needs an approved AC. A run needs approved AC and TC files.
 - The test agent logs in only on the staging URL in `project.md`, with project test accounts. Passwords stay in `qa/test-accounts.local.md`.
 - Domain-specific checks live in `.claude/rules/domain.md`. Skills must not hardcode a domain.
-- Run the `comment-style` lint on AC and TC files, and the coverage validator on TC files, before saving. Exit 1 or 2 blocks the save.
+- Run the `comment-style` lint on AC and TC files, and the coverage validator on TC files, after each save. Exit 1 or 2 → fix before the notification or `/approve`.
 - AC follow BABOK (`write-ac` › `references/ac-techniques.md`). TCs follow ISTQB CTFL v4.0.1 (`gen-testcase` › `references/test-design-techniques.md`).
 - Shared files stay generic for all projects. Put project-specific content only in the per-project files listed in `README.md`.
 

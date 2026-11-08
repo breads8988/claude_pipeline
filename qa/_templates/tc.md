@@ -9,21 +9,38 @@
 | Last updated | <YYYY-MM-DD> |
 
 ## Coverage summary
-| Technique | Items identified | Covered | Coverage |
+Paste the output of `coverage.py … --summary`. The validator fails when this table is out of date.
+
+| Technique | Items identified | Covered | Blocked | Coverage |
+| --- | --- | --- | --- | --- |
+| Scenario (AC) | 0 | 0 | 0 | — |
+| Business rules | 0 | 0 | 0 | — |
+| EP | 0 | 0 | 0 | — |
+| BVA | 0 | 0 | 0 | — |
+| Decision table | 0 | 0 | 0 | — |
+| State transition | 0 | 0 | 0 | — |
+
+## Test analysis
+
+EP partitions (one TC per invalid partition):
+
+| FLD | Partition | Kind | Example value |
 | --- | --- | --- | --- |
-| Scenario (AC) | 0 | 0 | 0% |
-| Business rules | 0 | 0 | 0% |
-| EP | 0 | 0 | 0% |
-| BVA | 0 | 0 | 0% |
-| Decision table | 0 | 0 | 0% |
-| State transition | 0 | 0 | 0% |
+| FLD-<CODE>-01 | valid | valid | <value> |
+| FLD-<CODE>-01 | <partition name> | invalid | <value> |
+
+BVA values (2-value, or 3-value for 🔴):
+
+| FLD | Label | Value | TC |
+| --- | --- | --- | --- |
+| FLD-<CODE>-01 | min-1 | <value> | TC-<CODE>-<NNN> |
 
 ## TC-<CODE>-001: <short title>
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-<CODE>-001 |
-| Technique | Scenario / EP / BVA / Decision table / State transition / Checklist / Error guessing |
-| Coverage items | <e.g. `FLD-<CODE>-01 BVA: max+1 = 255`, `DT-<CODE>-01.R2`> |
+| Technique | <one or more: Scenario, EP, BVA, Decision table, State transition, Checklist, Error guessing> |
+| Coverage items | <each in backticks: `AC-<CODE>-001`, `FLD-<CODE>-01 EP: <partition>`, `FLD-<CODE>-01 BVA: max+1 = 255`, `DT-<CODE>-01.R2`, `ST-<CODE>-01.T4`, `EG: <idea>`> |
 | Role | <role from project.md> |
 | Type | Functional / Non-functional |
 | Priority | 🔴 / 🟠 / 🟡 / ⚪ |

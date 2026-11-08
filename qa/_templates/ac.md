@@ -15,6 +15,10 @@
 ## Impacted existing behaviour
 - <feature (CODE): BR/AC/DT/ST IDs checked, conflicts found> or `None, isolated change.`
 
+## Coverage notes
+- Checklist (`domain.md`): <items covered; items not applicable and why>
+- Scenario classes skipped: <class and why, or none>
+
 ## Scenarios
 
 ### AC-<CODE>-001: <short title>
@@ -27,14 +31,14 @@
 - Then: <observable result: status, error code, copy, value, record>
 
 ## Business rules
-| Rule ID | Rule | Criticality | Source |
-| --- | --- | --- | --- |
-| BR-<CODE>-001 | <rule with an example value> | 🔴 | <ticket or doc> |
+| Rule ID | Rule | Criticality | Status | Source |
+| --- | --- | --- | --- | --- |
+| BR-<CODE>-001 | <rule with an example value> | 🔴 | Active | <ticket or doc> |
 
 ## Data constraints
-| FLD | Field | Type | Required | Min | Max | Format or allowed values | Criticality |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| FLD-<CODE>-01 | <field> | <text / number / date / list> | Yes / No | <min or —> | <max or —> | <format> | 🔴 |
+| FLD | Field | Type | Required | Min | Max | Step | Format or allowed values | Criticality | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| FLD-<CODE>-01 | <field> | <text / number / date / list> | Yes / No | <min or —> | <max or —> | <1, 0.01, 1 day> | <format> | 🔴 | Active |
 
 ## Decision tables
 
@@ -54,15 +58,17 @@
 - Criticality: 🔴
 - Covers: AC-<CODE>-001
 
+List every state × event pair. A pair that is not permitted is a row with `Valid: No` and its rejection.
+
 | T | From | Event | To | Valid |
 | --- | --- | --- | --- | --- |
 | T1 | — | <event> | <state> | Yes |
-| T2 | <state> | <event> | <state> | No |
+| T2 | <state> | <event> | <state> (rejected, <copy or ERR code>) | No |
 
 ## Open questions
 | OQ | Risk | Question | Blocks | Owner | Status |
 | --- | --- | --- | --- | --- | --- |
-| OQ-<CODE>-001 | 🔴 / 🟠 / 🟡 | <closed-ended question> | <ID or —> | BA/PO | Open |
+| OQ-<CODE>-001 | 🔴 / 🟠 / 🟡 | <closed-ended question> | <ID or —> | BA/PO | Open / Posted / Answered |
 
 ## Review log
 | Date | Action | By | Note |

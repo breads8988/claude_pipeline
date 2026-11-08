@@ -7,14 +7,25 @@
       "mcp__Atlassian_Rovo__getJiraIssue",
       "mcp__Atlassian_Rovo__searchJiraIssuesUsingJql",
       "mcp__Atlassian_Rovo__getConfluencePage",
-      "mcp__Atlassian_Rovo__searchConfluenceUsingCql"
+      "mcp__Atlassian_Rovo__searchConfluenceUsingCql",
+      "Bash(python3 .claude/skills/comment-style/scripts/lint.py:*)",
+      "Bash(python3 .claude/skills/gen-testcase/scripts/coverage.py:*)",
+      "Bash(python3 .claude/skills/test-run/scripts/report.py:*)"
     ],
     "ask": [
       "mcp__Atlassian_Rovo__createJiraIssue",
       "mcp__Atlassian_Rovo__editJiraIssue",
       "mcp__Atlassian_Rovo__addCommentToJiraIssue",
       "mcp__Atlassian_Rovo__transitionJiraIssue",
-      "mcp__Atlassian_Rovo__createIssueLink"
+      "mcp__Atlassian_Rovo__createIssueLink",
+      "mcp__Atlassian_Rovo__addWorklogToJiraIssue",
+      "mcp__Atlassian_Rovo__createConfluencePage",
+      "mcp__Atlassian_Rovo__updateConfluencePage",
+      "mcp__Atlassian_Rovo__createConfluenceFooterComment",
+      "mcp__Atlassian_Rovo__createConfluenceInlineComment",
+      "mcp__Atlassian_Rovo__createCompassComponent",
+      "mcp__Atlassian_Rovo__createCompassComponentRelationship",
+      "mcp__Atlassian_Rovo__createCompassCustomFieldDefinition"
     ],
     "deny": [
       "Read(./.env)",
@@ -22,7 +33,12 @@
       "Read(./secrets/**)",
       "Read(./automation/config/prod*)",
       "Edit(./automation/config/prod*)",
-      "Write(./automation/config/prod*)"
+      "Write(./automation/config/prod*)",
+      "Edit(./.env*)",
+      "Write(./.env*)",
+      "Edit(./secrets/**)",
+      "Write(./secrets/**)",
+      "Bash(cat .env*)"
     ]
   }
 }

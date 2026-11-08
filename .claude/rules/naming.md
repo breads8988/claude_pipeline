@@ -11,8 +11,9 @@
 | Data constraint (field) | `FLD-<CODE>-<NN>` | `FLD-USR-01` |
 | Decision table / rule | `DT-<CODE>-<NN>` / `.R<n>` | `DT-USR-01.R3` |
 | State model / transition | `ST-<CODE>-<NN>` / `.T<n>` | `ST-USR-01.T2` |
-| Bug draft file | `qa/tickets/BUG-<jira-key>.md` | `BUG-ABC-123.md` |
-| Task draft file | `qa/tickets/TASK-<jira-key>.md` | `TASK-ABC-124.md` |
+| App error code | `ERR-<CODE>-<NN>`, taken from the source; missing → open question | `ERR-USR-01` |
+| Bug draft file | `qa/tickets/BUG-TBD-<TC-ID>.md`, renamed `BUG-<jira-key>.md` once created | `BUG-ABC-123.md` |
+| Task draft file | `qa/tickets/TASK-TBD-<slug>.md`, renamed `TASK-<jira-key>.md` once created | `TASK-ABC-124.md` |
 
 - AC, TC, OQ, BR use 3 digits; FLD, DT, ST use 2 digits. Sequential per Feature Code, never reused.
 - Do not renumber. Mark removed items `Status: Deprecated`.
@@ -20,7 +21,7 @@
 
 ## Criticality and priority
 - One scale for AC, rules, models and TC: 🔴 Critical · 🟠 High · 🟡 Medium · ⚪ Low.
-- A TC's priority = the highest criticality among the items it covers.
+- **TC priority** = the highest criticality among its `Covers AC` and its `Coverage items`. Single source of this rule; the coverage validator enforces it.
 - AC `Type`: Functional | Non-functional | Transition. AC `Likelihood`: Normal | High.
 
 ## Folders
@@ -36,17 +37,27 @@
 - `Role`: a role from `.claude/rules/project.md`.
 - `Priority`: 🔴 | 🟠 | 🟡 | ⚪.
 - `Type`: Functional | Non-functional.
-- `Technique`: Scenario | EP | BVA | Decision table | State transition | Checklist | Error guessing.
+- `Technique`: one or more of Scenario, EP, BVA, Decision table, State transition, Checklist, Error guessing.
 - `Coverage items`: notation in `gen-testcase` › `references/test-design-techniques.md` §4.
 - `Automation`: Not yet | Candidate | Done.
-- `Status`: Active | Blocked | Deprecated. `Blocked` needs `Blocked by: OQ-<CODE>-<NNN>`.
+- `Status`: Active | Blocked | Deprecated. Only a TC that contains `TBD (OQ-…)` is `Blocked`, with `Blocked by` set to that question. Other TCs of the same AC stay `Active`.
+- Data-driven TC: several test data rows, steps run once per row; each row is one execution.
+- `EG:` and `CHK:` items need a `Covers AC`. A case no AC describes becomes an AC or an open question first.
+
+## Open question status
+- `Open`: asked, waiting. `Posted`: the user replied `skip`; the question is on the Jira ticket. `Answered`: answer recorded.
+- Before `/approve`, answers given in chat are applied by `write-ac`. After `/approve`, use `/resolve-oq`.
+
+## Item status in AC tables
+- Business rules and data constraints have a `Status` column: Active | Deprecated. Decision tables and state models may carry a `- Status: Deprecated` line.
 
 ## File status (header of `ac.md` and `tc.md`)
 - `Draft` → `Approved` (via `/approve`) or `Changes requested` (via `/reject`).
-- Any edit to an `Approved` file sets it back to `Draft`.
+- Any edit to an `Approved` `ac.md` sets it **and** its `tc.md` back to `Draft`. Any edit to an approved `tc.md` sets it back to `Draft`.
+- A run needs both files `Approved`.
 
 ## Runs
 - Run file: `qa/runs/<YYYY-MM-DD>-<feature>-<build>.md`.
-- Evidence: `qa/runs/<run>/evidence/<TC-ID>.png` (failed TCs only, git-ignored).
+- Evidence: failed TCs only. The run row's `Evidence` cell holds the screenshot path returned by the browser tool, or `qa/runs/<run>/evidence/<TC-ID>.png` (git-ignored).
 - Report: `qa/reports/<run>.html` (git-ignored).
 - Examples live in `_example/` folders and are never edited per project.

@@ -1,9 +1,8 @@
 ---
 description: Generate manual test cases from the approved AC of a feature
-argument-hint: <feature-folder or AC-ID list>
+argument-hint: <feature-folder>
 ---
 
 Use the `gen-testcase` skill for: $ARGUMENTS
 
-The skill stops when the AC file is not `Approved`.
-After saving, run the `tc-reviewer` agent on the new file and show its findings.
+The skill stops when the AC file is not `Approved`. It runs the coverage validator, the lint and the `tc-reviewer` agent before it sends the notification.
