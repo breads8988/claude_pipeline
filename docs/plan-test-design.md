@@ -11,7 +11,7 @@ Status: all decisions agreed 2026-11-08 · Phases A, B, C built 2026-11-08 · Ne
 | Source | Version | Used for |
 |---|---|---|
 | IIBA BABOK Guide | v3 (current guide). The Business Analysis Standard (2025) complements it, same 6 knowledge areas and 30 tasks | Requirement analysis, AC quality, business rules, decision and state models |
-| IIBA "9 quality criteria for requirements" | — | AC quality gate |
+| BABOK v3 §7.2.4.1 Characteristics of Requirements and Designs Quality (9) | — | AC quality gate |
 | ISTQB CTFL syllabus | v4.0.1, 2024-09-15, official PDF; chapter 4 (test analysis and design), chapter 5 (risk, defect reports) | Test techniques, coverage items, risk-based depth, defect report fields |
 | Existing skill `gen-ac-from-jira` (user's) | — | Ported: analysis checklist, scenario classes, GWT rules, criticality, final gate |
 
@@ -45,7 +45,7 @@ New IDs make each coverage item traceable:
 | A3 | New AC sections, filled when the requirement has them: **Data constraints**, **Decision tables**, **State model**, **Role × action matrix** | `qa/_templates/ac.md` |
 | A4 | Impacted existing behaviour: search other features' Business Rules, decision tables and state models that share the same entities (`domain.md` entity list). Cite real IDs only; conflicts become open questions | `write-ac/SKILL.md`, `domain.md` (Entities table) |
 | A5 | AC are implementation-free: behaviour, not UI clicks. UI steps live in TCs only | `ac-techniques.md`, golden example |
-| A6 | Quality gate = IIBA 9 criteria (understandable, concise, feasible, atomic, complete, testable, prioritized, consistent, unambiguous) + port's final checklist | `ac-techniques.md`, `ac-reviewer.md` |
+| A6 | Quality gate = BABOK v3 §7.2.4.1 (9 characteristics) (understandable, concise, feasible, atomic, complete, testable, prioritized, consistent, unambiguous) + port's final checklist | `ac-techniques.md`, `ac-reviewer.md` |
 | A7 | `ac-reviewer` = BABOK *Verify requirements* (checklist). `/approve` = *Validate requirements* (human) | `ac-reviewer.md` |
 
 ## Phase B · ISTQB in `gen-testcase`

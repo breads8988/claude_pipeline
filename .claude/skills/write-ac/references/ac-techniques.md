@@ -2,7 +2,11 @@
 
 How to turn a requirement into acceptance criteria. Apply every technique that fits; skip one only when it does not apply, and say why in the report.
 
-Sources: IIBA BABOK Guide v3 (techniques: Acceptance and Evaluation Criteria, Business Rules Analysis, Decision Modelling, State Modelling, Data Dictionary, Glossary, Non-Functional Requirements Analysis, User Stories, Use Cases and Scenarios, Reviews; tasks: Verify and Validate Requirements), IIBA *9 quality criteria for requirements*, ISTQB CTFL v4.0.1 §4.5 (acceptance criteria, ATDD).
+Sources:
+- IIBA BABOK Guide v3. Techniques: Acceptance and Evaluation Criteria, Business Rules Analysis, Decision Modelling, State Modelling, Data Dictionary, Glossary, Non-Functional Requirements Analysis, User Stories, Use Cases and Scenarios, Reviews. Tasks: 7.2 Verify Requirements, 7.3 Validate Requirements, 5.5 Approve Requirements.
+- Quality criteria: BABOK v3 §7.2.4.1 *Characteristics of Requirements and Designs Quality*.
+- ISTQB CTFL v4.0.1 §4.5 (acceptance criteria, ATDD).
+- Common practice, not BABOK: INVEST, Gherkin (Given/When/Then), specification by example.
 
 ## 1. Analyse before writing
 
@@ -22,7 +26,7 @@ This step drives most AC quality. Identify:
 | Impacted existing behaviour | Which existing rules or flows can this change break? (§6) |
 | Assumptions | What did you have to assume? Each one becomes an open question (§8). |
 
-Restate the requirement as a user story: **As a** `<role>`, **I want** `<capability>`, **so that** `<benefit>`. Check it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable).
+Restate the requirement as a user story: **As a** `<role>`, **I want** `<capability>`, **so that** `<benefit>`. Check it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable; common practice).
 
 ## 2. Classify each requirement (BABOK classification schema)
 
@@ -36,8 +40,8 @@ Restate the requirement as a user story: **As a** `<role>`, **I want** `<capabil
 
 | Form | Use for | Feeds test technique |
 |---|---|---|
-| Given / When / Then scenario | Observable behaviour and flows | Scenario test (ATDD) |
-| Business rule (`BR-`) | A policy reused by several scenarios: validation, calculation, authorisation, time-based, configuration, regulatory, data integrity | Covered through scenarios and models |
+| Given / When / Then scenario (scenario-oriented AC, CTFL §4.5.2) | Observable behaviour and flows | Scenario test (ATDD) |
+| Business rule (`BR-`) (rule-oriented AC, CTFL §4.5.2) | A policy reused by several scenarios: validation, calculation, authorisation, time-based, configuration, regulatory, data integrity | Covered through scenarios and models |
 | Data constraints (`FLD-`) | Every input field with a type, range, length or format | Equivalence partitioning, boundary value analysis |
 | Decision table (`DT-`) | An outcome that depends on a combination of conditions, including role × action permissions | Decision table testing |
 | State model (`ST-`) | An entity with a lifecycle | State transition testing |
@@ -68,7 +72,7 @@ Keep business rules out of GWT. GWT only shows the observable behaviour when a r
 - **When**: one action or event.
 - **Then**: an objective pass/fail result: status, error code, copy, computed value or stored record. Join with `And`; contrast with `But`.
 - Describe **what**, never **how**. No clicks, screens, selectors, API or database detail. UI steps belong to TCs.
-- Pin rules with concrete example values (specification by example): *limit 100, amount 150 → rejected with ERR-…*.
+- Pin rules with concrete example values (specification by example, common practice): *limit 100, amount 150 → rejected with ERR-…*.
 
 ## 6. Impacted existing behaviour
 
@@ -97,7 +101,7 @@ One scale for AC and TC.
 - Every assumption and every ambiguity becomes an open question with an ID and a `Blocks` value.
 - An AC built on an unconfirmed assumption names that open question.
 
-## 9. Quality gate (IIBA 9 criteria)
+## 9. Quality gate (BABOK v3 §7.2.4.1, 9 characteristics)
 
 Reject an AC, rule or model that fails any.
 

@@ -18,7 +18,7 @@ Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and de
 | `DT` decision table (incl. role × action) | Decision table testing | Every feasible column (`DT-…R<n>`) | §4.2.3 |
 | `ST` state model | State transition testing | Valid transitions; with *all transitions*, also each invalid transition | §4.2.4 |
 | `AC` GWT scenario | Scenario test (ATDD) | Each scenario | §4.5.3 |
-| `BR` business rule | Covered through the TC that applies the rule | Each rule at least once | §4.5.2 |
+| `BR` business rule (rule-oriented AC) | Covered through the TC that applies the rule | Each rule at least once | §4.5.2 |
 | `domain.md` checklist | Checklist-based testing | Each applicable checklist item | §4.4.3 |
 | Tester experience | Error guessing | Each anticipated defect type (fault attack) | §4.4.1 |
 
@@ -36,7 +36,7 @@ Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and de
 - 3-value is "more rigorous" and catches defects 2-value misses (e.g. `x ≤ 10` coded as `x = 10`).
 
 ### Decision table testing (§4.2.3)
-- Columns = combinations of conditions; the last row is the outcome.
+- Condition rows on top, action rows below. Each column is one rule: a combination of conditions and its actions.
 - Remove infeasible columns. A minimised table merges columns where a condition does not change the outcome.
 - With many conditions, the number of columns grows exponentially; minimise or select by risk.
 
@@ -63,15 +63,17 @@ Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and de
 
 The syllabus states that product risk determines "the test techniques to be employed and the coverage to be achieved". It does not map levels to techniques; this table is our convention.
 
-| Item criticality | EP | BVA | Decision table | State transition |
+| Depth | EP | BVA | Decision table | State transition |
 |---|---|---|---|---|
 | 🔴 Critical | All partitions | 3-value | All feasible columns | All transitions (valid + invalid) |
-| 🟠 High | All partitions | 2-value | All feasible columns | Valid transitions |
-| 🟡 Medium | All partitions | 2-value | All feasible columns | Valid transitions |
+| 🟠 High · 🟡 Medium | All partitions | 2-value | All feasible columns | Valid transitions |
 | ⚪ Low | All partitions | 2-value | Minimised table | Valid transitions |
 
-- Criticality comes from the item itself (`FLD`, `DT`, `ST` row or header), else from the AC it covers.
-- `Likelihood: High` on the AC raises the depth one level (risk = likelihood × impact, §5.2).
+- **Depth** of a `FLD`, `DT` or `ST` = the highest of its own criticality and the criticality of the AC it covers (`Covers` bullet, or AC that cite its ID).
+- `Likelihood: High` on a covered AC raises the depth one level, capped at 🔴 (risk = likelihood × impact, §5.2).
+- Depth sets the technique only. TC priority does not change (`naming.md`).
+- ⚪ minimised table: write the minimised table in `ac.md`. Its columns are the coverage items.
+- The validator applies this rule to BVA (3-value) and invalid transitions.
 
 ## 4. Coverage item notation in a TC
 

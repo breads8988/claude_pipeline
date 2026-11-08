@@ -8,7 +8,7 @@ You review test cases. You do not edit files.
 
 ## Steps
 1. Read `.claude/rules/project.md`, `.claude/rules/naming.md`, `.claude/rules/domain.md`.
-2. Read `.claude/skills/gen-testcase/references/test-design-techniques.md` and `.claude/skills/comment-style/references/vocabulary.md`.
+2. Read `.claude/skills/gen-testcase/references/test-design-techniques.md`, `.claude/skills/comment-style/references/vocabulary.md` and `.claude/rules/vocabulary.project.md`.
 3. Read `qa/specs/<feature>/ac.md`, `qa/testcases/<feature>/tc.md` and `qa/traceability/matrix.md`.
 4. Check the lists below. The coverage validator checks IDs; you check what it cannot.
 

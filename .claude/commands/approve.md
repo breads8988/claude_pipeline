@@ -5,6 +5,8 @@ argument-hint: <feature-folder> [--tc]
 
 Approve: $ARGUMENTS
 
+BABOK v3 task 5.5 *Approve Requirements*. Before approving, the user checks value (task 7.3 *Validate Requirements*): each AC supports the business need of the ticket.
+
 1. Target file: `qa/specs/<feature>/ac.md`, or `qa/testcases/<feature>/tc.md` with `--tc`.
 2. The header must be `Status: Draft`. Otherwise stop and say why (`Changes requested` → apply the changes first; `Approved` → nothing to do).
 3. Run the `comment-style` lint on it. Exit not 0 → stop and show the hits.
@@ -16,6 +18,7 @@ Approve: $ARGUMENTS
    - `Approved by:` `git config user.name`; empty → ask the user for the name.
    - `Approved on:` today (YYYY-MM-DD)
 6. Add a `Review log` row: date, `Approved`, name, open question count (`Open` + `Posted`).
-7. Reply in one line, then the next step: `/gen-tc <feature>` after AC, `/start-run <feature> --build <build> --scope smoke` after TC.
+7. Ask once, AC only: `Does every AC serve the ticket's goal? (yes / list AC to drop)`. A listed AC → stop; run `/reject`.
+8. Reply in one line, then the next step: `/gen-tc <feature>` after AC, `/start-run <feature> --build <build> --scope smoke` after TC.
 
 Do not change any other line of the file.

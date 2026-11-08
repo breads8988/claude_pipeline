@@ -23,7 +23,7 @@ Method: `references/ac-techniques.md`. Format: `qa/_templates/ac.md`. Reference:
 8. **Scenarios**: write GWT AC for each scenario class that applies (§4, §5). Set `Type`, `Criticality`, `Likelihood` (§2, §7).
 9. **Business rules**: one row per rule, with an example value.
 10. **Open questions** (§8): every assumption and ambiguity, closed-ended, with `Blocks`.
-11. **Gate**: run the IIBA quality gate and final checklist (§9, §11). Fix every miss. Fill `## Coverage notes` (checklist items not applicable, scenario classes skipped and why).
+11. **Gate**: run the BABOK quality gate and final checklist (§9, §11). Fix every miss. Fill `## Coverage notes` (checklist items not applicable, scenario classes skipped and why).
 12. Set the header: `Status: Draft`, `Open questions: <n>`, `Last updated`. Save to `qa/specs/<feature>/ac.md`.
 13. Run the `comment-style` lint on the saved file; fix and re-run, max 3 attempts. Errors left → list them in the notification.
 14. Run the `ac-reviewer` agent. Fix its findings, then re-run the lint.

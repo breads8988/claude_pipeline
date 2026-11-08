@@ -51,17 +51,17 @@ A UI component is a small state machine with a known pattern. Write it as a mode
 - Scope: WCAG 2.2 Level A + AA, applied only to the components present on the screen.
 - `ui-pattern-checklist.md` maps each component type to its criteria. Examples:
 
-| Component | WCAG 2.2 criteria checked |
+| Component | WCAG 2.2 success criteria checked (level) |
 |---|---|
-| Disclosure, accordion | 2.1.1 Keyboard, 2.4.7 Focus Visible, 2.4.11 Focus Not Obscured, 4.1.2 Name Role Value (`aria-expanded`), 2.5.8 Target Size |
-| Tooltip, popover | 1.4.13 Content on Hover or Focus, 2.1.1, 4.1.2 |
-| Form field | 1.3.1 Info and Relationships, 3.3.1 Error Identification, 3.3.2 Labels, 3.3.3 Error Suggestion, 3.3.4 Error Prevention (financial), 3.3.7 Redundant Entry, 1.4.3 Contrast |
-| Login | 3.3.8 Accessible Authentication |
-| Dialog (modal) | 2.1.2 No Keyboard Trap, 2.4.3 Focus Order, 2.1.1, 4.1.2 |
-| Drag and drop | 2.5.7 Dragging Movements |
-| Status message, toast | 4.1.3 Status Messages, 2.2.1 Timing Adjustable |
-| Text, images, icons | 1.1.1 Non-text Content, 1.4.3 Contrast, 1.4.11 Non-text Contrast, 1.4.4 Resize Text, 1.4.10 Reflow |
-| Page | 2.4.2 Page Titled, 3.1.1 Language of Page, 3.2.6 Consistent Help, 2.4.1 Bypass Blocks |
+| Disclosure, accordion | 2.1.1 Keyboard (A), 2.4.7 Focus Visible (AA), 2.4.11 Focus Not Obscured (Minimum) (AA), 4.1.2 Name, Role, Value (A) (`aria-expanded`), 2.5.3 Label in Name (A), 2.5.8 Target Size (Minimum) (AA) |
+| Tooltip, popover | 1.4.13 Content on Hover or Focus (AA), 2.1.1 Keyboard (A), 4.1.2 Name, Role, Value (A) |
+| Form field | 1.3.1 Info and Relationships (A), 1.3.5 Identify Input Purpose (AA), 1.4.1 Use of Color (A), 1.4.3 Contrast (Minimum) (AA), 2.4.6 Headings and Labels (AA), 2.5.3 Label in Name (A), 3.2.2 On Input (A), 3.3.1 Error Identification (A), 3.3.2 Labels or Instructions (A), 3.3.3 Error Suggestion (AA), 3.3.4 Error Prevention (Legal, Financial, Data) (AA), 3.3.7 Redundant Entry (A) |
+| Login | 3.3.8 Accessible Authentication (Minimum) (AA), 1.3.5 Identify Input Purpose (AA) |
+| Dialog (modal) | 2.1.1 Keyboard (A), 2.1.2 No Keyboard Trap (A), 2.4.3 Focus Order (A), 4.1.2 Name, Role, Value (A) |
+| Drag and drop | 2.5.7 Dragging Movements (AA) |
+| Status message, toast | 4.1.3 Status Messages (AA), 2.2.1 Timing Adjustable (A) |
+| Text, images, icons | 1.1.1 Non-text Content (A), 1.4.1 Use of Color (A), 1.4.3 Contrast (Minimum) (AA), 1.4.4 Resize Text (AA), 1.4.10 Reflow (AA), 1.4.11 Non-text Contrast (AA), 1.4.12 Text Spacing (AA) |
+| Page | 2.4.1 Bypass Blocks (A), 2.4.2 Page Titled (A), 2.4.6 Headings and Labels (AA), 3.1.1 Language of Page (A), 3.2.6 Consistent Help (A) |
 
 ## Phase U3 · Agent execution (Claude in Chrome)
 

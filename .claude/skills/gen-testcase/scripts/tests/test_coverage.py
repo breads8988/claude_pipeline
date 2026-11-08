@@ -88,12 +88,33 @@ class CoverageTest(unittest.TestCase):
     def test_invalid_transition_required_for_critical_model(self):
         code, out, _ = self.go(AC, drop_tc(TC, 'TC-USR-018'))
         self.assertEqual(code, 1)
-        self.assertIn('ST-USR-01.T4: invalid (required for 🔴) transition not covered', out)
+        self.assertIn('ST-USR-01.T4: invalid (required at 🔴 depth) transition not covered', out)
 
     def test_invalid_transition_optional_below_critical(self):
         ac = sub(AC, '### ST-USR-01: Invitation lifecycle\n- Criticality: 🔴', '### ST-USR-01: Invitation lifecycle\n- Criticality: 🟠')
+        ac = sub(ac, '- Covers: AC-USR-001, AC-USR-003, AC-USR-005, AC-USR-006, AC-USR-008, AC-USR-010', '- Covers: AC-USR-007')
         code, out, _ = self.go(ac, drop_tc(TC, 'TC-USR-018'))
         self.assertNotIn('ST-USR-01.T4', out)
+
+    def test_depth_raised_by_critical_covered_ac(self):
+        # 🟠 model covering 🔴 AC is tested at 🔴 depth: invalid transitions required.
+        ac = sub(AC, '### ST-USR-01: Invitation lifecycle\n- Criticality: 🔴', '### ST-USR-01: Invitation lifecycle\n- Criticality: 🟠')
+        code, out, _ = self.go(ac, drop_tc(TC, 'TC-USR-018'))
+        self.assertIn('ST-USR-01.T4: invalid (required at 🔴 depth) transition not covered', out)
+
+    def test_depth_raised_by_likelihood_high(self):
+        # 🟠 model covering only a 🟠 AC with Likelihood High is raised to 🔴.
+        ac = sub(AC, '### ST-USR-01: Invitation lifecycle\n- Criticality: 🔴', '### ST-USR-01: Invitation lifecycle\n- Criticality: 🟠')
+        ac = sub(ac, '- Covers: AC-USR-001, AC-USR-003, AC-USR-005, AC-USR-006, AC-USR-008, AC-USR-010', '- Covers: AC-USR-005')
+        code, out, _ = self.go(ac, drop_tc(TC, 'TC-USR-018'))
+        self.assertIn('ST-USR-01.T4: invalid (required at 🔴 depth) transition not covered', out)
+
+    def test_fld_depth_from_citing_ac(self):
+        # FLD 🟠 cited by a 🔴 AC needs 3-value BVA.
+        ac = sub(AC, '- Criticality: 🟠 High\n- Likelihood: Normal\n- Status: Active\n- Given: an Admin\n- When: the Admin sends an invitation to an email that breaks `FLD-USR-01`',
+                 '- Criticality: 🔴 Critical\n- Likelihood: Normal\n- Status: Active\n- Given: an Admin\n- When: the Admin sends an invitation to an email that breaks `FLD-USR-01`')
+        code, out, _ = self.go(ac, TC)
+        self.assertIn('FLD-USR-01: BVA min+1 not covered (3-value)', out)
 
     # EP
     def test_ep_partition_not_covered(self):

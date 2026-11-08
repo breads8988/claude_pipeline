@@ -8,7 +8,7 @@ Coverage items come from ac.md (AC, BR, DT columns, ST transitions, FLD boundari
 `## Test analysis` partition table in tc.md (EP partitions). Deprecated items are excluded.
 
 Errors (exit 1):
-  - An active AC, BR, DT column, valid transition (and invalid transition of a 🔴 model), EP partition
+  - An active AC, BR, DT column, valid transition (and invalid transition at 🔴 depth), EP partition
     or required BVA value has no TC. Items covered only by blocked TCs are reported as blocked, not errors.
   - A FLD has no partition row, or lacks a valid or an invalid partition.
   - A BVA label is unknown, or its value does not match the FLD min/max/step.
@@ -172,7 +172,9 @@ def parse_ac(path):
             dups.append(sid)
         seen.add(sid)
         ac[sid] = {'crit': level(bullet(lines, s, e, 'Criticality')),
-                   'active': not deprecated(bullet(lines, s, e, 'Status'))}
+                   'active': not deprecated(bullet(lines, s, e, 'Status')),
+                   'high': bullet(lines, s, e, 'Likelihood').lower().startswith('high'),
+                   'text': '\n'.join(lines[s:e])}
     if not ac:
         raise FormatError(f'{path}: no AC sections (### AC-<CODE>-NNN)')
     br, fld, oq = {}, {}, {}
@@ -190,11 +192,12 @@ def parse_ac(path):
                 fld[first] = {'crit': level(col(row, 'criticality')), 'min': lo, 'max': hi, 'step': step}
             elif re.fullmatch(rf'OQ-{CODE}-\d{{3}}', first):
                 oq[first] = col(row, 'status').strip('` ').lower()
-    dt, st = {}, {}
+    dt, st, links = {}, {}, {}
     for sid, s, e in sections(lines, DT_H, 3):
         if deprecated(bullet(lines, s, e, 'Status')):
             continue
         crit = level(bullet(lines, s, e, 'Criticality'))
+        covers = set(re.findall(rf'AC-{CODE}-\d{{3}}', bullet(lines, s, e, 'Covers')))
         cols = []
         for header, _ in tables(lines, s, e):
             cols = [c.upper() for c in header if re.fullmatch(r'r\d+', c)]
@@ -204,10 +207,12 @@ def parse_ac(path):
             raise FormatError(f'{path}: {sid} has no table with R1…Rn columns')
         for c in cols:
             dt[f'{sid}.{c}'] = crit
+        links[sid] = covers
     for sid, s, e in sections(lines, ST_H, 3):
         if deprecated(bullet(lines, s, e, 'Status')):
             continue
         crit = level(bullet(lines, s, e, 'Criticality'))
+        links[sid] = set(re.findall(rf'AC-{CODE}-\d{{3}}', bullet(lines, s, e, 'Covers')))
         found = 0
         for header, rows in tables(lines, s, e):
             if 't' not in header:
@@ -222,11 +227,22 @@ def parse_ac(path):
                 v = row.get('valid', '').strip('* ').lower()
                 if v not in TRUE | FALSE:
                     raise FormatError(f'{path}: {sid}.{t} Valid must be Yes or No, got "{v}"')
-                st[f'{sid}.{t}'] = {'crit': crit, 'valid': v in TRUE}
+                st[f'{sid}.{t}'] = {'crit': crit, 'valid': v in TRUE, 'model': sid}
                 found += 1
             break
         if not found:
             raise FormatError(f'{path}: {sid} has no transition rows (T1…Tn)')
+    # Depth (test-design-techniques §3): max(item, covered AC) + one level if a covered AC has
+    # Likelihood High, capped at 🔴. Links: the model's `Covers` bullet plus AC that cite the item ID.
+    def depth(item_id, crit):
+        acs = {a for a in links.get(item_id, set()) | {a for a, v in ac.items() if item_id in v['text']}
+               if a in ac and ac[a]['active']}
+        base = max([crit] + [ac[a]['crit'] for a in acs])
+        return min(4, base + (1 if any(ac[a]['high'] for a in acs) else 0))
+    for f, v in fld.items():
+        v['depth'] = depth(f, v['crit'])
+    for t, v in st.items():
+        v['depth'] = depth(v['model'], v['crit'])
     return {'ac': ac, 'br': br, 'fld': fld, 'dt': dt, 'st': st, 'oq': oq, 'dups': dups}
 
 
@@ -290,7 +306,7 @@ def norm(label):
 
 def bva_required(f):
     """Required BVA labels and expected values for a field."""
-    three = f['crit'] == 4
+    three = f.get('depth', f['crit']) == 4
     req = {}
     for side, raw in (('min', f['min']), ('max', f['max'])):
         if not raw.strip() or raw.strip() in ('—', '-', 'n/a', 'N/A'):
@@ -326,10 +342,10 @@ def check(spec, tcs, partitions):
             ('Decision table', list(spec['dt']), 'decision table column not covered')):
         missing, _ = tally(name, items, cited_a, cited_b)
         errors += [f'{i}: {label}' for i in missing]
-    need_st = [t for t, v in spec['st'].items() if v['valid'] or v['crit'] == 4]
+    need_st = [t for t, v in spec['st'].items() if v['valid'] or v.get('depth', v['crit']) == 4]
     missing, _ = tally('State transition', need_st, cited_a, cited_b)
     for t in missing:
-        kind = 'valid' if spec['st'][t]['valid'] else 'invalid (required for 🔴)'
+        kind = 'valid' if spec['st'][t]['valid'] else 'invalid (required at 🔴 depth)'
         errors.append(f'{t}: {kind} transition not covered')
 
     # EP: partitions from the tc.md test analysis table.
@@ -393,7 +409,7 @@ def check(spec, tcs, partitions):
             elif tids & set(blocked):
                 bva_b += 1
             else:
-                depth = '3-value' if v['crit'] == 4 else '2-value'
+                depth = '3-value' if v.get('depth', v['crit']) == 4 else '2-value'
                 errors.append(f'{f}: BVA {key} not covered ({depth})')
     summary['BVA'] = (bva_total, bva_a, bva_b)
 

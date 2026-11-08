@@ -3,7 +3,7 @@
 Status: backlog 2026-11-08 · To discuss after the manual pilot
 
 ## Principle
-- Test pyramid (ISTQB CTFL v4.0.1 §5.1.6): put each check at the lowest layer that can detect the defect.
+- Test pyramid (ISTQB CTFL v4.0.1 §5.1.6). Internal principle based on it: put each check at the lowest layer that can detect the defect.
 - API tests are the bulk. E2E stays a few journeys per feature. The rest stays manual.
 
 ## AC item → layer
