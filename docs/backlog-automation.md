@@ -24,6 +24,7 @@ Status: backlog 2026-11-08 · To discuss after the manual pilot
 ## API automation scope
 - Validation: every partition and boundary; error codes and error format.
 - Business rules: calculations, rounding, limits, eligibility checks from `domain.md`; every decision table column.
+- Later: multi-actor flows (maker-checker, two sessions on one record) and reconciliation (UI = API = storage), once API access exists.
 - Authorisation: every role × action, expired token, access to another user's resource.
 - Lifecycle: every valid and forbidden transition.
 - Non-functional at API level: idempotency (same request twice creates one record), concurrency, timeout and retry, partner failure through stubs.

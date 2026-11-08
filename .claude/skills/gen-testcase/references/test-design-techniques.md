@@ -21,6 +21,8 @@ Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and de
 | `BR` business rule (rule-oriented AC) | Covered through the TC that applies the rule | Each rule at least once | §4.5.2 |
 | `domain.md` checklist | Checklist-based testing | Each applicable checklist item | §4.4.3 |
 | Tester experience | Error guessing | Each anticipated defect type (fault attack) | §4.4.1 |
+| 3+ parameters whose combinations matter | Pairwise (all-pairs) | Each `PW-NN` row of the Test analysis table | CTAL-TA (combinatorial testing), beyond CTFL |
+| Areas with thin specs or high risk | Exploratory testing, session-based | Each charter `CH-<CODE>-NN` | §4.4.2 |
 
 ### Equivalence partitioning (§4.2.1)
 - Split each field's values into partitions the system treats the same way: valid and invalid. List them in the `Test analysis` table (FLD, partition, kind, example). The validator counts this table: every partition needs a TC.
@@ -58,6 +60,27 @@ Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and de
 - A checklist should not contain items that can be checked automatically; keep the `domain.md` checklist current.
 - An `EG:` or `CHK:` TC still needs a `Covers AC`. A case that no AC describes becomes an AC or an open question first.
 - Error guessing ideas: double submission, session expiry mid-flow, back button after submit, stale data in a second tab, special characters, very long input, concurrent edits.
+- Negative security ideas (each needs an AC or a `domain.md` permission item):
+  - open another user's or another tenant's record by changing the ID in the URL
+  - direct request to an action the UI hides for this role
+  - change a hidden or read-only value before submit (price, role, owner ID)
+  - replay the same request; reuse a one-time link or code
+  - act with an expired or logged-out session
+- Time-based ideas: cut-off times, time zones, daylight saving change, weekends and holidays, expiry exactly at the boundary, end of month and leap day.
+
+### Pairwise (all-pairs)
+- Use when 3 or more parameters each have several values and the full product is too large (e.g. browser × locale × role × channel).
+- Coverage item: each row of the pairwise table. Every pair of values of any two parameters appears in at least one row.
+- Generate the rows: `python3 .claude/skills/gen-testcase/scripts/pairwise.py --param "Browser=Chrome,Edge" --param "Locale=en,vi"`. Paste the table into `## Test analysis`.
+- Cite rows in `Coverage items`: `PW-03`. A PW TC needs a `Covers AC`. The validator checks rows and all pairs.
+- Pairs that must not combine (invalid in the domain) → remove the value pair and note why under the table.
+- Source: pairwise is not in CTFL v4.0.1. It is in the ISTQB Advanced Test Analyst syllabus (combinatorial testing).
+
+### Exploratory testing (§4.4.2)
+- Session-based: a charter sets the target, a time box and what to look for. It does not replace TCs.
+- Write charters in `## Exploratory charters` of `tc.md`: `CH-<CODE>-NN`, Covers AC, Explore (target), With (resources, data, role), To discover (risk), Time box.
+- Use when specs are thin, time is short, or after scripted TCs pass on a 🔴 area.
+- Findings → `log-ticket`, or a new AC or open question. Charters are not counted in the coverage summary.
 
 ## 3. Depth by risk (internal convention on §5.2.3)
 
@@ -87,6 +110,7 @@ The syllabus states that product risk determines "the test techniques to be empl
 | Transition | `ST-USR-01.T4` |
 | Checklist item | `CHK: double submission` |
 | Error guess | `EG: back button after submit` |
+| Pairwise row | `PW-03` |
 
 ## 5. Priority and execution order (§5.1.5)
 - TC priority: rule in `.claude/rules/naming.md` (highest of `Covers AC` and coverage items).

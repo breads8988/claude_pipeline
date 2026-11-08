@@ -19,6 +19,12 @@
 
 Result values: ⬜ Not run · ✅ Pass · ❌ Fail · ⛔ Blocked (OQ or missing precondition) · ⏭ Skip (user decision, reason in Note).
 
+## Exploratory sessions (optional)
+
+| Charter | Tester | Time spent | Findings | Bugs |
+| --- | --- | --- | --- | --- |
+| CH-<CODE>-01 | <person or test-runner> | <min> | <one line> | — |
+
 ## Summary
 | Total | Pass | Fail | Blocked | Skip | Not run |
 | --- | --- | --- | --- | --- | --- |

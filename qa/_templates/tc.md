@@ -35,6 +35,18 @@ BVA values (2-value, or 3-value for 🔴):
 | --- | --- | --- | --- |
 | FLD-<CODE>-01 | min-1 | <value> | TC-<CODE>-<NNN> |
 
+Pairwise (optional, 3+ parameters; output of `pairwise.py`; adds a `Pairwise` summary row):
+
+| PW | <Parameter 1> | <Parameter 2> | <Parameter 3> |
+| --- | --- | --- | --- |
+| PW-01 | <value> | <value> | <value> |
+
+## Exploratory charters (optional)
+
+| Charter | Covers AC | Explore | With | To discover | Time box |
+| --- | --- | --- | --- | --- | --- |
+| CH-<CODE>-01 | AC-<CODE>-<NNN> | <target area> | <role, data, tools> | <risk to look for> | <e.g. 45 min> |
+
 ## TC-<CODE>-001: <short title>
 | Field | Value |
 | --- | --- |

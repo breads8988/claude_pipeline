@@ -63,6 +63,9 @@ Keep business rules out of GWT. GWT only shows the observable behaviour when a r
   - date and time: time zone, DST, leap year, expired, future
   - concurrency: double submission, concurrent update, stale data
 - **Permission**: who may and may not act, and what each role sees. Write a role × action decision table.
+- **Negative security**: another user's or tenant's record, a direct request to an action the role does not have, a changed hidden or read-only value, a replayed request or a reused one-time link. Each is rejected with an error code and no side effects.
+- **Idempotency**: an action that changes state and can be repeated (submit, confirm, pay, approve) gets a business rule: what a second identical request does. Write it as a `BR` with an example.
+- **Time-based**: cut-off times, time zone, daylight saving change, holidays, expiry at the exact boundary. State the clock and the time zone the rule uses.
 - **State transitions**: valid and forbidden transitions of every lifecycle. Write a state model.
 - **Non-functional**: performance, security, accessibility, compatibility, localisation, reliability, audit, where they apply.
 

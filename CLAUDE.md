@@ -54,6 +54,7 @@ Per-project vs shared files: `README.md`.
 - Lint AC/TC: `python3 .claude/skills/comment-style/scripts/lint.py <file.md>`
 - Lint tests: `python3 -m unittest discover -s .claude/skills/comment-style/scripts/tests`
 - Coverage: `python3 .claude/skills/gen-testcase/scripts/coverage.py qa/specs/<feature>/ac.md qa/testcases/<feature>/tc.md --summary`
+- Pairwise rows: `python3 .claude/skills/gen-testcase/scripts/pairwise.py --param "Name=v1,v2" --param …`
 - Coverage tests: `python3 -m unittest discover -s .claude/skills/gen-testcase/scripts/tests`
 - Run report: `python3 .claude/skills/test-run/scripts/report.py qa/runs/<run>.md`
 - Report tests: `python3 -m unittest discover -s .claude/skills/test-run/scripts/tests`

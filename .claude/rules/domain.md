@@ -32,6 +32,7 @@ Replace the generic checklist with domain terms, limits, states and compliance i
 ### Permission and roles
 - Who can view, create, edit, delete, approve.
 - Behavior for unauthenticated, unauthorized and expired sessions.
+- Another user's or tenant's record by ID; direct request to a hidden action; changed hidden or read-only value; replayed request.
 
 ### State and lifecycle
 - List all states and allowed transitions.
@@ -39,10 +40,13 @@ Replace the generic checklist with domain terms, limits, states and compliance i
 
 ### Calculation and data
 - Rounding, units, currency, time zone, date format.
+- Decimal places and minor units of each currency; BVA step = one minor unit.
+- Time-based rules: cut-off, holidays, daylight saving change, expiry boundary.
 - Totals shown in UI equal totals in API and storage.
 
 ### Errors and edge cases
 - Error messages for each failure. Retry, timeout, duplicate submit.
+- Idempotency: a repeated state-changing request has a stated result (same record, or rejected).
 - Partial failure and rollback.
 
 ### Integration
@@ -57,5 +61,5 @@ Replace the generic checklist with domain terms, limits, states and compliance i
 - Use synthetic or masked data only in qa files.
 
 ## Examples of domain additions
-- Payments: FX rate lock, fees, limits, corridors, KYC, sanctions screening, ledger.
+- Payments: FX rate lock and its expiry, fees, limits, corridors, KYC, sanctions screening, ledger; pairwise over corridor × currency × method × channel; reconciliation (UI = API = ledger).
 - E-commerce: cart, stock, promo rules, tax, shipping, refunds.

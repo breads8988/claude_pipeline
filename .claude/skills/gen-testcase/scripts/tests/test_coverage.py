@@ -219,7 +219,7 @@ class CoverageTest(unittest.TestCase):
         sec = section(TC, 'TC-USR-019')
         tc = TC.replace(sec, sec.replace('| Covers AC | AC-USR-009 |', '| Covers AC | — |').replace('`AC-USR-009`, ', ''))
         code, out, _ = self.go(AC, tc)
-        self.assertIn('TC-USR-019: EG/CHK items need a Covers AC', out)
+        self.assertIn('TC-USR-019: EG/CHK/PW items need a Covers AC', out)
 
     # summary
     def test_summary_mismatch(self):
@@ -326,6 +326,74 @@ class CoverageTest(unittest.TestCase):
         code, _, err = self.go(AC, '# nothing\n')
         self.assertEqual(code, 2)
         self.assertIn('no TC sections', err)
+
+
+PW_TABLE = """
+Pairwise (all pairs):
+
+| PW | Browser | Locale | Role |
+| --- | --- | --- | --- |
+| PW-01 | Chrome | en | Admin |
+| PW-02 | Chrome | vi | Owner |
+| PW-03 | Edge | en | Owner |
+| PW-04 | Edge | vi | Admin |
+"""
+
+
+def with_pw(tc, rows=('PW-01', 'PW-02', 'PW-03', 'PW-04'), table=PW_TABLE):
+    tc = sub(tc, '\n## TC-USR-001:', table + '\n## TC-USR-001:')
+    cited = ', '.join(f'`{r}`' for r in rows)
+    return sub(tc, '`FLD-USR-01 EP: valid` |', f'`FLD-USR-01 EP: valid`, {cited} |')
+
+
+class NarrowRangeTest(unittest.TestCase):
+    setUp = CoverageTest.setUp
+    tearDown = CoverageTest.tearDown
+    go = CoverageTest.go
+
+    def test_equal_values_count_once(self):
+        # Range 6..7 at 🔴 depth: min+1 = max = 7 and max-1 = min = 6 are one item each.
+        ac = sub(AC, '| FLD-USR-01 | Email (length in characters) | text | Yes | 6 | 254 | 1 |',
+                 '| FLD-USR-01 | Email (length in characters) | text | Yes | 6 | 7 | 1 |')
+        ac = sub(ac, '| 🟠 | Active |\n\n## Decision tables', '| 🔴 | Active |\n\n## Decision tables')
+        code, out, _ = self.go(ac, TC, '--summary')
+        # Values 5, 6, 7, 8: four items, not six labels.
+        self.assertIn('| BVA | 4 |', out)
+
+
+class PairwiseTest(unittest.TestCase):
+    setUp = CoverageTest.setUp
+    tearDown = CoverageTest.tearDown
+    go = CoverageTest.go
+
+    def pw_errors(self, out):
+        return [l for l in out.splitlines() if ('PW-' in l or 'pairwise' in l) and 'Coverage summary' not in l]
+
+    def test_full_pairwise_ok(self):
+        code, out, _ = self.go(AC, with_pw(TC))
+        self.assertEqual(self.pw_errors(out), [])
+        self.assertIn('Coverage summary row "Pairwise" is missing', out)
+
+    def test_summary_lists_pairwise(self):
+        code, out, _ = self.go(AC, with_pw(TC), '--summary')
+        self.assertIn('| Pairwise | 4 | 4 | 0 | 100% |', out)
+
+    def test_pairwise_row_not_covered(self):
+        code, out, _ = self.go(AC, with_pw(TC, rows=('PW-01', 'PW-02', 'PW-03')))
+        self.assertIn('PW-04: pairwise row not covered', out)
+
+    def test_unknown_pairwise_row(self):
+        code, out, _ = self.go(AC, with_pw(TC, rows=('PW-01', 'PW-02', 'PW-03', 'PW-04', 'PW-09')))
+        self.assertIn('TC-USR-001: PW-09 is not in the pairwise table of Test analysis', out)
+
+    def test_missing_pair(self):
+        table = PW_TABLE.replace('| PW-04 | Edge | vi | Admin |\n', '')
+        code, out, _ = self.go(AC, with_pw(TC, rows=('PW-01', 'PW-02', 'PW-03'), table=table))
+        self.assertIn('pairwise: pair browser=edge × locale=vi is in no PW row', out)
+
+    def test_no_pairwise_no_summary_row(self):
+        code, out, _ = self.go(AC, TC, '--summary')
+        self.assertNotIn('Pairwise', out)
 
 
 if __name__ == '__main__':

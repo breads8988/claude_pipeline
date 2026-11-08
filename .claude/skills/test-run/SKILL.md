@@ -29,6 +29,7 @@ A run is one test cycle: one feature, one build, one scope. TCs are specs and ar
 4. One row per TC: ID, title, role, priority. Result `⬜`.
 5. `Status: Blocked` TCs → Result `⛔ Blocked`, Note `<OQ-ID>`. They are never executed.
 6. Order rows by role, then priority (🔴 first, risk-based), so the agent logs in once per role.
+7. Charters in `tc.md` (`CH-<CODE>-NN`): ask whether to include them. Included → one row each in `## Exploratory sessions`. They run after the TCs, within their time box; findings go to `log-ticket`.
 
 ## 2. Execute
 - Run the `test-runner` agent with the run file path.

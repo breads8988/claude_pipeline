@@ -16,7 +16,9 @@ Errors (exit 1):
   - TC priority ≠ highest criticality among its `Covers AC` and its coverage items.
   - Blocking: a `Blocked` TC needs `Blocked by: OQ-…` and a `TBD (OQ-…)` line; a TC with `TBD (OQ-…)`
     must be `Blocked` by that OQ; the OQ must exist and be `Open` or `Posted`.
-  - A TC citing `EG:` or `CHK:` items has no `Covers AC`.
+  - A TC citing `EG:`, `CHK:` or pairwise (`PW-NN`) items has no `Covers AC`.
+  - Pairwise: a `PW-NN` row of the Test analysis table has no TC, a TC cites an unknown row, or the
+    rows miss a pair of values of two parameters (all-pairs).
   - Duplicate AC or TC IDs; a TC section without a Field/Value table.
   - The `## Coverage summary` table in tc.md differs from the computed one.
 
@@ -44,6 +46,8 @@ TRUE = {'yes', 'y', 'valid', 'true', '✅', '✓'}
 FALSE = {'no', 'n', 'invalid', 'false', '❌', '✗'}
 OPEN_OQ = ('open', 'posted')
 TECHS = ('Scenario (AC)', 'Business rules', 'EP', 'BVA', 'Decision table', 'State transition')
+OPTIONAL_TECHS = ('Pairwise',)  # listed in the summary only when the tc.md has items for them
+PW_ID = re.compile(r'\bPW-\d{2}\b')
 
 
 class FormatError(Exception):
@@ -250,11 +254,19 @@ def parse_tc(path):
     lines = read(path)
     tcs, dups, errors = {}, [], []
     partitions = {}
+    pw = {}
     summary = None
     for i, line in enumerate(lines):
         if re.match(r'^##\s+Test analysis\b', line, re.I):
             end = next((j for j in range(i + 1, len(lines)) if re.match(r'^#{1,2}\s', lines[j])), len(lines))
             for header, rows in tables(lines, i, end):
+                if header and header[0] == 'pw':
+                    for r in rows:
+                        rid = (r[0] if r else '').strip('`* ')
+                        if PW_ID.fullmatch(rid):
+                            if rid in pw:
+                                errors.append(f'Test analysis: duplicate pairwise row {rid}')
+                            pw[rid] = {h: norm(v) for h, v in zip(header[1:], r[1:])}
                 if header[:2] == ['fld', 'partition']:
                     for r in rows:
                         row = dict(zip(header, r + [''] * (len(header) - len(r))))
@@ -285,11 +297,13 @@ def parse_tc(path):
         covers = set(re.findall(rf'AC-{CODE}-\d{{3}}', fields.get('covers ac', '')))
         body = '\n'.join(lines[s:e])
         flds = [m.groups() for m in (FLD_ITEM.match(x.strip()) for x in items) if m]
+        pws = {x.strip() for x in items if PW_ID.fullmatch(x.strip())}
         tcs[sid] = {
             'covers': covers,
             'ids': set(ITEM_ID.findall(items_cell)) | covers,
             'fld': [(f, tech.upper(), lab.strip()) for f, tech, lab in flds],
             'eg': any(re.match(r'^\s*(EG|CHK)\s*:', x) for x in items),
+            'pw': pws,
             'priority': level(fields.get('priority', '')),
             'status': fields.get('status', '').strip('` ').lower(),
             'blocked_by': fields.get('blocked by', '').strip(),
@@ -297,7 +311,7 @@ def parse_tc(path):
         }
     if not tcs:
         raise FormatError(f'{path}: no TC sections (## TC-<CODE>-NNN)')
-    return tcs, dups, errors, partitions, summary
+    return tcs, dups, errors, {'ep': partitions, 'pw': pw}, summary
 
 
 def norm(label):
@@ -320,7 +334,22 @@ def bva_required(f):
     return req
 
 
-def check(spec, tcs, partitions):
+def all_pairs_missing(rows):
+    """Pairs of values (two parameters) that no row contains. Values per parameter = values used in rows."""
+    if not rows:
+        return []
+    params = list(next(iter(rows.values())))
+    values = {p: sorted({r.get(p, '') for r in rows.values()} - {''}) for p in params}
+    missing = []
+    for i, a in enumerate(params):
+        for b in params[i + 1:]:
+            seen = {(r.get(a), r.get(b)) for r in rows.values()}
+            missing += [f'{a}={x} × {b}={y}' for x in values[a] for y in values[b] if (x, y) not in seen]
+    return missing
+
+
+def check(spec, tcs, analysis):
+    partitions, pw_rows = analysis['ep'], analysis['pw']
     errors = []
     live = {k: v for k, v in tcs.items() if not v['status'].startswith('deprecated')}
     active = {k: v for k, v in live.items() if not v['status'].startswith('blocked')}
@@ -379,6 +408,17 @@ def check(spec, tcs, partitions):
                 errors.append(f'{f}: EP partition "{lab}" not covered')
     summary['EP'] = (ep_total, ep_a, ep_b)
 
+    # Pairwise: rows of the PW table in Test analysis.
+    if pw_rows:
+        pw_a = set().union(*[t['pw'] for t in active.values()]) if active else set()
+        pw_b = set().union(*[t['pw'] for t in blocked.values()]) if blocked else set()
+        missing, _ = tally('Pairwise', sorted(pw_rows), pw_a, pw_b)
+        errors += [f'{r}: pairwise row not covered' for r in missing]
+        errors += [f'pairwise: pair {p} is in no PW row' for p in all_pairs_missing(pw_rows)]
+    for tid, t in live.items():
+        for r in sorted(t['pw'] - set(pw_rows)):
+            errors.append(f'{tid}: {r} is not in the pairwise table of Test analysis')
+
     # BVA: labels and values against min/max/step.
     bva_total = bva_a = bva_b = 0
     for f, v in spec['fld'].items():
@@ -401,16 +441,20 @@ def check(spec, tcs, partitions):
                 if want is not None and have is not None and abs(have - want) > 1e-9:
                     errors.append(f'{tid}: {f} BVA {key} = {m.group(3).strip()}, expected {want:g}')
                 got.setdefault(key, set()).add(tid)
-        for key in req:
+        # Labels with the same value (narrow range, e.g. min+1 = max) are one coverage item.
+        groups = {}
+        for key, want in req.items():
+            groups.setdefault(key if want is None else want, []).append(key)
+        for keys in groups.values():
             bva_total += 1
-            tids = got.get(key, set())
+            tids = set().union(*[got.get(k, set()) for k in keys])
             if tids & set(active):
                 bva_a += 1
             elif tids & set(blocked):
                 bva_b += 1
             else:
                 depth = '3-value' if v.get('depth', v['crit']) == 4 else '2-value'
-                errors.append(f'{f}: BVA {key} not covered ({depth})')
+                errors.append(f'{f}: BVA {" / ".join(keys)} not covered ({depth})')
     summary['BVA'] = (bva_total, bva_a, bva_b)
 
     for tid, t in sorted(tcs.items()):
@@ -425,8 +469,8 @@ def check(spec, tcs, partitions):
         if top and t['priority'] != top:
             errors.append(f'{tid}: priority {ICON_OF.get(t["priority"], "none")} should be {ICON_OF[top]} '
                           '(highest of Covers AC and coverage items)')
-        if t['eg'] and not t['covers']:
-            errors.append(f'{tid}: EG/CHK items need a Covers AC; raise an AC or open question first')
+        if (t['eg'] or t['pw']) and not t['covers']:
+            errors.append(f'{tid}: EG/CHK/PW items need a Covers AC; raise an AC or open question first')
         is_blocked = t['status'].startswith('blocked')
         oq = re.search(rf'OQ-{CODE}-\d{{3}}', t['blocked_by'])
         if is_blocked:
@@ -453,9 +497,10 @@ def pct(total, cov):
 
 
 def summary_rows(summary):
+    names = list(TECHS) + [n for n in OPTIONAL_TECHS if n in summary]
     return [(n, str(summary.get(n, (0, 0, 0))[0]), str(summary.get(n, (0, 0, 0))[1]),
              str(summary.get(n, (0, 0, 0))[2]), pct(summary.get(n, (0, 0, 0))[0], summary.get(n, (0, 0, 0))[1]))
-            for n in TECHS]
+            for n in names]
 
 
 def summary_table(summary):
@@ -484,11 +529,11 @@ def main(argv=None):
     a = ap.parse_args(argv)
     try:
         spec = parse_ac(a.ac)
-        tcs, tc_dups, tc_errors, partitions, header = parse_tc(a.tc)
+        tcs, tc_dups, tc_errors, analysis, header = parse_tc(a.tc)
     except FormatError as e:
         print(f'coverage: {e}', file=sys.stderr)
         return 2
-    errors, summary, eg = check(spec, tcs, partitions)
+    errors, summary, eg = check(spec, tcs, analysis)
     errors = [f'duplicate {d}' for d in spec['dups'] + tc_dups] + tc_errors + errors
     errors += compare_summary(header, summary)
     for e in errors:
