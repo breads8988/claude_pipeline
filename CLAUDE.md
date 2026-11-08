@@ -46,12 +46,15 @@ Per-project vs shared files: `README.md`.
 - `gen-testcase` needs an approved AC. A run needs an approved TC file.
 - The test agent logs in only on the staging URL in `project.md`, with project test accounts. Passwords stay in `qa/test-accounts.local.md`.
 - Domain-specific checks live in `.claude/rules/domain.md`. Skills must not hardcode a domain.
-- Run the `comment-style` lint on AC and TC files before saving. Exit 1 or 2 blocks the save.
+- Run the `comment-style` lint on AC and TC files, and the coverage validator on TC files, before saving. Exit 1 or 2 blocks the save.
+- AC follow BABOK (`write-ac` › `references/ac-techniques.md`). TCs follow ISTQB CTFL v4.0.1 (`gen-testcase` › `references/test-design-techniques.md`).
 - Shared files stay generic for all projects. Put project-specific content only in the per-project files listed in `README.md`.
 
 ## Commands
 - Lint AC/TC: `python3 .claude/skills/comment-style/scripts/lint.py <file.md>`
 - Lint tests: `python3 -m unittest discover -s .claude/skills/comment-style/scripts/tests`
+- Coverage: `python3 .claude/skills/gen-testcase/scripts/coverage.py qa/specs/<feature>/ac.md qa/testcases/<feature>/tc.md --summary`
+- Coverage tests: `python3 -m unittest discover -s .claude/skills/gen-testcase/scripts/tests`
 - Run report: `python3 .claude/skills/test-run/scripts/report.py qa/runs/<run>.md`
 - Report tests: `python3 -m unittest discover -s .claude/skills/test-run/scripts/tests`
 - No automation commands yet. Add them here when `automation/` is created.

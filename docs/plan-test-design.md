@@ -1,6 +1,6 @@
 # Plan: BABOK in write-ac, ISTQB in gen-testcase
 
-Status: proposed 2026-11-07 · Decisions 1, 2, 4, 5 agreed 2026-11-08 · Decision 3 pending · Blocks the pilot
+Status: all decisions agreed 2026-11-08 · Phases A, B, C built 2026-11-08 · Next: pilot
 
 ## Why
 - `write-ac` and `gen-testcase` define format only. They do not say how to analyse a requirement or how to design tests.
@@ -114,6 +114,6 @@ Internal convention built on 5.2.3 (the syllabus does not map risk levels to tec
 |---|---|
 | 1 | One scale for AC criticality and TC priority, with icons: 🔴 Critical · 🟠 High · 🟡 Medium · ⚪ Low. TC priority = criticality of the AC it covers (highest one). `P1`–`P3` is retired everywhere (templates, naming, run file, smoke scope = 🔴). |
 | 2 | AC are implementation-free. Clicks and screens live in TCs only. |
-| 3 | Depth by risk: pending review of the sourced table above. |
+| 3 | Depth by risk: the sourced table above, agreed. |
 | 4 | Non-functional AC stay in AC. Their TCs are typed `Non-functional` and run only when they can be checked manually on staging. |
 | 5 | Keep `gen-ac-from-jira` for its current project. Port a generic copy into `write-ac`. |
