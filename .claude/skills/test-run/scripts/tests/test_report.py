@@ -137,5 +137,125 @@ class ReportTest(unittest.TestCase):
         self.assertIn('unknown result', err)
 
 
+    # robustness (review 2026-11-08)
+    def write_run(self, text, name='2026-11-08-invite-2.4.1.md', raw=False):
+        path = os.path.join(self.dir, name)
+        with open(path, 'wb' if raw else 'w', **({} if raw else {'encoding': 'utf-8', 'newline': ''})) as f:
+            f.write(text)
+        return path
+
+    def run_main(self, *args):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = report.main(list(args))
+        return code, out.getvalue(), err.getvalue()
+
+    def test_escaped_pipe_in_title(self):
+        self.write_run(RUN.replace('| Invite valid email |', '| Invite a\\|b |'))
+        code, _, _, html = self.go()
+        self.assertEqual(code, 0)
+        self.assertIn('Invite a|b', html)
+
+    def test_pipe_inside_code_span_in_note(self):
+        self.write_run(RUN.replace('| no error displayed |', '| `a | b` not displayed |'))
+        code, _, _, html = self.go()
+        self.assertEqual(code, 0)
+        self.assertIn('<code>a | b</code>', html)
+
+    def test_out_is_directory_exits_2(self):
+        os.makedirs(os.path.join(self.dir, 'adir'))
+        code, _, err = self.run_main(self.run, '--out', os.path.join(self.dir, 'adir'))
+        self.assertEqual(code, 2)
+        self.assertIn('is a directory', err)
+
+    def test_non_utf8_exits_2(self):
+        self.write_run(b'\xff\xfe bad', raw=True)
+        code, _, err, _ = self.go()
+        self.assertEqual(code, 2)
+
+    def test_result_must_be_exact(self):
+        self.write_run(RUN.replace('✅ Pass | — | — | |\n| TC-USR-002', 'Passed with notes | — | — | |\n| TC-USR-002'))
+        code, _, err, _ = self.go()
+        self.assertEqual(code, 2)
+        self.assertIn('unknown result', err)
+
+    def test_word_results_and_variation_selector(self):
+        self.write_run(RUN.replace('| ✅ Pass | — | — | |\n| TC-USR-002', '| Pass | — | — | |\n| TC-USR-002')
+                       .replace('| ⬜ |', '| ⏭\ufe0f Skip |'))
+        code, out, _, _ = self.go()
+        self.assertEqual(code, 0)
+        self.assertIn('Skip 1', out)
+
+    def test_default_out_under_runs_goes_to_reports(self):
+        runs = os.path.join(self.dir, 'qa', 'runs')
+        os.makedirs(runs)
+        path = os.path.join(runs, 'r.md')
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(RUN)
+        cwd = os.getcwd()
+        os.chdir(self.dir)
+        try:
+            code, out, _ = self.run_main(path)
+        finally:
+            os.chdir(cwd)
+        self.assertEqual(code, 0)
+        self.assertTrue(os.path.isfile(os.path.join(self.dir, 'qa', 'reports', 'r.html')))
+
+    def test_default_out_elsewhere_is_next_to_run(self):
+        code, _, _ = self.run_main(self.run)
+        self.assertEqual(code, 0)
+        self.assertTrue(os.path.isfile(os.path.join(self.dir, '2026-11-08-invite-2.4.1.html')))
+
+    def test_evidence_from_cell_path(self):
+        os.remove(os.path.join(self.dir, '2026-11-08-invite-2.4.1', 'evidence', 'TC-USR-002.png'))
+        shot = os.path.join(self.dir, 'saved-by-browser.png')
+        with open(shot, 'wb') as f:
+            f.write(PNG)
+        self.write_run(RUN.replace('| TC-USR-002.png |', f'| {shot} |'))
+        _, _, _, html = self.go()
+        self.assertIn('data:image/png;base64,', html)
+
+    def test_evidence_ignores_unsafe_tc_value(self):
+        secret = os.path.join(self.dir, 'secret.png')
+        with open(secret, 'wb') as f:
+            f.write(PNG)
+        self.write_run(RUN.replace('| TC-USR-002 | Reject duplicate', '| ../../secret | Reject duplicate').replace('| TC-USR-002.png |', '| — |'))
+        _, _, _, html = self.go()
+        self.assertNotIn('data:image/png', html)
+
+    def test_state_warning(self):
+        self.write_run(RUN.replace('| State | `Done` |', '| State | `In progress` |'))
+        code, _, err, _ = self.go()
+        self.assertEqual(code, 0)
+        self.assertIn('not Done', err)
+
+    def test_summary_heading_without_table(self):
+        text = RUN[:RUN.index('## Summary')] + '## Summary\n\nTBD\n'
+        self.write_run(text)
+        self.go()
+        md = read(self.run)
+        self.assertEqual(md.count('## Summary'), 1)
+        self.assertIn('| 5 | 2 | 1 | 1 | 0 | 1 |', md)
+
+    def test_crlf_preserved_and_idempotent(self):
+        self.write_run(RUN.replace('\n', '\r\n'))
+        self.go()
+        first = open(self.run, 'rb').read()
+        self.go()
+        second = open(self.run, 'rb').read()
+        self.assertIn(b'\r\n', first)
+        self.assertEqual(first, second)
+
+    def test_bom_title(self):
+        self.write_run('\ufeff' + RUN)
+        _, _, _, html = self.go()
+        self.assertIn('<title>Run: invite', html)
+
+    def test_hash_in_title_kept(self):
+        self.write_run(RUN.replace('# Run: invite', '# #123 hotfix run'))
+        _, _, _, html = self.go()
+        self.assertIn('<title>#123 hotfix run', html)
+
+
 if __name__ == '__main__':
     unittest.main()

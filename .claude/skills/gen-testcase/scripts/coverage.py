@@ -4,24 +4,27 @@
 Usage:
   python3 coverage.py qa/specs/<feature>/ac.md qa/testcases/<feature>/tc.md [--summary]
 
-Checks (each failure is an error):
-  - Every active AC is covered by at least one active or blocked TC.
-  - Every business rule (BR) appears in a TC's coverage items.
-  - Every decision table column (DT-…R<n>) is covered.
-  - Every valid transition (ST-…T<n>) is covered; invalid transitions too when the model is 🔴.
-  - Every field (FLD) has an EP valid and an EP invalid item, and enough BVA items:
-    boundaries × 2 (2-value) or × 3 (3-value for 🔴).
-  - Every ID a TC cites exists in ac.md.
-  - TC priority = highest criticality among its covered items.
-  - A blocked TC names an open question that exists and is still open.
+Coverage items come from ac.md (AC, BR, DT columns, ST transitions, FLD boundaries) and from the
+`## Test analysis` partition table in tc.md (EP partitions). Deprecated items are excluded.
 
-Not checked here (tc-reviewer does it): correctness of partitions and boundary values,
-Likelihood: High depth raise, wording.
+Errors (exit 1):
+  - An active AC, BR, DT column, valid transition (and invalid transition of a 🔴 model), EP partition
+    or required BVA value has no TC. Items covered only by blocked TCs are reported as blocked, not errors.
+  - A FLD has no partition row, or lacks a valid or an invalid partition.
+  - A BVA label is unknown, or its value does not match the FLD min/max/step.
+  - A TC cites an ID that is not in ac.md, or an EP partition that is not in the partition table.
+  - TC priority ≠ highest criticality among its `Covers AC` and its coverage items.
+  - Blocking: a `Blocked` TC needs `Blocked by: OQ-…` and a `TBD (OQ-…)` line; a TC with `TBD (OQ-…)`
+    must be `Blocked` by that OQ; the OQ must exist and be `Open` or `Posted`.
+  - A TC citing `EG:` or `CHK:` items has no `Covers AC`.
+  - Duplicate AC or TC IDs; a TC section without a Field/Value table.
+  - The `## Coverage summary` table in tc.md differs from the computed one.
 
---summary prints the Coverage summary table for the tc.md header.
+--summary prints the computed Coverage summary table.
 Exit codes: 0 full coverage · 1 errors found · 2 usage, file or format error.
 """
 import argparse
+import math
 import re
 import sys
 
@@ -29,13 +32,18 @@ ICONS = {'🔴': 4, '🟠': 3, '🟡': 2, '⚪': 1}
 WORDS = {'critical': 4, 'high': 3, 'medium': 2, 'low': 1}
 ICON_OF = {v: k for k, v in ICONS.items()}
 CODE = r'[A-Z]{3,4}'
-SEP_RE = re.compile(r'^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$')
+SEP_RE = re.compile(r'^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$')
 AC_H = re.compile(rf'^###\s+(AC-{CODE}-\d{{3}})\b')
 DT_H = re.compile(rf'^###\s+(DT-{CODE}-\d{{2}})\b')
 ST_H = re.compile(rf'^###\s+(ST-{CODE}-\d{{2}})\b')
 TC_H = re.compile(rf'^##\s+(TC-{CODE}-\d{{3}})\b')
 ITEM_ID = re.compile(rf'\b((?:AC|BR)-{CODE}-\d{{3}}|(?:DT|ST)-{CODE}-\d{{2}}\.[RT]\d+|FLD-{CODE}-\d{{2}})\b')
-FLD_ITEM = re.compile(rf'(FLD-{CODE}-\d{{2}})\s+(EP|BVA)\s*:\s*([^`,;]+)')
+FLD_ITEM = re.compile(rf'^(FLD-{CODE}-\d{{2}})\s+(EP|BVA)\s*:\s*(.+)$')
+TBD_RE = re.compile(rf'TBD\s*\((OQ-{CODE}-\d{{3}})\)')
+TRUE = {'yes', 'y', 'valid', 'true', '✅', '✓'}
+FALSE = {'no', 'n', 'invalid', 'false', '❌', '✗'}
+OPEN_OQ = ('open', 'posted')
+TECHS = ('Scenario (AC)', 'Business rules', 'EP', 'BVA', 'Decision table', 'State transition')
 
 
 class FormatError(Exception):
@@ -44,18 +52,56 @@ class FormatError(Exception):
 
 def read(path):
     try:
-        with open(path, encoding='utf-8') as f:
-            return f.read().splitlines()
-    except OSError as e:
-        raise FormatError(f'cannot read {path}: {e.strerror}')
+        with open(path, encoding='utf-8-sig') as f:
+            text = f.read()
+    except (OSError, UnicodeDecodeError) as e:
+        raise FormatError(f'cannot read {path}: {getattr(e, "strerror", None) or e}')
+    lines = text.splitlines()
+    # Blank out fenced code so examples inside fences are never parsed.
+    out, fence = [], None
+    for line in lines:
+        m = re.match(r'^\s*(`{3,}|~{3,})', line)
+        if fence:
+            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence):
+                fence = None
+            out.append('')
+            continue
+        if m:
+            fence = m.group(1)
+            out.append('')
+            continue
+        out.append(line)
+    return out
 
 
 def cells(line):
-    return [c.strip() for c in line.strip().strip('|').split('|')]
+    """Split a table row on unescaped pipes outside code spans."""
+    s = line.strip()
+    if s.startswith('|'):
+        s = s[1:]
+    if s.endswith('|') and not s.endswith('\\|'):
+        s = s[:-1]
+    parts, buf, in_code, i = [], '', False, 0
+    while i < len(s):
+        ch = s[i]
+        if ch == '\\' and i + 1 < len(s) and s[i + 1] == '|':
+            buf += '|'
+            i += 2
+            continue
+        if ch == '`':
+            in_code = not in_code
+        if ch == '|' and not in_code:
+            parts.append(buf.strip())
+            buf = ''
+        else:
+            buf += ch
+        i += 1
+    parts.append(buf.strip())
+    return parts
 
 
 def level(text):
-    t = text.strip()
+    t = text.strip().strip('*').strip()
     for icon, v in ICONS.items():
         if icon in t:
             return v
@@ -65,12 +111,12 @@ def level(text):
     return 0
 
 
-def tables_after(lines, start, stop):
+def tables(lines, start, stop):
     """Yield (header, rows) for tables between line indexes start and stop."""
     i = start
     while i < stop:
         if lines[i].lstrip().startswith('|') and i + 1 < stop and SEP_RE.match(lines[i + 1]):
-            header = cells(lines[i])
+            header = [h.strip('* ').lower() for h in cells(lines[i])]
             rows, j = [], i + 2
             while j < stop and lines[j].lstrip().startswith('|'):
                 rows.append(cells(lines[j]))
@@ -81,26 +127,19 @@ def tables_after(lines, start, stop):
         i += 1
 
 
-def sections(lines, rx):
-    """Return [(id, start, end)] for headings matching rx; a section ends at the next heading of level ≤ 3."""
-    found = []
-    for i, line in enumerate(lines):
-        m = rx.match(line)
-        if m:
-            found.append((m.group(1), i))
+def sections(lines, rx, max_level):
+    """[(id, start, end)] for headings matching rx; ends at the next heading of level ≤ max_level."""
+    found = [(m.group(1), i) for i, l in enumerate(lines) for m in [rx.match(l)] if m]
+    stop_rx = re.compile(rf'^#{{1,{max_level}}}\s')
     out = []
-    for k, (sid, start) in enumerate(found):
-        end = len(lines)
-        for j in range(start + 1, len(lines)):
-            if re.match(r'^#{1,3}\s', lines[j]):
-                end = j
-                break
+    for sid, start in found:
+        end = next((j for j in range(start + 1, len(lines)) if stop_rx.match(lines[j])), len(lines))
         out.append((sid, start, end))
     return out
 
 
 def bullet(lines, start, end, name):
-    rx = re.compile(rf'^\s*-\s*{name}\s*:\s*(.+)$', re.I)
+    rx = re.compile(rf'^\s*-\s*\**{name}\**\s*:\s*\**\s*(.+?)\s*$', re.I)
     for i in range(start, end):
         m = rx.match(lines[i])
         if m:
@@ -108,118 +147,255 @@ def bullet(lines, start, end, name):
     return ''
 
 
+def deprecated(text):
+    return text.strip().strip('`*').lower().startswith('deprecated')
+
+
+def number(text):
+    m = re.search(r'-?\d+(?:\.\d+)?', text.replace(',', ''))
+    return float(m.group(0)) if m else None
+
+
+def col(row, *names):
+    for k, v in row.items():
+        if any(k.startswith(n) for n in names):
+            return v
+    return ''
+
+
 def parse_ac(path):
     lines = read(path)
-    ac = {}
-    for sid, s, e in sections(lines, AC_H):
-        status = bullet(lines, s, e, 'Status')
+    ac, seen = {}, set()
+    dups = []
+    for sid, s, e in sections(lines, AC_H, 3):
+        if sid in seen:
+            dups.append(sid)
+        seen.add(sid)
         ac[sid] = {'crit': level(bullet(lines, s, e, 'Criticality')),
-                   'active': not status.lower().startswith('deprecated')}
+                   'active': not deprecated(bullet(lines, s, e, 'Status'))}
     if not ac:
         raise FormatError(f'{path}: no AC sections (### AC-<CODE>-NNN)')
     br, fld, oq = {}, {}, {}
-    for header, rows in tables_after(lines, 0, len(lines)):
-        h = [x.lower() for x in header]
+    for header, rows in tables(lines, 0, len(lines)):
         for r in rows:
-            row = dict(zip(h, r + [''] * (len(h) - len(r))))
-            first = r[0] if r else ''
+            row = dict(zip(header, r + [''] * (len(header) - len(r))))
+            first = (r[0] if r else '').strip('` ')
+            if deprecated(col(row, 'status')):
+                continue
             if re.fullmatch(rf'BR-{CODE}-\d{{3}}', first):
-                br[first] = level(row.get('criticality', ''))
+                br[first] = level(col(row, 'criticality'))
             elif re.fullmatch(rf'FLD-{CODE}-\d{{2}}', first):
-                bounds = sum(1 for k in ('min', 'max') if re.search(r'\d', row.get(k, '')))
-                fld[first] = {'crit': level(row.get('criticality', '')), 'bounds': bounds}
+                lo, hi = col(row, 'min'), col(row, 'max')
+                step = number(col(row, 'step')) or 1.0
+                fld[first] = {'crit': level(col(row, 'criticality')), 'min': lo, 'max': hi, 'step': step}
             elif re.fullmatch(rf'OQ-{CODE}-\d{{3}}', first):
-                oq[first] = row.get('status', '').strip().lower()
+                oq[first] = col(row, 'status').strip('` ').lower()
     dt, st = {}, {}
-    for sid, s, e in sections(lines, DT_H):
+    for sid, s, e in sections(lines, DT_H, 3):
+        if deprecated(bullet(lines, s, e, 'Status')):
+            continue
         crit = level(bullet(lines, s, e, 'Criticality'))
-        for header, _ in tables_after(lines, s, e):
-            for col in header[1:]:
-                if re.fullmatch(r'R\d+', col):
-                    dt[f'{sid}.{col}'] = crit
-            break
-    for sid, s, e in sections(lines, ST_H):
+        cols = []
+        for header, _ in tables(lines, s, e):
+            cols = [c.upper() for c in header if re.fullmatch(r'r\d+', c)]
+            if cols:
+                break
+        if not cols:
+            raise FormatError(f'{path}: {sid} has no table with R1…Rn columns')
+        for c in cols:
+            dt[f'{sid}.{c}'] = crit
+    for sid, s, e in sections(lines, ST_H, 3):
+        if deprecated(bullet(lines, s, e, 'Status')):
+            continue
         crit = level(bullet(lines, s, e, 'Criticality'))
-        for header, rows in tables_after(lines, s, e):
-            h = [x.lower() for x in header]
+        found = 0
+        for header, rows in tables(lines, s, e):
+            if 't' not in header:
+                continue
+            if 'valid' not in header:
+                raise FormatError(f'{path}: {sid} transition table has no Valid column')
             for r in rows:
-                row = dict(zip(h, r))
-                t = row.get('t', '')
-                if re.fullmatch(r'T\d+', t):
-                    valid = row.get('valid', 'yes').strip().lower().startswith('y')
-                    st[f'{sid}.{t}'] = {'crit': crit, 'valid': valid}
+                row = dict(zip(header, r))
+                t = row.get('t', '').strip('* ')
+                if not re.fullmatch(r'T\d+', t):
+                    continue
+                v = row.get('valid', '').strip('* ').lower()
+                if v not in TRUE | FALSE:
+                    raise FormatError(f'{path}: {sid}.{t} Valid must be Yes or No, got "{v}"')
+                st[f'{sid}.{t}'] = {'crit': crit, 'valid': v in TRUE}
+                found += 1
             break
-    return {'ac': ac, 'br': br, 'fld': fld, 'dt': dt, 'st': st, 'oq': oq}
+        if not found:
+            raise FormatError(f'{path}: {sid} has no transition rows (T1…Tn)')
+    return {'ac': ac, 'br': br, 'fld': fld, 'dt': dt, 'st': st, 'oq': oq, 'dups': dups}
 
 
 def parse_tc(path):
     lines = read(path)
-    tcs = {}
-    for sid, s, e in sections(lines, TC_H):
-        fields = {}
-        for header, rows in tables_after(lines, s, e):
-            if [x.lower() for x in header[:2]] == ['field', 'value']:
-                fields = {r[0].lower(): (r[1] if len(r) > 1 else '') for r in rows}
-            break
+    tcs, dups, errors = {}, [], []
+    partitions = {}
+    summary = None
+    for i, line in enumerate(lines):
+        if re.match(r'^##\s+Test analysis\b', line, re.I):
+            end = next((j for j in range(i + 1, len(lines)) if re.match(r'^#{1,2}\s', lines[j])), len(lines))
+            for header, rows in tables(lines, i, end):
+                if header[:2] == ['fld', 'partition']:
+                    for r in rows:
+                        row = dict(zip(header, r + [''] * (len(header) - len(r))))
+                        f = row['fld'].strip('` ')
+                        label = norm(row['partition'])
+                        kind = row.get('kind', '').strip().lower()
+                        partitions.setdefault(f, {})[label] = kind
+        if re.match(r'^##\s+Coverage summary\b', line, re.I):
+            end = next((j for j in range(i + 1, len(lines)) if re.match(r'^#{1,2}\s', lines[j])), len(lines))
+            for header, rows in tables(lines, i, end):
+                summary = {r[0]: r[1:] for r in rows if r}
+                break
+    for sid, s, e in sections(lines, TC_H, 2):
+        if sid in tcs:
+            dups.append(sid)
+        fields = None
+        for header, rows in tables(lines, s, e):
+            if header[:2] == ['field', 'value']:
+                cand = {r[0].strip('* ').lower(): (r[1] if len(r) > 1 else '') for r in rows}
+                if 'covers ac' in cand or 'priority' in cand:
+                    fields = cand
+                    break
+        if fields is None:
+            errors.append(f'{sid}: no Field/Value table')
+            fields = {}
         items_cell = fields.get('coverage items', '')
+        items = re.findall(r'`([^`]+)`', items_cell) or [x for x in re.split(r'[,;]', items_cell) if x.strip()]
+        covers = set(re.findall(rf'AC-{CODE}-\d{{3}}', fields.get('covers ac', '')))
+        body = '\n'.join(lines[s:e])
+        flds = [m.groups() for m in (FLD_ITEM.match(x.strip()) for x in items) if m]
         tcs[sid] = {
-            'covers': set(re.findall(rf'AC-{CODE}-\d{{3}}', fields.get('covers ac', ''))),
-            'ids': set(ITEM_ID.findall(items_cell)) | set(re.findall(rf'AC-{CODE}-\d{{3}}', fields.get('covers ac', ''))),
-            'fld': [(m.group(1), m.group(2).upper(), m.group(3).strip().lower()) for m in FLD_ITEM.finditer(items_cell)],
+            'covers': covers,
+            'ids': set(ITEM_ID.findall(items_cell)) | covers,
+            'fld': [(f, tech.upper(), lab.strip()) for f, tech, lab in flds],
+            'eg': any(re.match(r'^\s*(EG|CHK)\s*:', x) for x in items),
             'priority': level(fields.get('priority', '')),
             'status': fields.get('status', '').strip('` ').lower(),
             'blocked_by': fields.get('blocked by', '').strip(),
+            'tbd': set(TBD_RE.findall(body)),
         }
     if not tcs:
         raise FormatError(f'{path}: no TC sections (## TC-<CODE>-NNN)')
-    return tcs
+    return tcs, dups, errors, partitions, summary
 
 
-def check(spec, tcs):
+def norm(label):
+    return re.sub(r'\s+', ' ', label.strip().strip('`').lower())
+
+
+def bva_required(f):
+    """Required BVA labels and expected values for a field."""
+    three = f['crit'] == 4
+    req = {}
+    for side, raw in (('min', f['min']), ('max', f['max'])):
+        if not raw.strip() or raw.strip() in ('—', '-', 'n/a', 'N/A'):
+            continue
+        base = number(raw)
+        step = f['step']
+        offs = {'min': (-1, 0, 1) if three else (-1, 0), 'max': (-1, 0, 1) if three else (0, 1)}[side]
+        for o in offs:
+            label = side if o == 0 else f'{side}{"+" if o > 0 else "-"}1'
+            req[label] = None if base is None else round(base + o * step, 6)
+    return req
+
+
+def check(spec, tcs, partitions):
     errors = []
     live = {k: v for k, v in tcs.items() if not v['status'].startswith('deprecated')}
-    cited = set().union(*[t['ids'] for t in live.values()]) if live else set()
+    active = {k: v for k, v in live.items() if not v['status'].startswith('blocked')}
+    blocked = {k: v for k, v in live.items() if v['status'].startswith('blocked')}
+    cited_a = set().union(*[t['ids'] for t in active.values()]) if active else set()
+    cited_b = set().union(*[t['ids'] for t in blocked.values()]) if blocked else set()
     known = set(spec['ac']) | set(spec['br']) | set(spec['dt']) | set(spec['st']) | set(spec['fld'])
     summary = {}
 
-    def tally(name, items, covered):
-        summary[name] = (len(items), len([i for i in items if i in covered]))
+    def tally(name, items, covered_a, covered_b):
+        a = [i for i in items if i in covered_a]
+        b = [i for i in items if i not in covered_a and i in covered_b]
+        summary[name] = (len(items), len(a), len(b))
+        return [i for i in items if i not in covered_a and i not in covered_b], b
 
-    act = [a for a, v in spec['ac'].items() if v['active']]
-    tally('Scenario (AC)', act, cited)
-    errors += [f'{a}: no TC covers this AC' for a in act if a not in cited]
-    tally('Business rules', list(spec['br']), cited)
-    errors += [f'{b}: no TC covers this business rule' for b in spec['br'] if b not in cited]
-    tally('Decision table', list(spec['dt']), cited)
-    errors += [f'{d}: decision table column not covered' for d in spec['dt'] if d not in cited]
+    for name, items, label in (
+            ('Scenario (AC)', [a for a, v in spec['ac'].items() if v['active']], 'no TC covers this AC'),
+            ('Business rules', list(spec['br']), 'no TC covers this business rule'),
+            ('Decision table', list(spec['dt']), 'decision table column not covered')):
+        missing, _ = tally(name, items, cited_a, cited_b)
+        errors += [f'{i}: {label}' for i in missing]
     need_st = [t for t, v in spec['st'].items() if v['valid'] or v['crit'] == 4]
-    tally('State transition', need_st, cited)
-    for t in need_st:
-        if t not in cited:
-            kind = 'valid' if spec['st'][t]['valid'] else 'invalid (required for 🔴)'
-            errors.append(f'{t}: {kind} transition not covered')
+    missing, _ = tally('State transition', need_st, cited_a, cited_b)
+    for t in missing:
+        kind = 'valid' if spec['st'][t]['valid'] else 'invalid (required for 🔴)'
+        errors.append(f'{t}: {kind} transition not covered')
 
-    ep_items, ep_cov, bva_items, bva_cov = 0, 0, 0, 0
+    # EP: partitions from the tc.md test analysis table.
+    ep_total = ep_a = ep_b = 0
+    ep_cited = {}
+    for tid, t in live.items():
+        for fid, tech, lab in t['fld']:
+            if tech == 'EP':
+                ep_cited.setdefault((fid, norm(lab)), set()).add(tid)
+    for (fid, lab), tids in sorted(ep_cited.items()):
+        if lab not in partitions.get(fid, {}):
+            errors.append(f'{", ".join(sorted(tids))}: EP partition "{lab}" of {fid} is not in the Test analysis table')
+    for f in spec['fld']:
+        parts = partitions.get(f, {})
+        if not parts:
+            errors.append(f'{f}: no partitions in the Test analysis table')
+            continue
+        kinds = set(parts.values())
+        if 'valid' not in kinds:
+            errors.append(f'{f}: no valid partition listed')
+        if 'invalid' not in kinds:
+            errors.append(f'{f}: no invalid partition listed')
+        for lab in parts:
+            ep_total += 1
+            tids = ep_cited.get((f, lab), set())
+            if tids & set(active):
+                ep_a += 1
+            elif tids & set(blocked):
+                ep_b += 1
+            else:
+                errors.append(f'{f}: EP partition "{lab}" not covered')
+    summary['EP'] = (ep_total, ep_a, ep_b)
+
+    # BVA: labels and values against min/max/step.
+    bva_total = bva_a = bva_b = 0
     for f, v in spec['fld'].items():
-        labels = [(tech, lab) for t in live.values() for (fid, tech, lab) in t['fld'] if fid == f]
-        ep = {lab for tech, lab in labels if tech == 'EP'}
-        has_valid = any(l.startswith('valid') for l in ep)
-        has_invalid = any(l.startswith('invalid') for l in ep)
-        ep_items += 2
-        ep_cov += int(has_valid) + int(has_invalid)
-        if not has_valid:
-            errors.append(f'{f}: no EP valid partition covered')
-        if not has_invalid:
-            errors.append(f'{f}: no EP invalid partition covered')
-        need = v['bounds'] * (3 if v['crit'] == 4 else 2)
-        got = len({lab for tech, lab in labels if tech == 'BVA'})
-        bva_items += need
-        bva_cov += min(got, need)
-        if got < need:
-            depth = '3-value' if v['crit'] == 4 else '2-value'
-            errors.append(f'{f}: {got}/{need} BVA values ({depth}, {v["bounds"]} boundaries)')
-    summary['EP'] = (ep_items, ep_cov)
-    summary['BVA'] = (bva_items, bva_cov)
+        req = bva_required(v)
+        got = {}
+        for tid, t in live.items():
+            for fid, tech, lab in t['fld']:
+                if fid != f or tech != 'BVA':
+                    continue
+                m = re.match(r'^\s*(min|max)\s*([+-]\s*1)?\s*(?:=\s*(.+))?$', lab, re.I)
+                if not m:
+                    errors.append(f'{tid}: BVA label "{lab}" for {f} must look like "min-1 = 5"')
+                    continue
+                key = m.group(1).lower() + (m.group(2) or '').replace(' ', '')
+                if key not in req:
+                    errors.append(f'{tid}: BVA label "{key}" is not required for {f}')
+                    continue
+                want = req[key]
+                have = number(m.group(3) or '')
+                if want is not None and have is not None and abs(have - want) > 1e-9:
+                    errors.append(f'{tid}: {f} BVA {key} = {m.group(3).strip()}, expected {want:g}')
+                got.setdefault(key, set()).add(tid)
+        for key in req:
+            bva_total += 1
+            tids = got.get(key, set())
+            if tids & set(active):
+                bva_a += 1
+            elif tids & set(blocked):
+                bva_b += 1
+            else:
+                depth = '3-value' if v['crit'] == 4 else '2-value'
+                errors.append(f'{f}: BVA {key} not covered ({depth})')
+    summary['BVA'] = (bva_total, bva_a, bva_b)
 
     for tid, t in sorted(tcs.items()):
         for i in sorted(t['ids'] - known):
@@ -231,45 +407,80 @@ def check(spec, tcs):
                  spec['fld'].get(i, {}).get('crit', 0) for i in t['ids']]
         top = max(crits, default=0)
         if top and t['priority'] != top:
-            have = ICON_OF.get(t['priority'], 'none')
-            errors.append(f'{tid}: priority {have} should be {ICON_OF[top]} (highest covered item)')
-        if t['status'].startswith('blocked'):
-            oq = re.search(rf'OQ-{CODE}-\d{{3}}', t['blocked_by'])
+            errors.append(f'{tid}: priority {ICON_OF.get(t["priority"], "none")} should be {ICON_OF[top]} '
+                          '(highest of Covers AC and coverage items)')
+        if t['eg'] and not t['covers']:
+            errors.append(f'{tid}: EG/CHK items need a Covers AC; raise an AC or open question first')
+        is_blocked = t['status'].startswith('blocked')
+        oq = re.search(rf'OQ-{CODE}-\d{{3}}', t['blocked_by'])
+        if is_blocked:
             if not oq:
                 errors.append(f'{tid}: blocked without an open question in Blocked by')
-            elif oq.group(0) not in spec['oq']:
-                errors.append(f'{tid}: Blocked by {oq.group(0)}, which is not in ac.md')
-            elif spec['oq'][oq.group(0)] != 'open':
-                errors.append(f'{tid}: {oq.group(0)} is {spec["oq"][oq.group(0)]}; unblock this TC')
-    return errors, summary
+            else:
+                q = oq.group(0)
+                if q not in spec['oq']:
+                    errors.append(f'{tid}: Blocked by {q}, which is not in ac.md')
+                elif not spec['oq'][q].startswith(OPEN_OQ):
+                    errors.append(f'{tid}: {q} is {spec["oq"][q]}; unblock this TC')
+                if q not in t['tbd']:
+                    errors.append(f'{tid}: blocked by {q} but has no "TBD ({q})" line; only TCs with TBD are blocked')
+        for q in sorted(t['tbd']):
+            if not is_blocked or not oq or oq.group(0) != q:
+                errors.append(f'{tid}: contains TBD ({q}) but is not Blocked by {q}')
+
+    eg = sum(1 for t in live.values() if t['eg'])
+    return errors, summary, eg
+
+
+def pct(total, cov):
+    return f'{math.floor(100 * cov / total)}%' if total else '—'
+
+
+def summary_rows(summary):
+    return [(n, str(summary.get(n, (0, 0, 0))[0]), str(summary.get(n, (0, 0, 0))[1]),
+             str(summary.get(n, (0, 0, 0))[2]), pct(summary.get(n, (0, 0, 0))[0], summary.get(n, (0, 0, 0))[1]))
+            for n in TECHS]
 
 
 def summary_table(summary):
-    rows = ['| Technique | Items identified | Covered | Coverage |', '| --- | --- | --- | --- |']
-    for name in ('Scenario (AC)', 'Business rules', 'EP', 'BVA', 'Decision table', 'State transition'):
-        total, cov = summary.get(name, (0, 0))
-        pct = f'{round(100 * cov / total)}%' if total else '—'
-        rows.append(f'| {name} | {total} | {cov} | {pct} |')
+    rows = ['| Technique | Items identified | Covered | Blocked | Coverage |', '| --- | --- | --- | --- | --- |']
+    rows += [f'| {a} | {b} | {c} | {d} | {e} |' for a, b, c, d, e in summary_rows(summary)]
     return '\n'.join(rows)
+
+
+def compare_summary(header_table, summary):
+    if header_table is None:
+        return ['tc.md: no "## Coverage summary" table; run with --summary and paste it']
+    errs = []
+    for name, *vals in summary_rows(summary):
+        have = [c.strip() for c in header_table.get(name, [])][:4]
+        if have != list(vals):
+            errs.append(f'Coverage summary row "{name}" is {have or "missing"}, expected {list(vals)}; '
+                        'run with --summary and paste the table')
+    return errs
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description='Check that tc.md covers every coverage item in ac.md.')
     ap.add_argument('ac')
     ap.add_argument('tc')
-    ap.add_argument('--summary', action='store_true', help='print the Coverage summary table')
+    ap.add_argument('--summary', action='store_true', help='print the computed Coverage summary table')
     a = ap.parse_args(argv)
     try:
-        spec, tcs = parse_ac(a.ac), parse_tc(a.tc)
+        spec = parse_ac(a.ac)
+        tcs, tc_dups, tc_errors, partitions, header = parse_tc(a.tc)
     except FormatError as e:
         print(f'coverage: {e}', file=sys.stderr)
         return 2
-    errors, summary = check(spec, tcs)
+    errors, summary, eg = check(spec, tcs, partitions)
+    errors = [f'duplicate {d}' for d in spec['dups'] + tc_dups] + tc_errors + errors
+    errors += compare_summary(header, summary)
     for e in errors:
         print(f'coverage: {e}')
     if a.summary:
         print(summary_table(summary))
-    print(f'coverage: {len(errors)} error(s), {len(tcs)} TC')
+    blocked = sum(v[2] for v in summary.values())
+    print(f'coverage: {len(errors)} error(s), {len(tcs)} TC, {blocked} item(s) blocked, {eg} EG/CHK TC')
     return 1 if errors else 0
 
 

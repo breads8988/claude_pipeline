@@ -25,7 +25,7 @@ VOCAB = textwrap.dedent('''\
     | still | remains | warn | |
     | the one | the named record | error | |
     | no … changes | no side effects | error | |
-    | /(?:^\\s*(?:\\d+\\.\\s+)?\\|\\x7c\\s*)Open\\s+(?=[A-Z])/ (Open <Page>) | navigate to | error | |
+    | /(?:^\\s*(?:\\d+\\.\\s+\\|[-*]\\s+)?\\|\\x7c\\s*)Open\\s+(?=[A-Z])/ (Open <Page>) | navigate to | error | |
     ''')
 
 
@@ -205,6 +205,86 @@ class LintTest(unittest.TestCase):
         lint.load_vocab(lint.SHARED_DEFAULT, rules, allow, require_banned=True)
         self.assertGreater(len(rules), 60)
         self.assertTrue(any(k.startswith('re:') for k in rules))
+
+
+    # review 2026-11-08
+    def test_open_with_backticked_page(self):
+        code, _, _ = self.run_lint('1. Open `Settings` › `Users`.\n')
+        self.assertEqual(code, 1)
+
+    def test_open_at_bullet_start(self):
+        code, _, _ = self.run_lint('- Open Settings page.\n')
+        self.assertEqual(code, 1)
+
+    def test_quoted_span_does_not_join_words(self):
+        code, out, _ = self.run_lint('Select the `Primary` one.\n')
+        self.assertNotIn('the one', out.lower().replace('"the one" →', ''))
+        self.assertEqual(code, 0)
+
+    def test_ellipsis_rule_across_quoted_span(self):
+        code, out, _ = self.run_lint('no `Invoice` changes\n')
+        self.assertEqual(code, 1)
+
+    def test_bom_and_front_matter(self):
+        code, _, _ = self.run_lint('\ufeff---\ntitle: shown\n---\nok\n')
+        self.assertEqual(code, 0)
+
+    def test_unclosed_front_matter_is_linted(self):
+        code, _, _ = self.run_lint('---\nThe button is shown.\n')
+        self.assertEqual(code, 1)
+
+    def test_non_utf8_page_exits_2(self):
+        page = os.path.join(self.dir, 'bad.md')
+        with open(page, 'wb') as f:
+            f.write(b'\xff\xfe bad')
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = lint.main([page, '--shared', self.vocab])
+        self.assertEqual(code, 2)
+
+    def test_mixed_fence_markers(self):
+        code, _, _ = self.run_lint('```\n~~~\n```\nshown\n')
+        self.assertEqual(code, 1)
+
+    def test_inch_mark_is_not_a_quote(self):
+        code, _, _ = self.run_lint('The 5" screen shows a toast and "x".\n')
+        self.assertEqual(code, 1)
+
+    def test_overlapping_hits_counted_once(self):
+        extra = self.write('extra.md', '| Banned | Use |\n|---|---|\n| not shown | hidden |\n')
+        code, out, _ = self.run_lint('The column is not shown.\n', '--vocab', extra)
+        self.assertIn('1 error(s)', out)
+
+    def test_urls_and_comments_ignored(self):
+        code, _, _ = self.run_lint('[spec](https://x.test/shows/1) <!-- shown -->\n')
+        self.assertEqual(code, 0)
+
+    def test_comma_inside_note(self):
+        extra = self.write('extra.md', '| Banned | Use |\n|---|---|\n| fires (in UI, not API) | is sent |\n')
+        code, out, _ = self.run_lint('not API) here\n', '--vocab', extra)
+        self.assertEqual(code, 0)
+
+    def test_regex_rule_matches_acronym(self):
+        extra = self.write('extra.md', '| Banned | Use |\n|---|---|\n| /TODO/ | remove |\n')
+        code, _, _ = self.run_lint('TODO fix\n', '--vocab', extra)
+        self.assertEqual(code, 1)
+
+    def test_short_separator_row(self):
+        code, _, _ = self.run_lint('| Shown | Still |\n|-|-|\n| a | b |\n')
+        self.assertEqual(code, 0)
+
+    def test_project_vocab_found_from_page_folder(self):
+        proj = os.path.join(self.dir, 'other')
+        os.makedirs(os.path.join(proj, '.claude', 'rules'))
+        with open(os.path.join(proj, '.claude', 'rules', 'vocabulary.project.md'), 'w', encoding='utf-8') as f:
+            f.write('| Allow | Reason |\n|---|---|\n| shown | x |\n')
+        page = os.path.join(proj, 'page.md')
+        with open(page, 'w', encoding='utf-8') as f:
+            f.write('The button is shown.\n')
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = lint.main([page, '--shared', self.vocab])
+        self.assertEqual(code, 0, out.getvalue())
 
 
 if __name__ == '__main__':

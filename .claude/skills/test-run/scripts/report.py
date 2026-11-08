@@ -2,12 +2,16 @@
 """Summarise a run file and export a self-contained HTML report.
 
 Usage:
-  python3 report.py qa/runs/<run>.md [--out qa/reports/<run>.html] [--no-update]
+  python3 report.py qa/runs/<run>.md [--out <file.html>] [--no-update]
 
 - Reads the header table (Field | Value) and the Results table of the run file.
-- Recounts results and rewrites the Summary table in the run file (skip with --no-update).
-- Embeds screenshots for failed TCs only, from qa/runs/<run>/evidence/<TC-ID>.png.
-- Lists 🔴 Critical passes as an optional re-check.
+- Writes the HTML report first, then recounts results into the run file's Summary table
+  (skip with --no-update; use it on `_example` files).
+- Default output: `<repo>/qa/reports/<run>.html` when the run file sits under a `runs` folder,
+  else next to the run file.
+- Embeds screenshots for failed TCs only. Source: the path in the row's Evidence cell (as saved by the
+  browser tool), else `<runs>/<run>/evidence/<TC-ID>.png`.
+- Lists 🔴 Critical passes as an optional re-check. Warns on stderr when State is not Done.
 
 Exit codes: 0 report written · 2 usage, file or format error.
 """
@@ -17,10 +21,13 @@ import html
 import os
 import re
 import sys
+import tempfile
 
 STATES = ('Pass', 'Fail', 'Blocked', 'Skip', 'Not run')
 EMOJI = {'✅': 'Pass', '❌': 'Fail', '⛔': 'Blocked', '⏭': 'Skip', '⬜': 'Not run'}
-SEP_RE = re.compile(r'^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$')
+SEP_RE = re.compile(r'^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$')
+TC_ID = re.compile(r'^TC-[A-Z]{3,4}-\d{3}$')
+IMAGE_TYPES = {'.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp'}
 
 
 class RunError(Exception):
@@ -28,17 +35,48 @@ class RunError(Exception):
 
 
 def cells(line):
-    parts = [p.strip() for p in line.strip().strip('|').split('|')]
+    """Split a table row on unescaped pipes outside code spans."""
+    s = line.strip()
+    if s.startswith('|'):
+        s = s[1:]
+    if s.endswith('|') and not s.endswith('\\|'):
+        s = s[:-1]
+    parts, buf, in_code, i = [], '', False, 0
+    while i < len(s):
+        ch = s[i]
+        if ch == '\\' and i + 1 < len(s) and s[i + 1] == '|':
+            buf += '|'
+            i += 2
+            continue
+        if ch == '`':
+            in_code = not in_code
+        if ch == '|' and not in_code:
+            parts.append(buf.strip())
+            buf = ''
+        else:
+            buf += ch
+        i += 1
+    parts.append(buf.strip())
     return parts
 
 
 def tables(lines):
-    """Yield (heading, header, rows) for each markdown table."""
-    heading, i = '', 0
+    """Yield (heading, header, rows, start, end) for each markdown table outside code fences."""
+    heading, i, fence = '', 0, None
     while i < len(lines):
         line = lines[i]
+        m = re.match(r'^\s*(`{3,}|~{3,})', line)
+        if fence:
+            if m and m.group(1)[0] == fence[0]:
+                fence = None
+            i += 1
+            continue
+        if m:
+            fence = m.group(1)
+            i += 1
+            continue
         if line.startswith('#'):
-            heading = line.lstrip('#').strip()
+            heading = re.sub(r'^#+\s*', '', line).strip()
         if line.lstrip().startswith('|') and i + 1 < len(lines) and SEP_RE.match(lines[i + 1]):
             header = [h.lower() for h in cells(line)]
             rows, j = [], i + 2
@@ -52,30 +90,43 @@ def tables(lines):
 
 
 def state_of(cell):
-    cell = cell.strip()
+    """Exact result tokens only: an emoji and/or a state word."""
+    text = cell.replace('\ufe0f', '').strip()
+    state = None
     for e, s in EMOJI.items():
-        if cell.startswith(e):
-            return s
-    low = cell.lower()
-    for s in STATES:
-        if low.startswith(s.lower()):
-            return s
-    return 'Not run' if not cell else None
+        if text.startswith(e):
+            state, text = s, text[len(e):].strip()
+            break
+    if not text:
+        return state or 'Not run'
+    word = next((s for s in STATES if text.lower() == s.lower()), None)
+    if word and (state is None or state == word):
+        return word
+    return None
 
 
 def parse(path):
     try:
-        with open(path, encoding='utf-8') as f:
+        with open(path, encoding='utf-8-sig') as f:
             lines = f.read().splitlines()
-    except OSError as e:
-        raise RunError(f'cannot read {path}: {e.strerror}')
-    title = next((l.lstrip('# ').strip() for l in lines if l.startswith('# ')), os.path.basename(path))
-    meta, results, summary_span = {}, None, None
+    except (OSError, UnicodeDecodeError) as e:
+        raise RunError(f'cannot read {path}: {getattr(e, "strerror", None) or e}')
+    title = next((re.sub(r'^#\s+', '', l).strip() for l in lines if l.startswith('# ')), os.path.basename(path))
+    meta, results, summary_span, summary_head = {}, None, None, None
+    for i, l in enumerate(lines):
+        if re.match(r'^##\s+Summary\b', l, re.I):
+            summary_head = i
     for heading, header, rows, start, end in tables(lines):
         if header[:2] == ['field', 'value'] and not meta:
             meta = {r[0]: r[1] for _, r in rows if len(r) >= 2}
         elif 'tc' in header and 'result' in header:
-            results = [dict(zip(header, r + [''] * (len(header) - len(r)))) for _, r in rows]
+            if results is not None:
+                raise RunError(f'{path}: more than one Results table')
+            results = []
+            for _, r in rows:
+                if len(r) > len(header):
+                    raise RunError(f'{path}: row "{r[0]}" has more cells than the header (unescaped |?)')
+                results.append(dict(zip(header, r + [''] * (len(header) - len(r)))))
         elif heading.lower().startswith('summary') and 'total' in header:
             summary_span = (start, end)
     if results is None:
@@ -83,9 +134,10 @@ def parse(path):
     for r in results:
         s = state_of(r.get('result', ''))
         if s is None:
-            raise RunError(f'{path}: unknown result "{r.get("result")}" for {r.get("tc")}')
+            raise RunError(f'{path}: unknown result "{r.get("result")}" for {r.get("tc")}; '
+                           'use ✅ Pass, ❌ Fail, ⛔ Blocked, ⏭ Skip or ⬜')
         r['state'] = s
-    return title, meta, results, lines, summary_span
+    return title, meta, results, lines, summary_span, summary_head
 
 
 def counts(results):
@@ -95,24 +147,67 @@ def counts(results):
     return c
 
 
-def update_summary(path, lines, span, c, total):
+def atomic_write(path, text):
+    d = os.path.dirname(os.path.abspath(path))
+    try:
+        os.makedirs(d, exist_ok=True)
+        fd, tmp = tempfile.mkstemp(dir=d, suffix='.tmp')
+        with os.fdopen(fd, 'w', encoding='utf-8', newline='') as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except OSError as e:
+        raise RunError(f'cannot write {path}: {e.strerror or e}')
+
+
+def update_summary(path, lines, span, head, c, total, newline):
     row = f"| {total} | {c['Pass']} | {c['Fail']} | {c['Blocked']} | {c['Skip']} | {c['Not run']} |"
     block = ['| Total | Pass | Fail | Blocked | Skip | Not run |', '| --- | --- | --- | --- | --- | --- |', row]
     if span:
         lines = lines[:span[0]] + block + lines[span[1]:]
+    elif head is not None:
+        lines = lines[:head + 1] + block + lines[head + 1:]
     else:
         lines = lines + ['', '## Summary'] + block
-    with open(path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines) + '\n')
+    atomic_write(path, newline.join(lines) + newline)
 
 
-def evidence_img(run_path, tc):
-    stem = os.path.splitext(os.path.basename(run_path))[0]
-    p = os.path.join(os.path.dirname(run_path), stem, 'evidence', f'{tc}.png')
-    if not os.path.isfile(p):
-        return None
-    with open(p, 'rb') as f:
-        return 'data:image/png;base64,' + base64.b64encode(f.read()).decode()
+def runs_root(run_path):
+    """Nearest ancestor folder named 'runs', or None."""
+    d = os.path.dirname(os.path.abspath(run_path))
+    while True:
+        if os.path.basename(d) == 'runs':
+            return d
+        parent = os.path.dirname(d)
+        if parent == d:
+            return None
+        d = parent
+
+
+def default_out(run_path, stem):
+    root = runs_root(run_path)
+    base = os.path.join(os.path.dirname(root), 'reports') if root else os.path.dirname(os.path.abspath(run_path))
+    return os.path.join(base, f'{stem}.html')
+
+
+def evidence_img(run_path, row):
+    """Data URI for a failed row's screenshot, or None."""
+    run_dir = os.path.dirname(os.path.abspath(run_path))
+    candidates = []
+    cell = row.get('evidence', '').strip().strip('`')
+    if os.path.splitext(cell)[1].lower() in IMAGE_TYPES:
+        candidates += [cell] if os.path.isabs(cell) else [os.path.join(run_dir, cell)]
+    tc = row.get('tc', '').strip()
+    if TC_ID.match(tc):
+        stem = os.path.splitext(os.path.basename(run_path))[0]
+        candidates.append(os.path.join(run_dir, stem, 'evidence', f'{tc}.png'))
+        if cell and '/' not in cell:
+            candidates.append(os.path.join(run_dir, stem, 'evidence', cell))
+    for p in candidates:
+        ext = os.path.splitext(p)[1].lower()
+        if ext in IMAGE_TYPES and os.path.isfile(p):
+            with open(p, 'rb') as f:
+                return f'data:{IMAGE_TYPES[ext]};base64,' + base64.b64encode(f.read()).decode()
+    return None
 
 
 CSS = """
@@ -178,7 +273,7 @@ def render(run_path, title, meta, results):
     for r in sorted(results, key=lambda r: (ORDER[r['state']], r.get('tc', ''))):
         ev = ''
         if r['state'] == 'Fail':
-            img = evidence_img(run_path, r.get('tc', ''))
+            img = evidence_img(run_path, r)
             ev = (f'<details><summary>Screenshot</summary><img alt="Screenshot for {e(r.get("tc", ""))}" src="{img}"></details>'
                   if img else '<span class="muted ev">No screenshot</span>')
         rows.append('<tr>' + ''.join([
@@ -213,18 +308,23 @@ def main(argv=None):
     ap.add_argument('--no-update', action='store_true', help='do not rewrite the Summary table')
     a = ap.parse_args(argv)
     try:
-        title, meta, results, lines, span = parse(a.run)
+        title, meta, results, lines, span, head = parse(a.run)
         c = counts(results)
-        if not a.no_update:
-            update_summary(a.run, lines, span, c, len(results))
         stem = os.path.splitext(os.path.basename(a.run))[0]
-        out = a.out or os.path.join('qa', 'reports', f'{stem}.html')
-        os.makedirs(os.path.dirname(out) or '.', exist_ok=True)
-        with open(out, 'w', encoding='utf-8') as f:
-            f.write(render(a.run, title, meta, results))
+        out = a.out or default_out(a.run, stem)
+        if os.path.isdir(out):
+            raise RunError(f'--out {out} is a directory; give a file name')
+        atomic_write(out, render(a.run, title, meta, results))
+        if not a.no_update:
+            with open(a.run, encoding='utf-8-sig', newline='') as f:
+                newline = '\r\n' if '\r\n' in f.read() else '\n'
+            update_summary(a.run, lines, span, head, c, len(results), newline)
     except RunError as err:
         print(f'report: {err}', file=sys.stderr)
         return 2
+    state = meta.get('State', '').strip('` ')
+    if state and state.lower() != 'done':
+        print(f'report: warning: run State is "{state}", not Done', file=sys.stderr)
     print(f"report: {out} · {len(results)} TC · " + ' · '.join(f'{s} {c[s]}' for s in STATES))
     return 0
 

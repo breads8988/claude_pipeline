@@ -19,7 +19,7 @@ Technical words for AC and TC text. `scripts/lint.py` reads every table whose fi
 
 | Banned | Use | Level | Example |
 |---|---|---|---|
-| /(?:^\s*(?:\d+\.\s+)?\|\x7c\s*)Open\s+(?=[A-Z])/ (Open <Page> at step start) | navigate to | error | Navigate to `<Page>` › `<Tab>` |
+| /(?:^\s*(?:\d+\.\s+\|[-*]\s+)?\|\x7c\s*)Open\s+(?=[A-Z])/ (Open <Page> at step or bullet start) | navigate to | error | Navigate to `<Page>` › `<Tab>` |
 | views, view | navigates to · is on | warn | When the user navigates to the `<Tab>` tab |
 | sees | is displayed | error | the error state is displayed |
 | choose, chooses | select (option) · click (card, button) | error | Select `<option>` in the `<Field>` dropdown |

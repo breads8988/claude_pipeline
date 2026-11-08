@@ -6,7 +6,7 @@
 | Build | <build> |
 | Scope | smoke / regression / all / retest |
 | Environment | <staging URL from project.md> |
-| Executed by | test-runner (Mode B) |
+| Executed by | test-runner (agent) |
 | State | `In progress` / `Paused` / `Done` |
 | Started | <YYYY-MM-DD HH:MM> |
 | Finished | — |

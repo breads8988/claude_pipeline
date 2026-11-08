@@ -6,8 +6,8 @@ Usage:
 
 Vocabulary load order (later wins on the same Banned term):
   1. Shared list: ../references/vocabulary.md (or --shared FILE).
-  2. Project list: .claude/rules/vocabulary.project.md, found by walking up from the
-     current directory (skip with --no-project).
+  2. Project list: .claude/rules/vocabulary.project.md, found by walking up from each
+     page's folder, then from the current directory (skip with --no-project).
   3. Each --vocab FILE.
 A table whose first header is `Allow` removes terms from the merged list.
 
@@ -26,11 +26,13 @@ SHARED_DEFAULT = os.path.normpath(os.path.join(HERE, '..', 'references', 'vocabu
 PROJECT_REL = os.path.join('.claude', 'rules', 'vocabulary.project.md')
 LEVELS = ('error', 'warn')
 
-SEP_RE = re.compile(r'^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$')
+SEP_RE = re.compile(r'^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$')
 CELL_SPLIT = re.compile(r'(?<!\\)\|')
-QUOTED = re.compile(r'`[^`]*`|"[^"\n]*"|“[^”\n]*”')
+QUOTED = re.compile(r'`[^`]*`|"(?=\S)[^"\n]*(?<=\S)"|“[^”\n]*”')
+PLACEHOLDER = ' QQ '  # replaces app copy so surrounding words never join
+NOISE = re.compile(r'\]\([^)]*\)|<!--.*?-->|https?://\S+')
 REGEX_CELL = re.compile(r'^/(.+)/\s*(\(.*\))?$')
-FENCE = ('```', '~~~')
+FENCE_RE = re.compile(r'^\s*(`{3,}|~{3,})')
 
 
 class ConfigError(Exception):
@@ -40,6 +42,30 @@ class ConfigError(Exception):
 class Rule:
     def __init__(self, key, rx, term, use, level, source):
         self.key, self.rx, self.term, self.use, self.level, self.source = key, rx, term, use, level, source
+        self.is_regex = key.startswith('re:')
+
+
+def read_lines(path, what):
+    try:
+        with open(path, encoding='utf-8-sig') as f:
+            return f.read().splitlines()
+    except (OSError, UnicodeDecodeError) as e:
+        raise ConfigError(f'cannot read {what}{path}: {getattr(e, "strerror", None) or e}')
+
+
+def fenced(lines):
+    """Set of line indexes inside code fences (fence lines included)."""
+    out, fence = set(), None
+    for i, line in enumerate(lines):
+        m = FENCE_RE.match(line)
+        if fence:
+            out.add(i)
+            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence):
+                fence = None
+        elif m:
+            fence = m.group(1)
+            out.add(i)
+    return out
 
 
 def split_cells(line):
@@ -54,17 +80,11 @@ def split_cells(line):
 
 def table_rows(path):
     """Yield (line_no, header, cells) for every data row of every markdown table."""
-    try:
-        with open(path, encoding='utf-8') as f:
-            lines = f.read().splitlines()
-    except OSError as e:
-        raise ConfigError(f'cannot read vocabulary {path}: {e.strerror}')
-    header, in_fence = None, False
+    lines = read_lines(path, 'vocabulary ')
+    skip = fenced(lines)
+    header = None
     for i, line in enumerate(lines):
-        if line.lstrip().startswith(FENCE):
-            in_fence = not in_fence
-            continue
-        if in_fence:
+        if i in skip:
             continue
         cells = split_cells(line)
         if cells is None:
@@ -100,7 +120,7 @@ def compile_term(term):
 def terms_of(cell):
     if REGEX_CELL.match(cell):
         return [cell]
-    return [t for t in cell.split(',')]
+    return [t for t in re.sub(r'\([^)]*\)', '', cell).split(',')]
 
 
 def load_vocab(path, rules, allow, require_banned=False):
@@ -145,34 +165,33 @@ def find_project(start):
 
 
 def lint_page(path, rules):
-    try:
-        with open(path, encoding='utf-8') as f:
-            lines = f.read().splitlines()
-    except OSError as e:
-        raise ConfigError(f'cannot read {path}: {e.strerror}')
+    lines = read_lines(path, '')
+    skip = fenced(lines)
+    front_end = 0
+    if lines and lines[0].strip() == '---':
+        close = next((i for i in range(1, len(lines)) if lines[i].strip() == '---'), None)
+        if close is not None:
+            front_end = close + 1
     hits = []
-    in_fence = False
-    in_front = bool(lines) and lines[0].strip() == '---'
-    for n, line in enumerate(lines, 1):
-        if in_front:
-            if n > 1 and line.strip() == '---':
-                in_front = False
+    for idx, line in enumerate(lines):
+        n = idx + 1
+        if idx < front_end or idx in skip or SEP_RE.match(line):
             continue
-        if line.lstrip().startswith(FENCE):
-            in_fence = not in_fence
-            continue
-        if in_fence or SEP_RE.match(line):
-            continue
-        nxt = lines[n] if n < len(lines) else ''
+        nxt = lines[idx + 1] if idx + 1 < len(lines) else ''
         if line.lstrip().startswith('|') and SEP_RE.match(nxt):
             continue
-        prose = QUOTED.sub('', line)
+        prose = QUOTED.sub(PLACEHOLDER, NOISE.sub(' ', line))
+        found = []
         for r in rules:
             for m in r.rx.finditer(prose):
                 txt = m.group(0).strip(' |')
-                if txt.isupper() and len(txt) > 3:
+                if not r.is_regex and txt.isupper() and len(txt) > 3:
                     continue
-                hits.append((n, txt, r))
+                found.append((m.start(), m.end(), txt, r))
+        for s0, e0, txt, r in found:
+            if any(s1 <= s0 and e0 <= e1 and (e1 - s1) > (e0 - s0) for s1, e1, _, _ in found):
+                continue
+            hits.append((n, txt, r))
     return hits
 
 
@@ -184,15 +203,22 @@ def main(argv=None):
     ap.add_argument('--no-project', action='store_true', help='do not load vocabulary.project.md')
     a = ap.parse_args(argv)
     try:
-        rules, allow = {}, set()
-        load_vocab(a.shared, rules, allow, require_banned=True)
-        sources = [] if a.no_project else [p for p in [find_project(os.getcwd())] if p]
-        for p in sources + a.vocab:
-            load_vocab(p, rules, allow)
-        active = [r for k, r in rules.items() if k not in allow]
+        cache = {}
+
+        def active_rules(project):
+            if project not in cache:
+                rules, allow = {}, set()
+                load_vocab(a.shared, rules, allow, require_banned=True)
+                for p in ([project] if project else []) + a.vocab:
+                    load_vocab(p, rules, allow)
+                cache[project] = [r for k, r in rules.items() if k not in allow]
+            return cache[project]
+
         errors = warns = 0
         for page in a.files:
-            for n, txt, r in sorted(lint_page(page, active), key=lambda h: h[0]):
+            project = None if a.no_project else (
+                find_project(os.path.dirname(os.path.abspath(page))) or find_project(os.getcwd()))
+            for n, txt, r in sorted(lint_page(page, active_rules(project)), key=lambda h: h[0]):
                 print(f'{page}:{n}: {r.level}: "{txt}" → {r.use}')
                 if r.level == 'error':
                     errors += 1

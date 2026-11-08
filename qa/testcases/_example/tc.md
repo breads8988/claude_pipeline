@@ -11,14 +11,37 @@ Golden example: the reference for level of detail. Not a real feature.
 | Last updated | 2026-11-08 |
 
 ## Coverage summary
-| Technique | Items identified | Covered | Coverage |
+| Technique | Items identified | Covered | Blocked | Coverage |
+| --- | --- | --- | --- | --- |
+| Scenario (AC) | 10 | 9 | 1 | 90% |
+| Business rules | 4 | 4 | 0 | 100% |
+| EP | 7 | 7 | 0 | 100% |
+| BVA | 4 | 4 | 0 | 100% |
+| Decision table | 3 | 3 | 0 | 100% |
+| State transition | 9 | 6 | 3 | 66% |
+
+## Test analysis
+
+EP partitions (one TC per invalid partition):
+
+| FLD | Partition | Kind | Example value |
 | --- | --- | --- | --- |
-| Scenario (AC) | 6 | 6 | 100% |
-| Business rules | 2 | 2 | 100% |
-| EP | 2 | 2 | 100% |
-| BVA | 4 | 4 | 100% |
-| Decision table | 3 | 3 | 100% |
-| State transition | 4 | 4 | 100% |
+| FLD-USR-01 | valid | valid | `new.user+001@example.test` |
+| FLD-USR-01 | empty | invalid | empty |
+| FLD-USR-01 | whitespace only | invalid | three spaces |
+| FLD-USR-01 | no @ | invalid | `new.user.example.test` |
+| FLD-USR-01 | two @ | invalid | `new@user@example.test` |
+| FLD-USR-01 | contains space | invalid | `new user@example.test` |
+| FLD-USR-01 | local part over 64 characters | invalid | 65 × `a` + `@example.test` |
+
+BVA values (🟠 → 2-value, step 1 character):
+
+| FLD | Label | Value | TC |
+| --- | --- | --- | --- |
+| FLD-USR-01 | min-1 | 5 | TC-USR-009 |
+| FLD-USR-01 | min | 6 | TC-USR-002 |
+| FLD-USR-01 | max | 254 | TC-USR-002 |
+| FLD-USR-01 | max+1 | 255 | TC-USR-010 |
 
 ## TC-USR-001: Invite a person with a valid email
 | Field | Value |
@@ -34,7 +57,7 @@ Golden example: the reference for level of detail. Not a real feature.
 | Blocked by | — |
 
 **Precondition**
-- Logged in as Admin. No user exists with the test email.
+- Logged in as Admin. No user or invitation exists for the test email.
 
 **Test data**
 | Field | Value |
@@ -51,43 +74,46 @@ Golden example: the reference for level of detail. Not a real feature.
 - Toast `Invitation sent.` is displayed.
 - The users grid lists `new.user+001@example.test` with status = `Invited`.
 
-## TC-USR-002: Reject an email without @
+## TC-USR-002: Accept emails at the minimum and maximum length
 | Field | Value |
 | --- | --- |
-| Covers AC | AC-USR-002 |
-| Technique | EP |
-| Coverage items | `AC-USR-002`, `FLD-USR-01 EP: invalid, format` |
+| Covers AC | AC-USR-001 |
+| Technique | BVA |
+| Coverage items | `FLD-USR-01 BVA: min = 6`, `FLD-USR-01 BVA: max = 254` |
 | Role | Admin |
 | Type | Functional |
-| Priority | 🟠 |
+| Priority | 🔴 |
 | Automation | `Candidate` |
 | Status | `Active` |
 | Blocked by | — |
 
 **Precondition**
-- Logged in as Admin.
+- Logged in as Admin. No user or invitation exists for either test email.
 
 **Test data**
 | Field | Value |
 | --- | --- |
-| Email | `new.user.example.test` |
+| Email, row 1 (6 characters) | `a@b.cd` |
+| Email, row 2 (254 characters) | 64 × `a` + `@` + 63 × `b` + `.` + 63 × `c` + `.` + 56 × `d` + `.test` |
+
+Data-driven: run the steps once per test data row. Each row is one execution.
 
 **Steps**
 1. Navigate to Settings › Users.
 2. Click `Invite user`.
-3. Enter `new.user.example.test` in the Email field.
+3. Enter the email of the current row in the Email field.
 4. Click `Send invite`.
 
 **Expected result**
-- Error `Enter a valid email.` is displayed under the Email field.
-- No side effects: no new row in the users grid.
+- Toast `Invitation sent.` is displayed.
+- The users grid lists the email with status = `Invited`.
 
-## TC-USR-003: Reject an empty email
+## TC-USR-003: Reject an email: empty
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
 | Technique | EP |
-| Coverage items | `FLD-USR-01 EP: invalid, empty` |
+| Coverage items | `AC-USR-002`, `FLD-USR-01 EP: empty` |
 | Role | Admin |
 | Type | Functional |
 | Priority | 🟠 |
@@ -113,38 +139,162 @@ Golden example: the reference for level of detail. Not a real feature.
 - Error `Enter a valid email.` is displayed under the Email field.
 - No side effects: no new row in the users grid.
 
-## TC-USR-004: Accept emails at the minimum and maximum length
+## TC-USR-004: Reject an email: whitespace only
 | Field | Value |
 | --- | --- |
-| Covers AC | AC-USR-001 |
-| Technique | BVA |
-| Coverage items | `FLD-USR-01 BVA: min = 6`, `FLD-USR-01 BVA: max = 254` |
+| Covers AC | AC-USR-002 |
+| Technique | EP |
+| Coverage items | `FLD-USR-01 EP: whitespace only` |
 | Role | Admin |
 | Type | Functional |
-| Priority | 🔴 |
+| Priority | 🟠 |
 | Automation | `Candidate` |
 | Status | `Active` |
 | Blocked by | — |
 
 **Precondition**
-- Logged in as Admin. No user exists with either test email.
+- Logged in as Admin.
 
 **Test data**
 | Field | Value |
 | --- | --- |
-| Email (6 chars) | `a@b.cd` |
-| Email (254 chars) | 242 × `a` + `@example.test` |
+| Email | three spaces |
 
 **Steps**
 1. Navigate to Settings › Users.
-2. Click `Invite user`, enter the 6-character email, click `Send invite`.
-3. Click `Invite user`, enter the 254-character email, click `Send invite`.
+2. Click `Invite user`.
+3. Enter three spaces in the Email field.
+4. Click `Send invite`.
 
 **Expected result**
-- Toast `Invitation sent.` is displayed after each invite.
-- The users grid lists both emails with status = `Invited`.
+- Error `Enter a valid email.` is displayed under the Email field.
+- No side effects: no new row in the users grid.
 
-## TC-USR-005: Reject an email one character below the minimum
+## TC-USR-005: Reject an email: no @
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-002 |
+| Technique | EP |
+| Coverage items | `FLD-USR-01 EP: no @` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🟠 |
+| Automation | `Candidate` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Admin.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new.user.example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Click `Invite user`.
+3. Enter `new.user.example.test` in the Email field.
+4. Click `Send invite`.
+
+**Expected result**
+- Error `Enter a valid email.` is displayed under the Email field.
+- No side effects: no new row in the users grid.
+
+## TC-USR-006: Reject an email: two @
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-002 |
+| Technique | EP |
+| Coverage items | `FLD-USR-01 EP: two @` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🟠 |
+| Automation | `Candidate` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Admin.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new@user@example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Click `Invite user`.
+3. Enter `new@user@example.test` in the Email field.
+4. Click `Send invite`.
+
+**Expected result**
+- Error `Enter a valid email.` is displayed under the Email field.
+- No side effects: no new row in the users grid.
+
+## TC-USR-007: Reject an email: contains space
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-002 |
+| Technique | EP |
+| Coverage items | `FLD-USR-01 EP: contains space` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🟠 |
+| Automation | `Candidate` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Admin.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new user@example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Click `Invite user`.
+3. Enter `new user@example.test` in the Email field.
+4. Click `Send invite`.
+
+**Expected result**
+- Error `Enter a valid email.` is displayed under the Email field.
+- No side effects: no new row in the users grid.
+
+## TC-USR-008: Reject an email: local part over 64 characters
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-002 |
+| Technique | EP |
+| Coverage items | `FLD-USR-01 EP: local part over 64 characters` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🟠 |
+| Automation | `Candidate` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Admin.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | 65 × `a` + `@example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Click `Invite user`.
+3. Enter the 78-character email in the Email field.
+4. Click `Send invite`.
+
+**Expected result**
+- Error `Enter a valid email.` is displayed under the Email field.
+- No side effects: no new row in the users grid.
+
+## TC-USR-009: Reject an email one character below the minimum length
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
@@ -163,7 +313,9 @@ Golden example: the reference for level of detail. Not a real feature.
 **Test data**
 | Field | Value |
 | --- | --- |
-| Email (5 chars) | `a@b.c` |
+| Email (5 characters) | `a@b.c` |
+
+A 5-character email also breaks the format rule. Both rules give the same error, so no defect is masked.
 
 **Steps**
 1. Navigate to Settings › Users.
@@ -175,7 +327,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Error `Enter a valid email.` is displayed under the Email field.
 - No side effects: no new row in the users grid.
 
-## TC-USR-006: Reject an email one character above the maximum
+## TC-USR-010: Reject an email one character above the maximum length
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
@@ -194,7 +346,7 @@ Golden example: the reference for level of detail. Not a real feature.
 **Test data**
 | Field | Value |
 | --- | --- |
-| Email (255 chars) | 243 × `a` + `@example.test` |
+| Email (255 characters) | 64 × `a` + `@` + 63 × `b` + `.` + 63 × `c` + `.` + 57 × `d` + `.test` |
 
 **Steps**
 1. Navigate to Settings › Users.
@@ -206,12 +358,12 @@ Golden example: the reference for level of detail. Not a real feature.
 - Error `Enter a valid email.` is displayed under the Email field.
 - No side effects: no new row in the users grid.
 
-## TC-USR-007: Reject an invite for an existing email, any letter case
+## TC-USR-011: Reject an invite for an existing user, any letter case
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-003 |
-| Technique | Decision table |
-| Coverage items | `AC-USR-003`, `BR-USR-002`, `DT-USR-01.R2` |
+| Technique | Decision table, State transition |
+| Coverage items | `AC-USR-003`, `BR-USR-002`, `DT-USR-01.R2`, `ST-USR-01.T7` |
 | Role | Admin |
 | Type | Functional |
 | Priority | 🔴 |
@@ -220,7 +372,7 @@ Golden example: the reference for level of detail. Not a real feature.
 | Blocked by | — |
 
 **Precondition**
-- Logged in as Admin. User `ana@example.test` exists.
+- Logged in as Admin. User `ana@example.test` exists with an accepted invitation.
 
 **Test data**
 | Field | Value |
@@ -237,7 +389,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Error `This email is already in use.` is displayed under the Email field.
 - No side effects: no new row in the users grid.
 
-## TC-USR-008: Viewer is not permitted to invite
+## TC-USR-012: Reject an invitation request sent by a Viewer
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-004 |
@@ -256,15 +408,77 @@ Golden example: the reference for level of detail. Not a real feature.
 **Test data**
 | Field | Value |
 | --- | --- |
-| — | — |
+| Request | `POST /api/invitations` with email `viewer.try@example.test` |
 
 **Steps**
 1. Navigate to Settings › Users.
+2. Open the browser console.
+3. Send the request from the test data.
 
 **Expected result**
-- The `Invite user` button is hidden.
+- Response status = 403 and error code = `ERR-USR-03`.
+- Response message = `You do not have permission to invite users.`
 
-## TC-USR-009: Invitee accepts a valid invitation
+## TC-USR-013: Invitation expires after the expiry time
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-005 |
+| Technique | State transition |
+| Coverage items | `AC-USR-005`, `ST-USR-01.T3` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🔴 |
+| Automation | `Not yet` |
+| Status | `Blocked` |
+| Blocked by | OQ-USR-001 |
+
+**Precondition**
+- Logged in as Admin.
+- Seeded on staging: invitation for `new.user+013@example.test` created TBD (OQ-USR-001) ago, status = `Invited`.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new.user+013@example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Locate the row for `new.user+013@example.test`.
+
+**Expected result**
+- The row displays status = `Expired`.
+
+## TC-USR-014: Expiry has no effect on an accepted invitation
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-005 |
+| Technique | State transition |
+| Coverage items | `ST-USR-01.T5` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🔴 |
+| Automation | `Not yet` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Admin.
+- Seeded on staging: invitation for `new.user+014@example.test` accepted, created 80 h ago (past both candidate expiry times).
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new.user+014@example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Locate the row for `new.user+014@example.test`.
+
+**Expected result**
+- The row displays status = `Active`.
+- No side effects: no `Expired` status displayed.
+
+## TC-USR-015: Invitee accepts a valid invitation
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-006 |
@@ -278,86 +492,115 @@ Golden example: the reference for level of detail. Not a real feature.
 | Blocked by | — |
 
 **Precondition**
-- An invitation for `new.user+009@example.test` has status = `Invited`.
+- Seeded on staging: invitation for `new.user+015@example.test` with status = `Invited`; its link is in the test mailbox.
 
 **Test data**
 | Field | Value |
 | --- | --- |
-| Password | `Synthetic#Pass9` |
+| Password | `Synthetic#Pass15` |
 
 **Steps**
 1. Navigate to the invitation link.
-2. Enter `Synthetic#Pass9` in the Password field.
+2. Enter `Synthetic#Pass15` in the Password field.
 3. Click `Accept invitation`.
 
 **Expected result**
-- The dashboard is displayed for `new.user+009@example.test`.
-- In Settings › Users (as Admin), the user has status = `Active`.
+- The dashboard is displayed.
+- The profile menu displays `new.user+015@example.test`.
 
-## TC-USR-010: Invitation expires after the expiry time
+## TC-USR-016: Viewer has no invite action
 | Field | Value |
 | --- | --- |
-| Covers AC | AC-USR-005 |
+| Covers AC | AC-USR-007 |
+| Technique | Decision table |
+| Coverage items | `AC-USR-007` |
+| Role | Viewer |
+| Type | Functional |
+| Priority | 🟠 |
+| Automation | `Candidate` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Viewer.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| — | — |
+
+**Steps**
+1. Navigate to Settings › Users.
+
+**Expected result**
+- The `Invite user` button is hidden.
+
+## TC-USR-017: Accepting an expired invitation is rejected
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-008 |
 | Technique | State transition |
-| Coverage items | `AC-USR-005`, `ST-USR-01.T3` |
+| Coverage items | `AC-USR-008`, `BR-USR-004`, `ST-USR-01.T6` |
 | Role | Invitee (no login) |
 | Type | Functional |
 | Priority | 🔴 |
 | Automation | `Not yet` |
-| Status | `Blocked` |
-| Blocked by | OQ-USR-001 |
+| Status | `Active` |
+| Blocked by | — |
 
 **Precondition**
-- An invitation for `new.user+010@example.test` has status = `Invited`.
+- Seeded on staging: invitation for `new.user+017@example.test` created 80 h ago, status = `Expired`; its link is in the test mailbox.
 
 **Test data**
 | Field | Value |
 | --- | --- |
-| Expiry | TBD (OQ-USR-001) |
+| Password | `Synthetic#Pass17` |
 
 **Steps**
-1. Move the invitation date earlier than the expiry time on staging.
-2. Navigate to the invitation link.
+1. Navigate to the invitation link.
+2. Enter `Synthetic#Pass17` in the Password field.
+3. Click `Accept invitation`.
 
 **Expected result**
-- The page displays `This invitation has expired.`
-- TBD (OQ-USR-001): status transitions to `Expired` after 24 h or 72 h.
+- Copy `This invitation is no longer valid.` is displayed.
+- No side effects: no account is created and the dashboard is not displayed.
 
-## TC-USR-011: Accepting an expired invitation is rejected
+## TC-USR-018: Reusing an accepted invitation link is rejected
 | Field | Value |
 | --- | --- |
-| Covers AC | AC-USR-005 |
+| Covers AC | AC-USR-008 |
 | Technique | State transition |
 | Coverage items | `ST-USR-01.T4` |
 | Role | Invitee (no login) |
 | Type | Functional |
 | Priority | 🔴 |
 | Automation | `Not yet` |
-| Status | `Blocked` |
-| Blocked by | OQ-USR-001 |
+| Status | `Active` |
+| Blocked by | — |
 
 **Precondition**
-- An invitation for `new.user+011@example.test` has status = `Expired`.
+- Seeded on staging: invitation for `new.user+018@example.test` already accepted; its link is in the test mailbox.
 
 **Test data**
 | Field | Value |
 | --- | --- |
-| Password | `Synthetic#Pass11` |
+| Password | `Synthetic#Pass18` |
 
 **Steps**
 1. Navigate to the invitation link.
+2. Enter `Synthetic#Pass18` in the Password field.
+3. Click `Accept invitation`.
 
 **Expected result**
-- The page displays `This invitation has expired.`
-- The `Accept invitation` button is hidden.
-- No side effects: status remains `Expired`.
+- Copy `This invitation is no longer valid.` is displayed.
+- No side effects: the password of the account is unchanged.
 
-## TC-USR-012: Double click on Send invite creates one invitation
+## TC-USR-019: Double click on Send invite creates one invitation
 | Field | Value |
 | --- | --- |
-| Covers AC | AC-USR-001 |
-| Technique | Error guessing |
-| Coverage items | `AC-USR-001`, `EG: double submission` |
+| Covers AC | AC-USR-009 |
+| Technique | Scenario, Error guessing |
+| Coverage items | `AC-USR-009`, `BR-USR-003`, `EG: double submission` |
 | Role | Admin |
 | Type | Functional |
 | Priority | 🔴 |
@@ -366,23 +609,85 @@ Golden example: the reference for level of detail. Not a real feature.
 | Blocked by | — |
 
 **Precondition**
-- Logged in as Admin. No user exists with the test email.
+- Logged in as Admin. No user or invitation exists for the test email.
 
 **Test data**
 | Field | Value |
 | --- | --- |
-| Email | `new.user+012@example.test` |
+| Email | `new.user+019@example.test` |
 
 **Steps**
 1. Navigate to Settings › Users.
 2. Click `Invite user`.
-3. Enter `new.user+012@example.test` in the Email field.
+3. Enter `new.user+019@example.test` in the Email field.
 4. Double-click `Send invite`.
 
 **Expected result**
-- The users grid lists `new.user+012@example.test` once, with status = `Invited`.
+- The users grid lists `new.user+019@example.test` once, with status = `Invited`.
+
+## TC-USR-020: Re-invite an email with a pending invitation
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-010 |
+| Technique | State transition |
+| Coverage items | `AC-USR-010`, `ST-USR-01.T8` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🔴 |
+| Automation | `Not yet` |
+| Status | `Blocked` |
+| Blocked by | OQ-USR-002 |
+
+**Precondition**
+- Logged in as Admin.
+- Seeded on staging: invitation for `new.user+020@example.test` with status = `Invited`.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new.user+020@example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Click `Invite user`.
+3. Enter `new.user+020@example.test` in the Email field.
+4. Click `Send invite`.
+
+**Expected result**
+- TBD (OQ-USR-002): invitation resent, new invitation created, or rejected.
+
+## TC-USR-021: Re-invite an email with an expired invitation
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-010 |
+| Technique | State transition |
+| Coverage items | `ST-USR-01.T9` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🔴 |
+| Automation | `Not yet` |
+| Status | `Blocked` |
+| Blocked by | OQ-USR-002 |
+
+**Precondition**
+- Logged in as Admin.
+- Seeded on staging: invitation for `new.user+021@example.test` with status = `Expired`.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new.user+021@example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Click `Invite user`.
+3. Enter `new.user+021@example.test` in the Email field.
+4. Click `Send invite`.
+
+**Expected result**
+- TBD (OQ-USR-002): new invitation created or rejected.
 
 ## Review log
 | Date | Action | By | Note |
 | --- | --- | --- | --- |
-| 2026-11-08 | Approved | qa.lead | TC-USR-010 and TC-USR-011 blocked by OQ-USR-001 |
+| 2026-11-08 | Approved | qa.lead | TC-USR-013 blocked by OQ-USR-001; TC-USR-020 and TC-USR-021 blocked by OQ-USR-002 |
