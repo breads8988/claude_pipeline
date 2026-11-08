@@ -12,6 +12,7 @@ Every notification has two parts.
 
 - Push text: `<item> · <state> — <counts> · <action>`. Max 120 characters.
 - No push tool → send the chat block only.
+- Notify only where the user must act: the two review gates, a paused run, a run with failures. Nothing else.
 - One notification per event.
 - No notification for lint or validator errors: the skill fixes them (max 3 attempts). Errors left after 3 attempts go in the `Next` line of the ready notification.
 - No notification for a command the user just ran (`/approve`, `/resolve-oq`): reply in chat.
@@ -24,7 +25,7 @@ Every notification has two parts.
 | AC ready for review | `write-ac` | All open questions (table 2), or none | Only OQ the user replies `skip` to |
 | TC ready for review | `gen-testcase` | Hand-off (table 1) + blocked TC count | No |
 | Run paused | `test-runner` | TC, reason (OTP, unknown host, page down) | No |
-| Run finished | `/end-run` | Run summary + failed TCs | No |
+| Run failed: ≥ 1 `❌` | `/end-run` | Run summary + failed TCs | No |
 
 ## Formats
 
@@ -45,7 +46,7 @@ Push: `AC-<CODE> ready · <n> AC · <n> OQ open · reply in chat`
 - List **all** open questions, 🔴 first. No cap on rows.
 - No open questions → replace the table with `No open questions.`
 
-### Run finished
+### Run failed
 
 Push: `Run <feature> <b> done · <n> ✅ · <n> ❌ · <n> ⛔ · confirm fails in chat`
 
@@ -59,6 +60,7 @@ Push: `Run <feature> <b> done · <n> ✅ · <n> ❌ · <n> ⛔ · confirm fails 
 - **Next:** confirm failed TCs, then bugs go to Jira. Report: `qa/reports/<run>.html`
 ```
 
+- No `❌` in the run → no notification; reply in chat with the headline and report path.
 - Rows: failed TCs first, then blocked. Passed TCs are counted in the headline only.
 
 ### TC ready for review

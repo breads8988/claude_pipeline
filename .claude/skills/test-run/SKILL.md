@@ -38,7 +38,7 @@ A run is one test cycle: one feature, one build, one scope. TCs are specs and ar
 1. Every row has a result other than `⬜`, or the user ends the run early (rest stay `⬜`).
 2. Set `State: Done` and `Finished`.
 3. Run the report script. Exit 2 → fix the run file and run it again.
-4. Send the **Run finished** notification (`comment-style` › `references/notifications.md`).
+4. At least one `❌` → send the **Run failed** notification (`comment-style` › `references/notifications.md`). None → reply in chat only.
 5. Each `❌ Fail` → draft `qa/tickets/BUG-TBD-<TC-ID>.md` with `log-ticket` (run, TC, AC, evidence path). Show the drafts.
 6. The user confirms a failure → create the bug in Jira. Rename the draft `BUG-<key>.md` and write the key in the run row's `Bug` cell.
 7. Evidence files are not uploaded by any tool. Ask the user to attach them to the bug.
