@@ -195,7 +195,13 @@ def evidence_img(run_path, row):
     candidates = []
     cell = row.get('evidence', '').strip().strip('`')
     if os.path.splitext(cell)[1].lower() in IMAGE_TYPES:
-        candidates += [cell] if os.path.isabs(cell) else [os.path.join(run_dir, cell)]
+        if os.path.isabs(cell):
+            candidates.append(cell)
+        else:
+            candidates.append(os.path.join(run_dir, cell))
+            root = runs_root(run_path)
+            if root:  # repo-relative path (`qa/runs/<run>/evidence/…`): resolve from the repo root
+                candidates.append(os.path.join(os.path.dirname(os.path.dirname(root)), cell))
     tc = row.get('tc', '').strip()
     if TC_ID.match(tc):
         stem = os.path.splitext(os.path.basename(run_path))[0]
@@ -322,6 +328,9 @@ def main(argv=None):
     except RunError as err:
         print(f'report: {err}', file=sys.stderr)
         return 2
+    missing = [r.get('tc', '?') for r in results if r['state'] == 'Fail' and not evidence_img(a.run, r)]
+    if missing:
+        print(f'report: warning: no screenshot found for {", ".join(missing)}', file=sys.stderr)
     state = meta.get('State', '').strip('` ')
     if state and state.lower() != 'done':
         print(f'report: warning: run State is "{state}", not Done', file=sys.stderr)

@@ -7,7 +7,7 @@ Every notification has two parts.
 
 | Part | Where | Content |
 |---|---|---|
-| Push | Push-notification tool, when the session has one | The headline only, one line, no table, no Markdown |
+| Push | Push-notification tool, if the session has one (none → skip this part) | The headline only, one line, no table, no Markdown |
 | Chat block | Final message of the turn | Headline, one table, `Next` line (`comment-patterns.md`) |
 
 - Push text: `<item> · <state> — <counts> · <action>`. Max 120 characters.
@@ -24,7 +24,7 @@ Every notification has two parts.
 |---|---|---|---|
 | AC ready for review | `write-ac` | All open questions (table 2), or none | Only OQ the user replies `skip` to |
 | TC ready for review | `gen-testcase` | Hand-off (table 1) + blocked TC count | No |
-| Run paused | `test-runner` | TC, reason (OTP, unknown host, page down) | No |
+| Run paused | main session, from the `test-runner` block | TC, reason (OTP, unknown host, page down, accounts file missing) | No |
 | Run failed: ≥ 1 `❌` | `/end-run` | Run summary + failed TCs | No |
 
 ## Formats
@@ -88,7 +88,7 @@ Push: `Run <feature> paused at <TC-ID> · <reason>`
 
 | TC | Role | Reason |
 |---|---|---|
-| TC-<CODE>-014 | <role> | <OTP not in accounts file · unknown host <host> · login failed twice · staging down> |
+| TC-<CODE>-014 | <role> | <OTP not in accounts file · unknown host <host> · login failed twice · staging down · accounts file missing> |
 
-- **Next:** fix the cause, then reply `resume`. Or `/end-run` to stop here.
+- **Next:** fix the cause, then reply `resume` (or `/start-run --resume <run file>`). Or `/end-run` to stop here.
 ```

@@ -26,8 +26,8 @@ Keep every row. A field the project does not use: write `—`.
 | --- | --- |
 | Bug issue type | <e.g. Bug> |
 | Task issue type | <e.g. Task> |
-| Priority values (🔴 🟠 🟡 ⚪) | <e.g. Highest · High · Medium · Low> |
-| Severity field | <field name and values, or —> |
+| Severity field and values (🔴 🟠 🟡 ⚪) | <e.g. Severity: Critical · Major · Minor · Trivial, or —> |
+| Priority | <set by PO; default value on create, or —> |
 | Component | <default component, or —> |
 | Required fields on create | <extra required fields, or —> |
 | Bug or task | Bug: displayed or stored result differs from an approved AC or TC. Task: anything else (test data, environment, tooling). |
@@ -41,7 +41,7 @@ Keep every row. A field the project does not use: write `—`.
 | Login | App login form |
 | OTP / 2FA | None |
 | Test mailbox | <inbox or mail-catcher URL for invite links and email OTP, or —> |
-| Test data backdoor | <seed script, admin page or API to set preconditions, or —> |
+| Test data backdoor | <admin page URL (used by the agent) · seed script command (run by the main session before the run, after a yes) · or —> |
 
 - The test agent opens the Allowed hosts only, exact host match (no subdomain wildcard). Any other host pauses the run.
 - Test mailbox and backdoor hosts must be in Allowed hosts.

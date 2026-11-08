@@ -10,7 +10,21 @@
       "mcp__Atlassian_Rovo__searchConfluenceUsingCql",
       "Bash(python3 .claude/skills/comment-style/scripts/lint.py:*)",
       "Bash(python3 .claude/skills/gen-testcase/scripts/coverage.py:*)",
-      "Bash(python3 .claude/skills/test-run/scripts/report.py:*)"
+      "Bash(python3 .claude/skills/test-run/scripts/report.py:*)",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "mcp__claude-in-chrome__tabs_create_mcp",
+      "mcp__claude-in-chrome__navigate",
+      "mcp__claude-in-chrome__computer",
+      "mcp__claude-in-chrome__read_page",
+      "mcp__claude-in-chrome__find",
+      "mcp__claude-in-chrome__form_input",
+      "mcp__claude-in-chrome__get_page_text",
+      "mcp__claude-in-chrome__resize_window",
+      "mcp__claude-in-chrome__read_console_messages",
+      "mcp__claude-in-chrome__read_network_requests",
+      "Bash(python3 .claude/skills/gen-testcase/scripts/pairwise.py:*)",
+      "Bash(python3 .claude/scripts/consistency.py:*)",
+      "Bash(git config user.name)"
     ],
     "ask": [
       "mcp__Atlassian_Rovo__createJiraIssue",
@@ -25,7 +39,8 @@
       "mcp__Atlassian_Rovo__createConfluenceInlineComment",
       "mcp__Atlassian_Rovo__createCompassComponent",
       "mcp__Atlassian_Rovo__createCompassComponentRelationship",
-      "mcp__Atlassian_Rovo__createCompassCustomFieldDefinition"
+      "mcp__Atlassian_Rovo__createCompassCustomFieldDefinition",
+      "mcp__claude-in-chrome__javascript_tool"
     ],
     "deny": [
       "Read(./.env)",

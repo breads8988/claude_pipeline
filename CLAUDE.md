@@ -30,7 +30,7 @@ Per-project vs shared files: `README.md`.
 3. `/approve <feature>` → AC `Approved` (open questions allowed).
 4. `/gen-tc <feature>` → TC `Draft`; AC blocked by an open question get `Blocked` TCs.
 5. `/approve <feature> --tc` → TC `Approved`.
-6. `/start-run <feature> --build <b> --scope <s>` → `test-runner` executes on staging → `/end-run` → HTML report + notification.
+6. `/start-run <feature> --build <b> --scope <s>` → `test-runner` executes on staging → `/end-run` → HTML report; Run failed notification when ≥ 1 ❌.
 7. Failed TC → `log-ticket` draft → user confirms → Jira.
 8. `/resolve-oq <OQ-ID> "<answer>"` → AC and TC updated, blocked TCs become `Active`.
 9. Change request → `impact-analysis` → affected AC and TC.
@@ -38,15 +38,15 @@ Per-project vs shared files: `README.md`.
 
 ## Rules
 - Every TC links to at least one AC. Every AC links to a Jira ticket.
-- Every TC has precondition, data, steps, expected result, Priority, Automation.
+- Every TC has precondition, data, steps, expected result, Role, Priority, Automation.
 - Use synthetic or masked data only. Never real customer or account data.
 - Never read or write `.env`, secrets or production config.
 - Jira writes (create, comment, transition) need user confirmation first. A `skip` reply to an open question is that confirmation.
 - Only `/approve` sets `Approved`. Any edit to an approved AC file sets it and its TC file back to `Draft`. Any edit to an approved TC file sets it back to `Draft`.
 - `gen-testcase` needs an approved AC. A run needs approved AC and TC files.
-- The test agent logs in only on the staging URL in `project.md`, with project test accounts. Passwords stay in `qa/test-accounts.local.md`.
+- The test agent opens only the Allowed hosts in `project.md` and logs in with project test accounts. Passwords stay in `qa/test-accounts.local.md`.
 - Domain-specific checks live in `.claude/rules/domain.md`. Skills must not hardcode a domain.
-- Run the `comment-style` lint on AC and TC files, and the coverage validator on TC files, after each save. Exit 1 or 2 → fix before the notification or `/approve`.
+- Run the `comment-style` lint on AC and TC files, and the coverage validator on TC files, after each save. Exit 1 or 2 → fix and re-run, max 3 attempts; errors left go in the ready notification. `/approve` needs exit 0.
 - AC follow BABOK (`write-ac` › `references/ac-techniques.md`). TCs follow ISTQB CTFL v4.0.1 (`gen-testcase` › `references/test-design-techniques.md`).
 - Shared files stay generic for all projects. Put project-specific content only in the per-project files listed in `README.md`.
 
@@ -58,4 +58,6 @@ Per-project vs shared files: `README.md`.
 - Coverage tests: `python3 -m unittest discover -s .claude/skills/gen-testcase/scripts/tests`
 - Run report: `python3 .claude/skills/test-run/scripts/report.py qa/runs/<run>.md`
 - Report tests: `python3 -m unittest discover -s .claude/skills/test-run/scripts/tests`
+- Repo consistency: `python3 .claude/scripts/consistency.py` (run after editing shared files)
+- Consistency tests: `python3 -m unittest discover -s .claude/scripts/tests`
 - No automation commands yet. Add them here when `automation/` is created.

@@ -32,7 +32,7 @@ Source: ISTQB CTFL syllabus v4.0.1 (2024-09-15), chapter 4 (test analysis and de
 
 ### Boundary value analysis (§4.2.2)
 - Only for ordered partitions (numbers, lengths, dates).
-- Range 1–100, 2-value: `0, 1, 100, 101`. 3-value: `0, 1, 2, 99, 100, 101`.
+- Range 1–100, 2-value: `0, 1, 100, 101`. 3-value: `0, 1, 2, 99, 100, 101` (CTFL example; outer neighbours -1 and 102 are not required).
 - The neighbour is one `Step` away (FLD column): 1 for integers and lengths, 0.01 for amounts with 2 decimals, the currency's minor unit for money, 1 day for dates.
 - Label each value `min-1`, `min`, `min+1`, `max-1`, `max`, `max+1` with its number: `FLD-…-01 BVA: max+1 = 255`. The validator checks the number.
 - 3-value is "more rigorous" and catches defects 2-value misses (e.g. `x ≤ 10` coded as `x = 10`).
@@ -88,15 +88,17 @@ The syllabus states that product risk determines "the test techniques to be empl
 
 | Depth | EP | BVA | Decision table | State transition |
 |---|---|---|---|---|
-| 🔴 Critical | All partitions | 3-value | All feasible columns | All transitions (valid + invalid) |
-| 🟠 High · 🟡 Medium | All partitions | 2-value | All feasible columns | Valid transitions |
-| ⚪ Low | All partitions | 2-value | Minimised table | Valid transitions |
+| 🔴 Critical | All partitions | 3-value | All feasible columns, not minimised | All transitions (valid + invalid) |
+| 🟠 High | All partitions | 3-value | All feasible columns, not minimised | Valid transitions |
+| 🟡 Medium | All partitions | 2-value | All feasible columns | Valid transitions |
+| ⚪ Low | All partitions | 2-value | Minimised table allowed | Valid transitions |
 
 - **Depth** of a `FLD`, `DT` or `ST` = the highest of its own criticality and the criticality of the AC it covers (`Covers` bullet, or AC that cite its ID).
 - `Likelihood: High` on a covered AC raises the depth one level, capped at 🔴 (risk = likelihood × impact, §5.2).
 - Depth sets the technique only. TC priority does not change (`naming.md`).
-- ⚪ minimised table: write the minimised table in `ac.md`. Its columns are the coverage items.
-- The validator applies this rule to BVA (3-value) and invalid transitions.
+- Minimised table (columns merged with `–` where a condition does not change the outcome): ⚪ only. 🔴 and 🟠 list every feasible column.
+- The validator applies this rule to BVA (3-value at 🟠 and 🔴) and invalid transitions (🔴).
+- This section is the single source of the depth rule. Other files point here.
 
 ## 4. Coverage item notation in a TC
 

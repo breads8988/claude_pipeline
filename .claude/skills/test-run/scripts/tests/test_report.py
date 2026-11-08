@@ -116,6 +116,30 @@ class ReportTest(unittest.TestCase):
         self.assertIn('No screenshot', html)
         self.assertNotIn('data:image/png', html)
 
+    def test_missing_screenshot_warned(self):
+        os.remove(os.path.join(self.dir, '2026-11-08-invite-2.4.1', 'evidence', 'TC-USR-002.png'))
+        code, _, err, _ = self.go()
+        self.assertEqual(code, 0)
+        self.assertIn('no screenshot found for TC-USR-002', err)
+
+    def test_repo_relative_evidence_path(self):
+        repo = os.path.join(self.dir, 'repo')
+        runs = os.path.join(repo, 'qa', 'runs')
+        ev = os.path.join(runs, 'r1', 'evidence')
+        os.makedirs(ev)
+        with open(os.path.join(ev, 'shot1.png'), 'wb') as f:
+            f.write(PNG)
+        run = os.path.join(runs, 'r1.md')
+        with open(run, 'w', encoding='utf-8') as f:
+            f.write(RUN.replace('| TC-USR-002.png |', '| qa/runs/r1/evidence/shot1.png |'))
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = report.main([run, '--out', self.out])
+        with open(self.out, encoding='utf-8') as f:
+            html = f.read()
+        self.assertEqual(code, 0, err.getvalue())
+        self.assertIn('data:image/png;base64,', html)
+
     def test_missing_run_file_exits_2(self):
         os.remove(self.run)
         code, _, err, _ = self.go()

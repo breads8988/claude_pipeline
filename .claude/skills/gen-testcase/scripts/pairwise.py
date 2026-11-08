@@ -12,7 +12,8 @@ import argparse
 import itertools
 import sys
 
-MAX_CANDIDATES = 200_000
+MAX_CANDIDATES = 20_000
+MAX_ROWS = 99
 
 
 def parse(params):
@@ -27,8 +28,16 @@ def parse(params):
         out.append((name.strip(), values))
     if len(out) < 2:
         raise ValueError('give at least 2 parameters')
-    if len({n for n, _ in out}) != len(out):
-        raise ValueError('duplicate parameter name')
+    if len({n.lower() for n, _ in out}) != len(out):
+        raise ValueError('duplicate parameter name (case-insensitive)')
+    for n, vals in out:
+        if len({v.lower() for v in vals}) != len(vals):
+            raise ValueError(f'duplicate value in {n} (case-insensitive)')
+        if any('|' in x for x in [n] + vals):
+            raise ValueError(f'"|" is not allowed in {n} or its values')
+    top = sorted((len(v) for _, v in out), reverse=True)
+    if top[0] * top[1] > MAX_ROWS:
+        raise ValueError(f'at least {top[0] * top[1]} rows needed (two largest value counts); max {MAX_ROWS}: split the parameters')
     return out
 
 
@@ -84,7 +93,7 @@ def main(argv=None):
         print(f'pairwise: {e}', file=sys.stderr)
         return 2
     rows = generate(params)
-    if len(rows) > 99:
+    if len(rows) > MAX_ROWS:
         print('pairwise: more than 99 rows; split the parameters', file=sys.stderr)
         return 2
     print(table(params, rows))

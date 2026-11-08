@@ -29,7 +29,7 @@ Base principles live in `.claude/rules/writing-style.md`. This skill adds three 
 The project value wins. Do not copy these rules into other skills; reference this skill.
 
 ## Lint (required for AC and TC files)
-Run from the repo root before saving:
+Run from the repo root after each save:
 
 ```bash
 python3 .claude/skills/comment-style/scripts/lint.py qa/specs/<feature>/ac.md
@@ -37,8 +37,8 @@ python3 .claude/skills/comment-style/scripts/lint.py qa/specs/<feature>/ac.md
 
 | Exit | Meaning | Action |
 |---|---|---|
-| 0 | Clean. Warnings may print. | Review warnings, then save. |
-| 1 | Error-level words found | Rewrite each line. Keep meaning and IDs. Re-run. |
+| 0 | Clean. Warnings may print. | Review warnings. |
+| 1 | Error-level words found | Rewrite each line. Keep meaning and IDs. Re-run, max 3 attempts. |
 | 2 | Usage, file or vocabulary error | Fix the cause. Never skip the lint. |
 
 - Never change app copy (backticks, double quotes) to pass the lint.

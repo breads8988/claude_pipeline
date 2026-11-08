@@ -27,6 +27,7 @@ One copy per project. Shared files stay identical across projects; only per-proj
 | `.claude/rules/naming.md` | ID and file naming |
 | `.claude/skills/**` | write-ac, gen-testcase, log-ticket, impact-analysis, comment-style, test-run |
 | `.claude/agents/**` | ac-reviewer, tc-reviewer, test-runner |
+| `.claude/scripts/**` | Repo consistency check (single-source rules, stale terms, paths) |
 | `.claude/commands/**` | /gen-ac, /approve, /reject, /resolve-oq, /gen-tc, /start-run, /end-run, /impact |
 | `qa/_templates/**` | AC, TC, bug, task, run, test-account templates |
 | `qa/**/_example/` | Golden examples |
@@ -36,10 +37,19 @@ One copy per project. Shared files stay identical across projects; only per-proj
 - Change a shared file here first, then copy it to each project.
 - A project need that a shared file cannot cover goes into a per-project file, never into the shared file.
 
+## Prerequisites
+
+| Item | Needed for |
+| --- | --- |
+| Python 3.10+ | lint, coverage, pairwise, report scripts |
+| `git config user.name` set | `/approve`, `/reject` (Approved by) |
+| Atlassian connector authorised | `/gen-ac`, Jira comments, bugs |
+| Claude in Chrome extension; site permissions = `Allowed hosts` in `project.md` only | `/start-run` (Mode B). The extension allowlist is the hard limit; the agent's host check is the second line |
+
 ## New project
 1. Copy this repo (or use it as a GitHub template).
 2. Fill the per-project files above. Copy `qa/_templates/test-accounts.local.md` to `qa/test-accounts.local.md`.
-3. Run the three test suites: lint, coverage, report (`CLAUDE.md` › Commands).
+3. Run the four test suites (lint, coverage, report, consistency) and `consistency.py` (`CLAUDE.md` › Commands).
 4. Project notes and decisions go in `docs/project/` (per-project), never in the shared `docs/` files.
 
 ## Update an existing project

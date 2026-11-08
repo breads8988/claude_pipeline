@@ -13,12 +13,12 @@ Golden example: the reference for level of detail. Not a real feature.
 ## Coverage summary
 | Technique | Items identified | Covered | Blocked | Coverage |
 | --- | --- | --- | --- | --- |
-| Scenario (AC) | 10 | 9 | 1 | 90% |
+| Scenario (AC) | 11 | 9 | 2 | 81% |
 | Business rules | 4 | 4 | 0 | 100% |
-| EP | 7 | 7 | 0 | 100% |
-| BVA | 4 | 4 | 0 | 100% |
-| Decision table | 3 | 3 | 0 | 100% |
-| State transition | 9 | 6 | 3 | 66% |
+| EP | 11 | 11 | 0 | 100% |
+| BVA | 6 | 6 | 0 | 100% |
+| Decision table | 4 | 4 | 0 | 100% |
+| State transition | 10 | 7 | 3 | 70% |
 
 ## Test analysis
 
@@ -33,13 +33,19 @@ EP partitions (one TC per invalid partition):
 | FLD-USR-01 | two @ | invalid | `new@user@example.test` |
 | FLD-USR-01 | contains space | invalid | `new user@example.test` |
 | FLD-USR-01 | local part over 64 characters | invalid | 65 × `a` + `@example.test` |
+| FLD-USR-01 | empty local part | invalid | `@example.test` |
+| FLD-USR-01 | missing domain | invalid | `new.user@` |
+| FLD-USR-01 | missing TLD | invalid | `new.user@example` |
+| FLD-USR-01 | domain label over 63 characters | invalid | `new.user@` + 64 × `b` + `.test` |
 
-BVA values (🟠 → 2-value, step 1 character):
+BVA values (depth 🟠 → 3-value, step 1 character):
 
 | FLD | Label | Value | TC |
 | --- | --- | --- | --- |
 | FLD-USR-01 | min-1 | 5 | TC-USR-009 |
 | FLD-USR-01 | min | 6 | TC-USR-002 |
+| FLD-USR-01 | min+1 | 7 | TC-USR-002 |
+| FLD-USR-01 | max-1 | 253 | TC-USR-002 |
 | FLD-USR-01 | max | 254 | TC-USR-002 |
 | FLD-USR-01 | max+1 | 255 | TC-USR-010 |
 
@@ -74,12 +80,12 @@ BVA values (🟠 → 2-value, step 1 character):
 - Toast `Invitation sent.` is displayed.
 - The users grid lists `new.user+001@example.test` with status = `Invited`.
 
-## TC-USR-002: Accept emails at the minimum and maximum length
+## TC-USR-002: Accept emails at the boundary lengths
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-001 |
 | Technique | BVA |
-| Coverage items | `FLD-USR-01 BVA: min = 6`, `FLD-USR-01 BVA: max = 254` |
+| Coverage items | `FLD-USR-01 BVA: min = 6`, `FLD-USR-01 BVA: min+1 = 7`, `FLD-USR-01 BVA: max-1 = 253`, `FLD-USR-01 BVA: max = 254` |
 | Role | Admin |
 | Type | Functional |
 | Priority | 🔴 |
@@ -88,13 +94,15 @@ BVA values (🟠 → 2-value, step 1 character):
 | Blocked by | — |
 
 **Precondition**
-- Logged in as Admin. No user or invitation exists for either test email.
+- Logged in as Admin. No user or invitation exists for any test email.
 
 **Test data**
 | Field | Value |
 | --- | --- |
 | Email, row 1 (6 characters) | `a@b.cd` |
-| Email, row 2 (254 characters) | 64 × `a` + `@` + 63 × `b` + `.` + 63 × `c` + `.` + 56 × `d` + `.test` |
+| Email, row 2 (7 characters) | `a@b.cde` |
+| Email, row 3 (253 characters) | 64 × `a` + `@` + 63 × `b` + `.` + 63 × `c` + `.` + 55 × `d` + `.test` |
+| Email, row 4 (254 characters) | 64 × `a` + `@` + 63 × `b` + `.` + 63 × `c` + `.` + 56 × `d` + `.test` |
 
 Data-driven: run the steps once per test data row. Each row is one execution.
 
@@ -315,7 +323,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | --- | --- |
 | Email (5 characters) | `a@b.c` |
 
-A 5-character email also breaks the format rule. Both rules give the same error, so no defect is masked.
+`a@b.c` meets the FLD-USR-01 format (one-character labels are allowed). Only the length rule rejects it, so a missing length check is not masked by the format check.
 
 **Steps**
 1. Navigate to Settings › Users.
@@ -412,8 +420,7 @@ A 5-character email also breaks the format rule. Both rules give the same error,
 
 **Steps**
 1. Navigate to Settings › Users.
-2. Open the browser console.
-3. Send the request from the test data.
+2. Send the request from the test data with the browser JavaScript tool (`fetch`, same session).
 
 **Expected result**
 - Response status = 403 and error code = `ERR-USR-03`.
@@ -451,9 +458,9 @@ A 5-character email also breaks the format rule. Both rules give the same error,
 ## TC-USR-014: Expiry has no effect on an accepted invitation
 | Field | Value |
 | --- | --- |
-| Covers AC | AC-USR-005 |
+| Covers AC | AC-USR-011 |
 | Technique | State transition |
-| Coverage items | `ST-USR-01.T5` |
+| Coverage items | `AC-USR-011`, `ST-USR-01.T5` |
 | Role | Admin |
 | Type | Functional |
 | Priority | 🔴 |
@@ -475,7 +482,7 @@ A 5-character email also breaks the format rule. Both rules give the same error,
 2. Locate the row for `new.user+014@example.test`.
 
 **Expected result**
-- The row displays status = `Active`.
+- The row displays status = `Accepted`.
 - No side effects: no `Expired` status displayed.
 
 ## TC-USR-015: Invitee accepts a valid invitation
@@ -484,7 +491,7 @@ A 5-character email also breaks the format rule. Both rules give the same error,
 | Covers AC | AC-USR-006 |
 | Technique | State transition |
 | Coverage items | `AC-USR-006`, `ST-USR-01.T2` |
-| Role | Invitee (no login) |
+| Role | Anonymous |
 | Type | Functional |
 | Priority | 🔴 |
 | Automation | `Candidate` |
@@ -512,7 +519,7 @@ A 5-character email also breaks the format rule. Both rules give the same error,
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-007 |
-| Technique | Decision table |
+| Technique | Scenario |
 | Coverage items | `AC-USR-007` |
 | Role | Viewer |
 | Type | Functional |
@@ -541,7 +548,7 @@ A 5-character email also breaks the format rule. Both rules give the same error,
 | Covers AC | AC-USR-008 |
 | Technique | State transition |
 | Coverage items | `AC-USR-008`, `BR-USR-004`, `ST-USR-01.T6` |
-| Role | Invitee (no login) |
+| Role | Anonymous |
 | Type | Functional |
 | Priority | 🔴 |
 | Automation | `Not yet` |
@@ -571,7 +578,7 @@ A 5-character email also breaks the format rule. Both rules give the same error,
 | Covers AC | AC-USR-008 |
 | Technique | State transition |
 | Coverage items | `ST-USR-01.T4` |
-| Role | Invitee (no login) |
+| Role | Anonymous |
 | Type | Functional |
 | Priority | 🔴 |
 | Automation | `Not yet` |
@@ -685,9 +692,192 @@ A 5-character email also breaks the format rule. Both rules give the same error,
 4. Click `Send invite`.
 
 **Expected result**
-- TBD (OQ-USR-002): new invitation created or rejected.
+- TBD (OQ-USR-002): invitation resent, new invitation created, or rejected.
+
+## TC-USR-022: Reject an email: empty local part
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-002 |
+| Technique | EP |
+| Coverage items | `FLD-USR-01 EP: empty local part` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🟠 |
+| Automation | `Candidate` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Admin.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `@example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Click `Invite user`.
+3. Enter `@example.test` in the Email field.
+4. Click `Send invite`.
+
+**Expected result**
+- Error `Enter a valid email.` is displayed under the Email field.
+- No side effects: no new row in the users grid.
+
+## TC-USR-023: Reject an email: missing domain
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-002 |
+| Technique | EP |
+| Coverage items | `FLD-USR-01 EP: missing domain` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🟠 |
+| Automation | `Candidate` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Admin.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new.user@` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Click `Invite user`.
+3. Enter `new.user@` in the Email field.
+4. Click `Send invite`.
+
+**Expected result**
+- Error `Enter a valid email.` is displayed under the Email field.
+- No side effects: no new row in the users grid.
+
+## TC-USR-024: Reject an email: missing TLD
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-002 |
+| Technique | EP |
+| Coverage items | `FLD-USR-01 EP: missing TLD` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🟠 |
+| Automation | `Candidate` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Admin.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new.user@example` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Click `Invite user`.
+3. Enter `new.user@example` in the Email field.
+4. Click `Send invite`.
+
+**Expected result**
+- Error `Enter a valid email.` is displayed under the Email field.
+- No side effects: no new row in the users grid.
+
+## TC-USR-025: Reject an email: domain label over 63 characters
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-002 |
+| Technique | EP |
+| Coverage items | `FLD-USR-01 EP: domain label over 63 characters` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🟠 |
+| Automation | `Candidate` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Admin.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new.user@` + 64 × `b` + `.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Click `Invite user`.
+3. Enter `new.user@` + 64 × `b` + `.test` in the Email field.
+4. Click `Send invite`.
+
+**Expected result**
+- Error `Enter a valid email.` is displayed under the Email field.
+- No side effects: no new row in the users grid.
+
+## TC-USR-026: Reject an invitation request by a Viewer for an existing user
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-004 |
+| Technique | Decision table |
+| Coverage items | `AC-USR-004`, `DT-USR-01.R4` |
+| Role | Viewer |
+| Type | Functional |
+| Priority | 🔴 |
+| Automation | `Candidate` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Viewer. User `ana@example.test` exists.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Request | `POST /api/invitations` with email `ana@example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Send the request from the test data with the browser JavaScript tool (`fetch`, same session).
+
+**Expected result**
+- Response status = 403 and error code = `ERR-USR-03`.
+- No side effects: no invitation created; the response does not reveal that the user exists.
+
+## TC-USR-027: Expiry has no effect on an expired invitation
+| Field | Value |
+| --- | --- |
+| Covers AC | AC-USR-011 |
+| Technique | State transition |
+| Coverage items | `AC-USR-011`, `ST-USR-01.T10` |
+| Role | Admin |
+| Type | Functional |
+| Priority | 🔴 |
+| Automation | `Not yet` |
+| Status | `Active` |
+| Blocked by | — |
+
+**Precondition**
+- Logged in as Admin.
+- Seeded on staging: invitation for `new.user+027@example.test` created 160 h ago, status = `Expired`.
+
+**Test data**
+| Field | Value |
+| --- | --- |
+| Email | `new.user+027@example.test` |
+
+**Steps**
+1. Navigate to Settings › Users.
+2. Locate the row for `new.user+027@example.test`.
+
+**Expected result**
+- The row displays status = `Expired`.
+- No side effects: no second expiry event in the row history.
 
 ## Review log
 | Date | Action | By | Note |
 | --- | --- | --- | --- |
-| 2026-11-08 | Approved | qa.lead | TC-USR-013 blocked by OQ-USR-001; TC-USR-020 and TC-USR-021 blocked by OQ-USR-002 |
+| 2026-11-08 | Approved | qa.lead | TC-USR-013 blocked by OQ-USR-001; TC-USR-020 and TC-USR-021 blocked by OQ-USR-002. TC-USR-022 to 027 are newer than TC-USR-001 to 021; IDs are never renumbered |

@@ -29,7 +29,7 @@ EP partitions (one TC per invalid partition):
 | FLD-<CODE>-01 | valid | valid | <value> |
 | FLD-<CODE>-01 | <partition name> | invalid | <value> |
 
-BVA values (2-value, or 3-value for 🔴):
+BVA values (depth per `test-design-techniques.md` §3: 3-value at 🟠 and 🔴, else 2-value):
 
 | FLD | Label | Value | TC |
 | --- | --- | --- | --- |

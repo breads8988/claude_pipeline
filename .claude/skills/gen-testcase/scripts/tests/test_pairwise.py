@@ -60,6 +60,25 @@ class PairwiseGenTest(unittest.TestCase):
         self.assertEqual(self.run_main('--param', 'A=1,1', '--param', 'B=1')[0], 2)
         self.assertEqual(self.run_main('--param', 'A=1', '--param', 'A=2')[0], 2)
         self.assertEqual(self.run_main('--param', 'bad', '--param', 'B=1')[0], 2)
+        self.assertEqual(self.run_main('--param', 'A=x', '--param', 'a=y')[0], 2)
+        self.assertEqual(self.run_main('--param', 'A=x|y,z', '--param', 'B=1')[0], 2)
+
+    def test_too_many_rows_fails_fast(self):
+        import time
+        t = time.time()
+        vals = ','.join(str(v) for v in range(300))
+        code, _, err = self.run_main('--param', f'A={vals}', '--param', f'B={vals}')
+        self.assertEqual(code, 2)
+        self.assertIn('rows needed', err)
+        self.assertLess(time.time() - t, 2)
+
+    def test_mid_size_is_fast(self):
+        import time
+        t = time.time()
+        params = pw.parse([f'P{i}=' + ','.join(str(v) for v in range(7)) for i in range(6)])
+        rows = pw.generate(params)
+        self.assertTrue(covers_all_pairs(params, rows))
+        self.assertLess(time.time() - t, 5)
 
 
 if __name__ == '__main__':

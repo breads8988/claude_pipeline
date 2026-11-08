@@ -156,7 +156,10 @@ def deprecated(text):
 
 
 def number(text):
-    m = re.search(r'-?\d+(?:\.\d+)?', text.replace(',', ''))
+    """The plain number in a cell, or None (empty, TBD, an ID or a mixed value)."""
+    t = text.strip().strip('`*').replace('\u2212', '-').replace('\u00a0', '').replace(' ', '')
+    t = re.sub(r'(?<=\d),(?=\d{3}\b)', '', t)  # thousands separator
+    m = re.fullmatch(r'-?\d+(?:\.\d+)?', t)
     return float(m.group(0)) if m else None
 
 
@@ -196,22 +199,28 @@ def parse_ac(path):
                 fld[first] = {'crit': level(col(row, 'criticality')), 'min': lo, 'max': hi, 'step': step}
             elif re.fullmatch(rf'OQ-{CODE}-\d{{3}}', first):
                 oq[first] = col(row, 'status').strip('` ').lower()
-    dt, st, links = {}, {}, {}
+    dt, st, links, dt_meta = {}, {}, {}, {}
     for sid, s, e in sections(lines, DT_H, 3):
         if deprecated(bullet(lines, s, e, 'Status')):
             continue
         crit = level(bullet(lines, s, e, 'Criticality'))
         covers = set(re.findall(rf'AC-{CODE}-\d{{3}}', bullet(lines, s, e, 'Covers')))
-        cols = []
-        for header, _ in tables(lines, s, e):
+        cols, merged = [], False
+        for header, rows in tables(lines, s, e):
             cols = [c.upper() for c in header if re.fullmatch(r'r\d+', c)]
             if cols:
+                idx = [i for i, c in enumerate(header) if re.fullmatch(r'r\d+', c)]
+                for r in rows:
+                    if r and 'outcome' in r[0].lower() or (r and r[0].startswith('**')):
+                        continue
+                    merged |= any(i < len(r) and r[i].strip() in ('–', '-', '—') for i in idx)
                 break
         if not cols:
             raise FormatError(f'{path}: {sid} has no table with R1…Rn columns')
         for c in cols:
             dt[f'{sid}.{c}'] = crit
         links[sid] = covers
+        dt_meta[sid] = {'crit': crit, 'merged': merged}
     for sid, s, e in sections(lines, ST_H, 3):
         if deprecated(bullet(lines, s, e, 'Status')):
             continue
@@ -229,6 +238,10 @@ def parse_ac(path):
                 if not re.fullmatch(r'T\d+', t):
                     continue
                 v = row.get('valid', '').strip('* ').lower()
+                if TBD_RE.search(row.get('valid', '')):
+                    st[f'{sid}.{t}'] = {'crit': crit, 'valid': None, 'model': sid}
+                    found += 1
+                    continue
                 if v not in TRUE | FALSE:
                     raise FormatError(f'{path}: {sid}.{t} Valid must be Yes or No, got "{v}"')
                 st[f'{sid}.{t}'] = {'crit': crit, 'valid': v in TRUE, 'model': sid}
@@ -247,26 +260,36 @@ def parse_ac(path):
         v['depth'] = depth(f, v['crit'])
     for t, v in st.items():
         v['depth'] = depth(v['model'], v['crit'])
-    return {'ac': ac, 'br': br, 'fld': fld, 'dt': dt, 'st': st, 'oq': oq, 'dups': dups}
+    errors = []
+    for sid, m in dt_meta.items():
+        d = depth(sid, m['crit'])
+        if m['merged'] and d >= 3:
+            errors.append(f'{sid}: minimised table (merged "–" cells) at {ICON_OF[d]} depth; list every feasible column')
+    return {'ac': ac, 'br': br, 'fld': fld, 'dt': dt, 'st': st, 'oq': oq, 'dups': dups, 'errors': errors}
 
 
 def parse_tc(path):
     lines = read(path)
     tcs, dups, errors = {}, [], []
     partitions = {}
-    pw = {}
+    pw, pw_params = {}, []
     summary = None
     for i, line in enumerate(lines):
         if re.match(r'^##\s+Test analysis\b', line, re.I):
             end = next((j for j in range(i + 1, len(lines)) if re.match(r'^#{1,2}\s', lines[j])), len(lines))
             for header, rows in tables(lines, i, end):
                 if header and header[0] == 'pw':
+                    pw_params[:] = header[1:]
+                    if len(set(header[1:])) != len(header[1:]):
+                        errors.append('Test analysis: pairwise table has duplicate parameter names')
                     for r in rows:
                         rid = (r[0] if r else '').strip('`* ')
+                        if len(r) > len(header):
+                            errors.append(f'Test analysis: {rid} has more cells than the pairwise header')
                         if PW_ID.fullmatch(rid):
                             if rid in pw:
                                 errors.append(f'Test analysis: duplicate pairwise row {rid}')
-                            pw[rid] = {h: norm(v) for h, v in zip(header[1:], r[1:])}
+                            pw[rid] = {h: norm(r[i + 1]) if i + 1 < len(r) else '' for i, h in enumerate(header[1:])}
                 if header[:2] == ['fld', 'partition']:
                     for r in rows:
                         row = dict(zip(header, r + [''] * (len(header) - len(r))))
@@ -301,6 +324,7 @@ def parse_tc(path):
         tcs[sid] = {
             'covers': covers,
             'ids': set(ITEM_ID.findall(items_cell)) | covers,
+            'items': set(ITEM_ID.findall(items_cell)),
             'fld': [(f, tech.upper(), lab.strip()) for f, tech, lab in flds],
             'eg': any(re.match(r'^\s*(EG|CHK)\s*:', x) for x in items),
             'pw': pws,
@@ -320,7 +344,7 @@ def norm(label):
 
 def bva_required(f):
     """Required BVA labels and expected values for a field."""
-    three = f.get('depth', f['crit']) == 4
+    three = f.get('depth', f['crit']) >= 3  # 🟠 and 🔴: 3-value (test-design-techniques §3)
     req = {}
     for side, raw in (('min', f['min']), ('max', f['max'])):
         if not raw.strip() or raw.strip() in ('—', '-', 'n/a', 'N/A'):
@@ -338,13 +362,15 @@ def all_pairs_missing(rows):
     """Pairs of values (two parameters) that no row contains. Values per parameter = values used in rows."""
     if not rows:
         return []
-    params = list(next(iter(rows.values())))
+    params = list(next(iter(rows.values())))  # every row has every header parameter (blank = '')
     values = {p: sorted({r.get(p, '') for r in rows.values()} - {''}) for p in params}
     missing = []
     for i, a in enumerate(params):
         for b in params[i + 1:]:
             seen = {(r.get(a), r.get(b)) for r in rows.values()}
             missing += [f'{a}={x} × {b}={y}' for x in values[a] for y in values[b] if (x, y) not in seen]
+    blanks = sorted(f'{rid} {p}' for rid, r in rows.items() for p in params if not r.get(p))
+    missing += [f'{b} is blank' for b in blanks]
     return missing
 
 
@@ -365,16 +391,20 @@ def check(spec, tcs, analysis):
         summary[name] = (len(items), len(a), len(b))
         return [i for i in items if i not in covered_a and i not in covered_b], b
 
+    item_a = set().union(*[t['items'] for t in active.values()]) if active else set()
+    item_b = set().union(*[t['items'] for t in blocked.values()]) if blocked else set()
+    missing, _ = tally('Scenario (AC)', [a for a, v in spec['ac'].items() if v['active']], item_a, item_b)
+    errors += [f'{i}: no TC cites this AC in Coverage items' for i in missing]
     for name, items, label in (
-            ('Scenario (AC)', [a for a, v in spec['ac'].items() if v['active']], 'no TC covers this AC'),
             ('Business rules', list(spec['br']), 'no TC covers this business rule'),
             ('Decision table', list(spec['dt']), 'decision table column not covered')):
         missing, _ = tally(name, items, cited_a, cited_b)
         errors += [f'{i}: {label}' for i in missing]
-    need_st = [t for t, v in spec['st'].items() if v['valid'] or v.get('depth', v['crit']) == 4]
+    need_st = [t for t, v in spec['st'].items()
+               if v['valid'] or v['valid'] is None or v.get('depth', v['crit']) == 4]
     missing, _ = tally('State transition', need_st, cited_a, cited_b)
     for t in missing:
-        kind = 'valid' if spec['st'][t]['valid'] else 'invalid (required at 🔴 depth)'
+        kind = {True: 'valid', None: 'TBD'}.get(spec['st'][t]['valid'], 'invalid (required at 🔴 depth)')
         errors.append(f'{t}: {kind} transition not covered')
 
     # EP: partitions from the tc.md test analysis table.
@@ -453,7 +483,7 @@ def check(spec, tcs, analysis):
             elif tids & set(blocked):
                 bva_b += 1
             else:
-                depth = '3-value' if v.get('depth', v['crit']) == 4 else '2-value'
+                depth = '3-value' if v.get('depth', v['crit']) >= 3 else '2-value'
                 errors.append(f'{f}: BVA {" / ".join(keys)} not covered ({depth})')
     summary['BVA'] = (bva_total, bva_a, bva_b)
 
@@ -534,7 +564,7 @@ def main(argv=None):
         print(f'coverage: {e}', file=sys.stderr)
         return 2
     errors, summary, eg = check(spec, tcs, analysis)
-    errors = [f'duplicate {d}' for d in spec['dups'] + tc_dups] + tc_errors + errors
+    errors = [f'duplicate {d}' for d in spec['dups'] + tc_dups] + spec['errors'] + tc_errors + errors
     errors += compare_summary(header, summary)
     for e in errors:
         print(f'coverage: {e}')

@@ -46,7 +46,7 @@ New IDs make each coverage item traceable:
 | A4 | Impacted existing behaviour: search other features' Business Rules, decision tables and state models that share the same entities (`domain.md` entity list). Cite real IDs only; conflicts become open questions | `write-ac/SKILL.md`, `domain.md` (Entities table) |
 | A5 | AC are implementation-free: behaviour, not UI clicks. UI steps live in TCs only | `ac-techniques.md`, golden example |
 | A6 | Quality gate = BABOK v3 §7.2.4.1 (9 characteristics) (understandable, concise, feasible, atomic, complete, testable, prioritized, consistent, unambiguous) + port's final checklist | `ac-techniques.md`, `ac-reviewer.md` |
-| A7 | `ac-reviewer` = BABOK *Verify requirements* (checklist). `/approve` = *Validate requirements* (human) | `ac-reviewer.md` |
+| A7 | `ac-reviewer` = BABOK 7.2 *Verify Requirements* (checklist). `/approve` = 5.5 *Approve Requirements* with a 7.3 *Validate* value question (human) | `ac-reviewer.md` |
 
 ## Phase B · ISTQB in `gen-testcase`
 
@@ -82,16 +82,11 @@ What the syllabus states:
 
 Internal convention built on 5.2.3 (the syllabus does not map risk levels to techniques; this table is ours):
 
-| AC criticality | EP | BVA | Decision table | State transition |
-|---|---|---|---|---|
-| 🔴 Critical | All partitions | 3-value | All feasible columns | All transitions (valid + invalid) |
-| 🟠 High | All partitions | 2-value | All feasible columns | Valid transitions |
-| 🟡 Medium | All partitions | 2-value | All feasible columns | Valid transitions |
-| ⚪ Low | All partitions | 2-value | Minimised table | Valid transitions |
+Current table and rule: `gen-testcase` › `references/test-design-techniques.md` §3 (single source).
 
 - EP stays at 100% at every level: one test per partition is cheap.
 - 🔴 uses the strongest criteria named in 4.2.2 and 4.2.4. Monetary amounts, limits and transaction states are typically 🔴.
-- Likelihood (5.2): when an AC is new, complex, recently changed or has defect history, raise its depth one level. Recorded per AC as `Likelihood: High`.
+- Likelihood (5.2): recorded per AC as `Likelihood: High` when the AC is new, complex, recently changed or has defect history.
 - Each invalid transition gets its own TC (4.2.4).
 
 ## Phase C · Examples, lint, validator
@@ -112,7 +107,7 @@ Internal convention built on 5.2.3 (the syllabus does not map risk levels to tec
 
 | # | Decision |
 |---|---|
-| 1 | One scale for AC criticality and TC priority, with icons: 🔴 Critical · 🟠 High · 🟡 Medium · ⚪ Low. TC priority = criticality of the AC it covers (highest one). `P1`–`P3` is retired everywhere (templates, naming, run file, smoke scope = 🔴). |
+| 1 | One scale for AC criticality and TC priority, with icons: 🔴 Critical · 🟠 High · 🟡 Medium · ⚪ Low. TC priority: `naming.md` (single source). `P1`–`P3` is retired everywhere (templates, naming, run file, smoke scope = 🔴). |
 | 2 | AC are implementation-free. Clicks and screens live in TCs only. |
 | 3 | Depth by risk: the sourced table above, agreed. |
 | 4 | Non-functional AC stay in AC. Their TCs are typed `Non-functional` and run only when they can be checked manually on staging. |

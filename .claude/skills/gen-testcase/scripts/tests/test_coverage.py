@@ -64,19 +64,19 @@ class CoverageTest(unittest.TestCase):
     def test_golden_example_passes(self):
         code, out, _ = self.go()
         self.assertEqual(code, 0, out)
-        self.assertIn('4 item(s) blocked', out)
+        self.assertIn('5 item(s) blocked', out)
 
     def test_summary_table_has_blocked_column(self):
         code, out, _ = self.go(AC, TC, '--summary')
         self.assertEqual(code, 0, out)
-        self.assertIn('| State transition | 9 | 6 | 3 | 66% |', out)
-        self.assertIn('| Scenario (AC) | 10 | 9 | 1 | 90% |', out)
+        self.assertIn('| State transition | 10 | 7 | 3 | 70% |', out)
+        self.assertIn('| Scenario (AC) | 11 | 9 | 2 | 81% |', out)
 
     # missing coverage
     def test_uncovered_ac_and_valid_transition(self):
         code, out, _ = self.go(AC, drop_tc(TC, 'TC-USR-015'))
         self.assertEqual(code, 1)
-        self.assertIn('AC-USR-006: no TC covers this AC', out)
+        self.assertIn('AC-USR-006: no TC cites this AC in Coverage items', out)
         self.assertIn('ST-USR-01.T2: valid transition not covered', out)
 
     def test_uncovered_business_rule_and_dt_column(self):
@@ -110,11 +110,31 @@ class CoverageTest(unittest.TestCase):
         self.assertIn('ST-USR-01.T4: invalid (required at 🔴 depth) transition not covered', out)
 
     def test_fld_depth_from_citing_ac(self):
-        # FLD 🟠 cited by a 🔴 AC needs 3-value BVA.
-        ac = sub(AC, '- Criticality: 🟠 High\n- Likelihood: Normal\n- Status: Active\n- Given: an Admin\n- When: the Admin sends an invitation to an email that breaks `FLD-USR-01`',
-                 '- Criticality: 🔴 Critical\n- Likelihood: Normal\n- Status: Active\n- Given: an Admin\n- When: the Admin sends an invitation to an email that breaks `FLD-USR-01`')
-        code, out, _ = self.go(ac, TC)
+        # FLD 🟡 cited by a 🟠 AC is tested at 🟠 depth: 3-value BVA.
+        ac = sub(AC, 'domain labels 1–63 characters | 🟠 |', 'domain labels 1–63 characters | 🟡 |')
+        code, out, _ = self.go(ac, drop_tc(TC, 'TC-USR-002'))
         self.assertIn('FLD-USR-01: BVA min+1 not covered (3-value)', out)
+
+    def test_minimised_dt_rejected_at_critical(self):
+        ac = sub(AC, '| Email belongs to an existing user | N | Y | N | Y |', '| Email belongs to an existing user | N | Y | – | – |')
+        code, out, _ = self.go(ac, TC)
+        self.assertIn('DT-USR-01: minimised table', out)
+
+    def test_minimised_dt_allowed_at_low(self):
+        ac = sub(AC, '| Email belongs to an existing user | N | Y | N | Y |', '| Email belongs to an existing user | N | Y | – | – |')
+        ac = sub(ac, '### DT-USR-01: Invitation outcome\n- Criticality: 🔴\n- Covers: AC-USR-001, AC-USR-003, AC-USR-004',
+                 '### DT-USR-01: Invitation outcome\n- Criticality: ⚪')
+        code, out, _ = self.go(ac, TC)
+        self.assertNotIn('minimised table', out)
+
+    def test_tbd_transition_needs_blocked_tc(self):
+        code, out, _ = self.go(AC, drop_tc(TC, 'TC-USR-020'))
+        self.assertIn('ST-USR-01.T8: TBD transition not covered', out)
+
+    def test_tbd_limit_is_not_a_number(self):
+        ac = sub(AC, '| Yes | 6 | 254 | 1 |', '| Yes | 6 | TBD (OQ-USR-002) | 1 |')
+        code, out, _ = self.go(ac, TC)
+        self.assertNotIn('expected -2', out)
 
     # EP
     def test_ep_partition_not_covered(self):
@@ -140,18 +160,32 @@ class CoverageTest(unittest.TestCase):
     # BVA
     def test_bva_value_missing(self):
         code, out, _ = self.go(AC, drop_tc(TC, 'TC-USR-010'))
-        self.assertIn('FLD-USR-01: BVA max+1 not covered (2-value)', out)
+        self.assertIn('FLD-USR-01: BVA max+1 not covered (3-value)', out)
+
+    def test_covers_ac_alone_does_not_cover(self):
+        # Covers AC without the AC in Coverage items does not count as scenario coverage.
+        tc = sub(TC, '`AC-USR-006`, `ST-USR-01.T2`', '`ST-USR-01.T2`')
+        code, out, _ = self.go(AC, tc)
+        self.assertIn('AC-USR-006: no TC cites this AC in Coverage items', out)
 
     def test_bva_wrong_value(self):
         tc = sub(TC, '`FLD-USR-01 BVA: max+1 = 255`', '`FLD-USR-01 BVA: max+1 = 256`')
         code, out, _ = self.go(AC, tc)
         self.assertIn('TC-USR-010: FLD-USR-01 BVA max+1 = 256, expected 255', out)
 
-    def test_bva_three_value_for_critical_field(self):
-        ac = sub(AC, 'domain labels 1–63 characters | 🟠 |', 'domain labels 1–63 characters | 🔴 |')
-        code, out, _ = self.go(ac, TC)
+    def test_bva_three_value_at_high(self):
+        tc = drop_tc(TC, 'TC-USR-002')
+        code, out, _ = self.go(AC, tc)
         self.assertIn('FLD-USR-01: BVA min+1 not covered (3-value)', out)
         self.assertIn('FLD-USR-01: BVA max-1 not covered (3-value)', out)
+
+    def test_bva_two_value_at_medium(self):
+        # FLD 🟡 cited only by a 🟡 AC: min+1 and max-1 are not required.
+        ac = sub(AC, 'domain labels 1–63 characters | 🟠 |', 'domain labels 1–63 characters | 🟡 |')
+        ac = sub(ac, '- Criticality: 🟠 High\n- Likelihood: Normal\n- Status: Active\n- Given: an Admin\n- When: the Admin sends an invitation to an email that breaks',
+                 '- Criticality: 🟡 Medium\n- Likelihood: Normal\n- Status: Active\n- Given: an Admin\n- When: the Admin sends an invitation to an email that breaks')
+        code, out, _ = self.go(ac, TC)
+        self.assertIn('BVA label "min+1" is not required for FLD-USR-01', out)
 
     def test_bva_bad_label(self):
         tc = sub(TC, '`FLD-USR-01 BVA: min-1 = 5`', '`FLD-USR-01 BVA: x`')
@@ -161,6 +195,7 @@ class CoverageTest(unittest.TestCase):
     def test_bva_step_for_decimals(self):
         ac = sub(AC, '| Yes | 6 | 254 | 1 |', '| Yes | 0.01 | 100 | 0.01 |')
         tc = sub(sub(sub(sub(TC, 'min-1 = 5`', 'min-1 = 0`'), 'min = 6`', 'min = 0.01`'), 'max = 254`', 'max = 100`'), 'max+1 = 255`', 'max+1 = 100.01`')
+        tc = sub(sub(tc, 'min+1 = 7`', 'min+1 = 0.02`'), 'max-1 = 253`', 'max-1 = 99.99`')
         code, out, _ = self.go(ac, tc)
         self.assertNotIn('BVA', out.replace('BVA |', ''))
 
@@ -223,7 +258,7 @@ class CoverageTest(unittest.TestCase):
 
     # summary
     def test_summary_mismatch(self):
-        tc = sub(TC, '| EP | 7 | 7 | 0 | 100% |', '| EP | 2 | 2 | 0 | 100% |')
+        tc = sub(TC, '| EP | 11 | 11 | 0 | 100% |', '| EP | 2 | 2 | 0 | 100% |')
         code, out, _ = self.go(AC, tc)
         self.assertEqual(code, 1)
         self.assertIn('Coverage summary row "EP"', out)
@@ -248,8 +283,7 @@ class CoverageTest(unittest.TestCase):
 
     def test_escaped_pipe_does_not_shift_columns(self):
         ac = sub(AC, '`local@domain.tld`; local part', '`a\\|b` or `local@domain.tld`; local part')
-        ac = sub(ac, 'domain labels 1–63 characters | 🟠 |', 'domain labels 1–63 characters | 🔴 |')
-        code, out, _ = self.go(ac, TC)
+        code, out, _ = self.go(ac, drop_tc(TC, 'TC-USR-002'))
         self.assertIn('FLD-USR-01: BVA min+1 not covered (3-value)', out)
 
     def test_pipe_inside_code_span(self):
@@ -279,7 +313,7 @@ class CoverageTest(unittest.TestCase):
         self.assertEqual(code, 0, out)
 
     def test_dt_without_rule_columns_exits_2(self):
-        ac = sub(AC, '| Condition | R1 | R2 | R3 |', '| Condition | A | B | C |')
+        ac = sub(AC, '| Condition | R1 | R2 | R3 | R4 |', '| Condition | A | B | C | D |')
         code, _, err = self.go(ac, TC)
         self.assertEqual(code, 2)
         self.assertIn('DT-USR-01 has no table with R1…Rn columns', err)
