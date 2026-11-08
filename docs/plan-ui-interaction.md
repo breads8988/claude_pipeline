@@ -1,6 +1,6 @@
 # Plan: UI interaction testing (hover, collapse, expand, tooltip …)
 
-Status: proposed 2026-11-08 · Decisions 2, 3 agreed · 1, 4 pending
+Status: all decisions agreed 2026-11-08 · Ready to build
 
 ## Problem
 - AC and TC cover business behaviour well, but UI component behaviour has no model: default state, triggers (mouse, keyboard, focus), dismissal, persistence.
@@ -34,7 +34,7 @@ A UI component is a small state machine with a known pattern. Write it as a mode
 | U1.1 | New AC section **UI components**: one row per component — `UIC` ID, element, pattern (APG name), default state, states, triggers, rules (single/multiple open, persistence after reload or navigation, delay), criticality, covers AC | `qa/_templates/ac.md`, `naming.md` |
 | U1.2 | AC wording stays behavioural: "the Fees section is collapsed by default; expanding it displays fee lines". Never selectors, pixels or click coordinates | `ac-techniques.md` |
 | U1.3 | Analysis checklist adds: which components change state, their defaults, how the user triggers them, what persists | `ac-techniques.md` |
-| U1.4 | Design source: screenshots or design files are read before writing UIC rows; unseen UI is never invented | `write-ac/SKILL.md` |
+| U1.4 | Design sources, read in this order to save tokens: (1) design repo (local clone: component specs, tokens, exported frames), (2) Figma connector (frames named in the ticket), (3) Claude Design artifact link, (4) screenshots attached to the ticket. Unseen UI is never invented | `write-ac/SKILL.md`, `project.md` (`Design sources` table) |
 
 ## Phase U2 · Techniques in TC
 
@@ -47,6 +47,22 @@ A UI component is a small state machine with a known pattern. Write it as a mode
 | U2.5 | Depth by criticality: 🔴 = every trigger + full pattern checklist; 🟠/🟡 = pointer + keyboard primary keys + 1.4.13 for hover content; ⚪ = pointer path + default state | `test-design-techniques.md` |
 | U2.6 | Validator: every `UIC` has a TC per listed trigger; checklist items cited must exist in the pattern checklist | `coverage.py` + tests |
 
+### WCAG by component (decision 1)
+- Scope: WCAG 2.2 Level A + AA, applied only to the components present on the screen.
+- `ui-pattern-checklist.md` maps each component type to its criteria. Examples:
+
+| Component | WCAG 2.2 criteria checked |
+|---|---|
+| Disclosure, accordion | 2.1.1 Keyboard, 2.4.7 Focus Visible, 2.4.11 Focus Not Obscured, 4.1.2 Name Role Value (`aria-expanded`), 2.5.8 Target Size |
+| Tooltip, popover | 1.4.13 Content on Hover or Focus, 2.1.1, 4.1.2 |
+| Form field | 1.3.1 Info and Relationships, 3.3.1 Error Identification, 3.3.2 Labels, 3.3.3 Error Suggestion, 3.3.4 Error Prevention (financial), 3.3.7 Redundant Entry, 1.4.3 Contrast |
+| Login | 3.3.8 Accessible Authentication |
+| Dialog (modal) | 2.1.2 No Keyboard Trap, 2.4.3 Focus Order, 2.1.1, 4.1.2 |
+| Drag and drop | 2.5.7 Dragging Movements |
+| Status message, toast | 4.1.3 Status Messages, 2.2.1 Timing Adjustable |
+| Text, images, icons | 1.1.1 Non-text Content, 1.4.3 Contrast, 1.4.11 Non-text Contrast, 1.4.4 Resize Text, 1.4.10 Reflow |
+| Page | 2.4.2 Page Titled, 3.1.1 Language of Page, 3.2.6 Consistent Help, 2.4.1 Bypass Blocks |
+
 ## Phase U3 · Agent execution (Claude in Chrome)
 
 Available actions (verified in the tool schema): `hover`, `key` (Enter, Space, Escape, Tab), `left_click`, `read_page` (accessibility tree), `find`, `zoom`, `screenshot` with `save_to_disk`.
@@ -57,6 +73,14 @@ Available actions (verified in the tool schema): `hover`, `key` (Enter, Space, E
 | U3.2 | State check: read `aria-expanded`, `role`, `aria-describedby` from the accessibility tree instead of guessing from pixels | `test-runner.md` |
 | U3.3 | Animations: wait until the transition ends before asserting; a timeout is a Fail with note `no state change after <n> s` | `test-runner.md` |
 | U3.4 | Viewport TCs: set the window size, then run the steps | `test-runner.md` |
+
+## Phase U5 · Heuristic review (decision 4)
+
+| # | Item | Files |
+|---|---|---|
+| U5.1 | `/heuristic-review <screen or feature>`: optional review of a screen against Nielsen's 10 heuristics (ISTQB CT-UT §4.2.3). Findings only linked to a heuristic; no invented heuristics | `.claude/commands/heuristic-review.md` |
+| U5.2 | Output: findings table (heuristic, location, issue, severity 🔴🟠🟡⚪, suggestion) saved to `qa/reports/heuristic-<feature>-<date>.md`; serious findings can become open questions or tickets | command, `log-ticket` |
+| U5.3 | Runs on staging through Claude in Chrome, or on designs from the design sources | command |
 
 ## Phase U4 · Example
 - Add to `_example`: a disclosure (invitation details row) and a tooltip (role info icon) with UIC rows, TCs for each trigger and checklist items, and the validator at 100%.
@@ -74,7 +98,7 @@ Available actions (verified in the tool schema): `hover`, `key` (Enter, Space, E
 
 | # | Decision |
 |---|---|
-| 1 | Accessibility scope: pending (interaction criteria only, or full WCAG 2.2 A + AA = 55 criteria). |
+| 1 | Accessibility: WCAG 2.2 Level A + AA, applied per component present on the screen (mapping table above). |
 | 2 | Viewports: desktop is active. Tablet and mobile rows are kept in `project.md`, commented out, for later. |
-| 3 | Design source: Figma connector (to connect); Claude Design artifacts read when shared by link. Screenshots remain the fallback. |
-| 4 | Heuristic evaluation: pending explanation. |
+| 3 | Design sources in order: design repo → Figma connector → Claude Design link → screenshots. Repo first to save tokens. |
+| 4 | Heuristic review: added as an optional command (`/heuristic-review`). |
