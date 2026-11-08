@@ -1,6 +1,6 @@
 # Plan: UI interaction testing (hover, collapse, expand, tooltip …)
 
-Status: all decisions agreed 2026-11-08 · Ready to build
+Status: all decisions agreed 2026-11-08 · Not built yet · Build order: U1 → U2 → U3 → U4 → U5 → U6
 
 ## Problem
 - AC and TC cover business behaviour well, but UI component behaviour has no model: default state, triggers (mouse, keyboard, focus), dismissal, persistence.
@@ -23,7 +23,7 @@ A UI component is a small state machine with a known pattern. Write it as a mode
 |---|---|---|
 | AC (behaviour, still implementation-free) | `UIC-<CODE>-NN` UI component model: pattern, default state, states, triggers, rules | — |
 | TC | Each valid state change per trigger (click, Enter, Space, Escape, hover in/out, focus/blur) | State transition (§4.2.4) |
-| TC | Pattern checklist items (APG keys and states, WCAG 1.4.13, 2.1.1, 2.4.7, 4.1.2) | Checklist-based (§4.4.3) |
+| TC | Pattern checklist items: APG keys and states, WCAG 2.2 A + AA criteria of the component (table in U2) | Checklist-based (§4.4.3) |
 | TC | Viewport breakpoints where layout or component changes (e.g. 767 / 768 px) | EP + BVA (§4.2.1–4.2.2) |
 | Review (optional) | Nielsen's 10 heuristics on the screen | Heuristic evaluation (CT-UT §4.2.3) |
 
@@ -74,6 +74,9 @@ Available actions (verified in the tool schema): `hover`, `key` (Enter, Space, E
 | U3.3 | Animations: wait until the transition ends before asserting; a timeout is a Fail with note `no state change after <n> s` | `test-runner.md` |
 | U3.4 | Viewport TCs: set the window size, then run the steps | `test-runner.md` |
 
+## Phase U4 · Example
+- Add to `_example`: a disclosure (invitation details row) and a tooltip (role info icon) with UIC rows, TCs for each trigger and checklist items, and the validator at 100%.
+
 ## Phase U5 · Heuristic review (decision 4)
 
 | # | Item | Files |
@@ -84,7 +87,7 @@ Available actions (verified in the tool schema): `hover`, `key` (Enter, Space, E
 
 ## Phase U6 · Design check (separate from functional TCs)
 
-Placement: side flow **5b**, run alongside stage 5 on staging when a screen is new or its UI changes. It does not block gates G1/G2. Input: design sources from stage 0. Output: UI bugs into stage 7. Shares the staging, browser agent, design sources, `log-ticket` and reports.
+Placement: side flow **5b**, run alongside stage 5 on staging (stages and gates: `docs/plan.md` › Pipeline) when a screen is new or its UI changes. It does not block gates G1/G2. Input: design sources from stage 0. Output: UI bugs into stage 7. Shares the staging, browser agent, design sources, `log-ticket` and reports.
 
 Why separate from TCs: the source of truth is the design (not the AC), it runs when a screen is new or its UI changes (not every regression), the audience is designers and frontend developers, and the result is a list of deviations with tolerances. Mixing it into TCs would bloat the suite and tie AC to pixels.
 
@@ -105,9 +108,6 @@ Split into its own pipeline when at least one holds:
 
 Not in this phase: pixel diff regression (new build vs previous screenshot). It belongs to automation (e.g. visual snapshots) and is in the backlog.
 
-## Phase U4 · Example
-- Add to `_example`: a disclosure (invitation details row) and a tooltip (role info icon) with UIC rows, TCs for each trigger and checklist items, and the validator at 100%.
-
 ## Out of scope (now)
 
 | Item | Why |
@@ -115,7 +115,7 @@ Not in this phase: pixel diff regression (new build vs previous screenshot). It 
 | Pixel diff regression (new build vs previous) | Needs visual-regression automation; design-vs-build comparison is covered by U6 |
 | Screen-reader output | The agent reads ARIA attributes, not spoken output |
 | Touch gestures (no hover on touch) | Staging runs in desktop Chrome |
-| Full WCAG audit | Only the interaction criteria above unless decided otherwise |
+| Full-site WCAG audit | WCAG 2.2 A + AA is checked only for the components present on the screen (decision 1) |
 
 ## Decisions
 

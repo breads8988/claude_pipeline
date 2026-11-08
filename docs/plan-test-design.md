@@ -24,7 +24,7 @@ BABOK models written in the AC file are the direct input of ISTQB black-box tech
 | **Data constraints** table (data dictionary): field, type, required, min, max, format | Equivalence partitioning + boundary value analysis | Valid and invalid partitions; boundary values |
 | **Decision table** (decision modelling): conditions → outcome per rule | Decision table testing | Feasible rules (columns) |
 | **State model** (state modelling): states, events, valid transitions | State transition testing | Valid transitions; invalid transitions for Critical |
-| **Role × action matrix** (business rules, permissions) | Decision table testing on roles | Each role × action cell |
+| **Role × action** permissions: written as a decision table (`DT`), not a separate matrix | Decision table testing | Each feasible column |
 | **GWT scenarios** (acceptance criteria, scenarios) | Scenario test (ATDD order: positive → negative → non-functional) | Each scenario |
 | `domain.md` checklist + error guessing list | Checklist-based, error guessing | Each checklist item |
 
@@ -42,7 +42,7 @@ New IDs make each coverage item traceable:
 |---|---|---|
 | A1 | Port `gen-ac-from-jira` techniques, made generic (no vault, entity notes or project names): requirement analysis checklist, user story + INVEST, scenario classes, GWT rules, criticality, gaps, two-way coverage, final gate | `write-ac/references/ac-techniques.md` |
 | A2 | Requirement classification (BABOK schema) per AC: `Functional` · `Non-functional` · `Transition` (data migration, cut-over) | `qa/_templates/ac.md`, `naming.md` |
-| A3 | New AC sections, filled when the requirement has them: **Data constraints**, **Decision tables**, **State model**, **Role × action matrix** | `qa/_templates/ac.md` |
+| A3 | New AC sections, filled when the requirement has them: **Data constraints**, **Decision tables**, **State model** (role × action goes in a decision table) | `qa/_templates/ac.md` |
 | A4 | Impacted existing behaviour: search other features' Business Rules, decision tables and state models that share the same entities (`domain.md` entity list). Cite real IDs only; conflicts become open questions | `write-ac/SKILL.md`, `domain.md` (Entities table) |
 | A5 | AC are implementation-free: behaviour, not UI clicks. UI steps live in TCs only | `ac-techniques.md`, golden example |
 | A6 | Quality gate = BABOK v3 §7.2.4.1 (9 characteristics) (understandable, concise, feasible, atomic, complete, testable, prioritized, consistent, unambiguous) + port's final checklist | `ac-techniques.md`, `ac-reviewer.md` |
@@ -53,10 +53,10 @@ New IDs make each coverage item traceable:
 | # | Item | Files |
 |---|---|---|
 | B1 | Technique reference: EP, BVA (2-value / 3-value), decision table, state transition, scenario/ATDD, checklist, error guessing. Definitions, coverage items, worked examples | `gen-testcase/references/test-design-techniques.md` |
-| B2 | Test analysis step: list test conditions from every AC, BR, FLD, DT rule, ST transition, role cell, checklist item before writing TCs | `gen-testcase/SKILL.md` |
+| B2 | Test analysis step: list test conditions from every AC, BR, FLD, DT rule, ST transition, checklist item before writing TCs | `gen-testcase/SKILL.md` |
 | B3 | Technique selection matrix (table above) + depth by risk | `test-design-techniques.md` |
 | B4 | Risk-based depth: risk = AC criticality (impact) × likelihood (new, complex, changed, defect history) | `test-design-techniques.md` |
-| B5 | TC fields: `Technique`, `Coverage items` (e.g. `FLD-USR-01: max+1`, `DT-USR-01.R3`, `ST-USR-01.T2`) | `qa/_templates/tc.md`, `naming.md` |
+| B5 | TC fields: `Technique`, `Coverage items` (e.g. `FLD-USR-01 EP: empty`, `FLD-USR-01 BVA: max+1 = 255`, `DT-USR-01.R3`, `ST-USR-01.T2`) | `qa/_templates/tc.md`, `naming.md` |
 | B6 | Coverage summary in `tc.md` header: per technique, items total / covered / % | `qa/_templates/tc.md` |
 | B7 | Rules from ISTQB: cover the story fully, nothing beyond it; no duplicate TCs; one TC may cover several items when it stays readable | `gen-testcase/SKILL.md` |
 | B8 | `tc-reviewer` checks: every coverage item has a TC, technique fits the model, depth matches risk | `tc-reviewer.md` |
@@ -90,7 +90,7 @@ Internal convention built on 5.2.3 (the syllabus does not map risk levels to tec
 | ⚪ Low | All partitions | 2-value | Minimised table | Valid transitions |
 
 - EP stays at 100% at every level: one test per partition is cheap.
-- 🔴 uses the strongest criteria named in 4.2.2 and 4.2.4. Payment amounts, limits and transaction states are typically 🔴.
+- 🔴 uses the strongest criteria named in 4.2.2 and 4.2.4. Monetary amounts, limits and transaction states are typically 🔴.
 - Likelihood (5.2): when an AC is new, complex, recently changed or has defect history, raise its depth one level. Recorded per AC as `Likelihood: High`.
 - Each invalid transition gets its own TC (4.2.4).
 
@@ -100,7 +100,7 @@ Internal convention built on 5.2.3 (the syllabus does not map risk levels to tec
 |---|---|
 | C1 | Rewrite the `_example` feature: implementation-free AC; add FLD, DT, ST, role matrix; TCs with technique and coverage items; coverage summary |
 | C2 | Vocabulary: keep ISTQB and BABOK terms out of the banned list; add domain-neutral checks if the pilot shows misses |
-| C3 | Validator (pulled forward from phase 4): every FLD, DT rule, ST transition and role cell is referenced by at least one TC; every TC's coverage items exist |
+| C3 | Validator (pulled forward from phase 4): every FLD, DT rule and ST transition is referenced by at least one TC; every TC's coverage items exist |
 
 ## Order
 1. Phase A → commit.

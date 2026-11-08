@@ -17,7 +17,7 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | TC-<CODE>-001 | <title> | <role> | 🔴 | ⬜ | — | — | |
 
-Result values: ⬜ Not run · ✅ Pass · ❌ Fail · ⛔ Blocked · ⏭ Skip.
+Result values: ⬜ Not run · ✅ Pass · ❌ Fail · ⛔ Blocked (OQ or missing precondition) · ⏭ Skip (user decision, reason in Note).
 
 ## Summary
 | Total | Pass | Fail | Blocked | Skip | Not run |

@@ -7,7 +7,7 @@ One copy per project. Shared files stay identical across projects; only per-proj
 
 | File | What to fill in |
 |---|---|
-| `.claude/rules/project.md` | Project name, domain, Jira key, Feature Codes, comment caps |
+| `.claude/rules/project.md` | Project name, domain, Jira key, AC source of record, notifications, Feature Codes, staging URL, roles and test accounts (no passwords), comment caps |
 | `.claude/rules/domain.md` | Domain entities, rules, compliance, Glossary, checklist |
 | `.claude/rules/vocabulary.project.md` | Extra banned words, Allow list for domain terms |
 | `.claude/settings.json` | Permissions, MCP tool names of the project's connectors |
@@ -16,6 +16,7 @@ One copy per project. Shared files stay identical across projects; only per-proj
 | `qa/test-accounts.local.md` | Test account passwords, local only, git-ignored |
 | `qa/traceability/matrix.md` | Project traceability rows |
 | `automation/` (later) | Project test code and config |
+| `docs/project/` | Project-specific notes and decisions (create when needed) |
 
 ## Shared files (never edit per project)
 
@@ -29,7 +30,7 @@ One copy per project. Shared files stay identical across projects; only per-proj
 | `.claude/commands/**` | /gen-ac, /approve, /reject, /resolve-oq, /gen-tc, /start-run, /end-run, /impact |
 | `qa/_templates/**` | AC, TC, bug, task, run, test-account templates |
 | `qa/**/_example/` | Golden examples |
-| `docs/plan.md` | Template roadmap and decisions |
+| `docs/` | Template plans, decisions, review and backlog. Generic only: no project terms |
 | `README.md`, `.gitignore` | Repo docs and ignores |
 
 - Change a shared file here first, then copy it to each project.
@@ -38,7 +39,8 @@ One copy per project. Shared files stay identical across projects; only per-proj
 ## New project
 1. Copy this repo (or use it as a GitHub template).
 2. Fill the per-project files above. Copy `qa/_templates/test-accounts.local.md` to `qa/test-accounts.local.md`.
-3. Run both test suites (see `CLAUDE.md` › Commands).
+3. Run the three test suites: lint, coverage, report (`CLAUDE.md` › Commands).
+4. Project notes and decisions go in `docs/project/` (per-project), never in the shared `docs/` files.
 
 ## Update an existing project
 - Copy only the shared files. Per-project files are never overwritten.

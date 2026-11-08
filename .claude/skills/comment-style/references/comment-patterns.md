@@ -62,7 +62,7 @@ Pick the one that matches the comment.
 | OQ-<CODE>-001 | 🔴 | Is retry allowed after a 30s gateway timeout? | AC-<CODE>-005 |
 ```
 
-- Risk: 🔴 blocker · 🟠 major · 🟡 minor. 🔴 rows first.
+- Risk: impact if the answer is wrong, on the `naming.md` scale: 🔴 Critical · 🟠 High · 🟡 Medium · ⚪ Low. 🔴 rows first.
 - `Blocks` = the exact ID it holds up, or `—`.
 - 🟠 and 🟡 rows: one closed-ended line.
 - Log questions, never answer them. No recommendations.
@@ -100,12 +100,13 @@ Features have no IDs yet, so a positional `#` is correct here only.
 ```markdown
 | Case | TC | Result | Build | Evidence |
 |---|---|---|---|---|
-| 3 decimals | TC-<CODE>-014 | ❌ Fail | 2.4.1 | screenshot-02.png |
+| 3 decimals | TC-<CODE>-014 | ❌ Fail | 2.4.1 | TC-<CODE>-014.png |
 | 2 decimals | TC-<CODE>-013 | ✅ Pass | 2.4.1 | — |
 ```
 
 - Headline status: `✅ fixed` when all pass, `⛔ reopened` when any fail.
 - Failed rows first.
+- Evidence: file name of the run row's `Evidence` path. Attach the file to the ticket.
 
 ## Exemptions: when the cap does not apply
 

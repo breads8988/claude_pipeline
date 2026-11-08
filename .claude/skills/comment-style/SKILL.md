@@ -5,7 +5,7 @@ description: Layout for every Jira comment and Claude notification (table-first,
 
 # comment-style
 
-Base principles live in `.claude/rules/writing-style.md`. This skill adds two parts.
+Base principles live in `.claude/rules/writing-style.md`. This skill adds three parts.
 
 | Part | Applies to | Reference |
 |---|---|---|

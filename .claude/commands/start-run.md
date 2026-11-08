@@ -1,6 +1,6 @@
 ---
 description: Start a test cycle for a feature on staging and execute it
-argument-hint: <feature-folder> --build <build> --scope smoke|regression|all|retest [TC-IDs]
+argument-hint: <feature-folder> --build <build> --scope smoke|all|retest [TC-IDs]|regression [--change <JIRA-KEY>]
 ---
 
 Start a run: $ARGUMENTS

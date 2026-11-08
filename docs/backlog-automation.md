@@ -14,7 +14,7 @@ Status: backlog 2026-11-08 · To discuss after the manual pilot
 | `DT` decision table (fees, limits, eligibility) | Every column | — | — |
 | `DT` role × action | Every cell: 401 / 403 for roles not permitted | 1–2 cases: hidden action | Hidden vs displayed in the UI |
 | `ST` state model | Every transition, invalid ones included | Main path only | — |
-| `BR` calculations (fee, FX, rounding) | All | Displayed value matches the API in one case | — |
+| `BR` calculations (e.g. fees, conversion, rounding) | All | Displayed value matches the API in one case | — |
 | 🔴 scenarios (main journeys) | Each step at API level | Main journey across systems | First runs, before the flow is stable |
 | `UIC` UI interactions | — | Critical interactions on 🔴 screens only | Most, by APG checklist |
 | WCAG | — | Automated scan on key pages (partial) | The rest |
@@ -23,7 +23,7 @@ Status: backlog 2026-11-08 · To discuss after the manual pilot
 
 ## API automation scope
 - Validation: every partition and boundary; error codes and error format.
-- Business rules: fees, FX, rounding, limits, eligibility (e.g. KYC, sanctions); every decision table column.
+- Business rules: calculations, rounding, limits, eligibility checks from `domain.md`; every decision table column.
 - Authorisation: every role × action, expired token, access to another user's resource.
 - Lifecycle: every valid and forbidden transition.
 - Non-functional at API level: idempotency (same request twice creates one record), concurrency, timeout and retry, partner failure through stubs.

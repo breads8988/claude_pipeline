@@ -21,7 +21,7 @@ A run is one test cycle: one feature, one build, one scope. TCs are specs and ar
 | Scope | TCs |
 |---|---|
 | `smoke` | `Priority: 🔴` |
-| `regression` | TCs picked by `impact-analysis` for the change; no change given → all active TCs |
+| `regression` | `--change <JIRA-KEY>` → TCs picked by `impact-analysis` for that change; no `--change` → all active TCs |
 | `all` | Every active and blocked TC |
 | `retest` | TCs failed in the latest run of the feature, or the TC IDs given |
 
@@ -53,3 +53,9 @@ A run is one test cycle: one feature, one build, one scope. TCs are specs and ar
 - A `Fail` is confirmed by the user before a bug goes to Jira.
 - A run never edits `ac.md` or `tc.md`.
 - Results are written as `✅ Pass` · `❌ Fail` · `⛔ Blocked` · `⏭ Skip` · `⬜`.
+
+| Result | Meaning | Set by |
+|---|---|---|
+| `⛔ Blocked` | Cannot run: open question, or precondition missing on staging. Note: OQ ID or missing precondition | Start step or agent |
+| `⏭ Skip` | Not run by the user's decision, e.g. feature off in this build. Note: reason | User only |
+| `⬜` | Not run yet | Start step |

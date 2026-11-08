@@ -1,6 +1,6 @@
 # Plan: approval, open questions and test execution
 
-Status: agreed 2026-11-07 · Phases 1–3 built · `docs/plan-test-design.md` built · Next: pilot on one real ticket
+Status: agreed 2026-11-07 · Phases 1–3 built · `docs/plan-test-design.md` built · Review batch 1 and batch 2 applied 2026-11-08 · Next: pilot on one real ticket
 
 ## Scope
 - Pre-launch: one user runs and approves everything.
@@ -13,28 +13,33 @@ Status: agreed 2026-11-07 · Phases 1–3 built · `docs/plan-test-design.md` bu
 |---|---|
 | D1 | AC source of record is the repo. Jira holds links and comments only. |
 | D2 | The user approves AC and TC with `/approve`. Approval is allowed with open questions. Editing an approved file returns it to `Draft`. |
-| D3 | Notifications go through Claude notifications (to the person running the session). |
+| D3 | Claude notifications (to the person running the session), only where the user must act: AC ready, TC ready, run paused, run failed. Each = 1-line push + table in chat. |
 | D4 | AC done → one notification: headline + table of all open questions. The user answers what they can in chat (AC updated at once) and replies `skip` for the rest. Only skipped questions are commented on the Jira ticket; `skip` counts as approval to post. |
 | D5 | AC blocked by an open question still gets TCs (IDs exist). Those TCs get `Status: Blocked`, `Blocked by: OQ-…`, and `TBD (OQ-…)` where content depends on the answer. |
 | D6 | Execution model like Zephyr: TC = spec, never edited by a run. One run file per cycle. |
-| D7 | Default execution is Mode B: an agent runs TCs in Claude in Chrome on staging. |
+| D7 | Default execution is Mode B (agent execution): the `test-runner` agent runs TCs in Claude in Chrome on staging. Mode A (a person runs the TCs) stays possible with the same run file. |
 | D8 | The agent logs in by itself through the app's login form, with one test account per role. TCs carry a `Role` field. |
 | D9 | Report is exported as one HTML file. Screenshots are taken and embedded for failed TCs only. |
-| D10 | An agent Pass is final (`Pass`); no mandatory verify step, because expected results are approved at the TC gate. When time allows, the user may re-check P1 passes (optional). A Fail is always confirmed by the user before a bug goes to Jira. |
+| D10 | An agent Pass is final (`Pass`); no mandatory verify step, because expected results are approved at the TC gate. When time allows, the user may re-check 🔴 passes (optional). A Fail is always confirmed by the user before a bug goes to Jira. |
 
 ## Pipeline
 
-```
-Jira story
-  → write-ac → ac.md (Draft) → ac-reviewer → 🔔 headline + OQ table
-  → user answers OQ in chat → AC updated · `skip` → Jira comment (skipped OQ only)
-  → /approve → Approved
-  → gen-testcase → tc.md (Active | Blocked by OQ) → tc-reviewer → 🔔
-  → /approve --tc → Approved
-  → /start-run → run file → test-runner (Mode B, staging, per role) → /end-run → HTML report → 🔔
-       Fail → log-ticket (bug draft) → user verifies → Jira
-OQ answered → /resolve-oq → update AC → TC Blocked → Active → 🔔
-```
+| Stage | Step | Output | Notification |
+|---|---|---|---|
+| 0 | Inputs: Jira ticket, design sources (`project.md`) | — | — |
+| 1 | `/gen-ac` → `write-ac` → lint → `ac-reviewer` | `ac.md` `Draft` | 🔔 AC ready + all OQ |
+| 2 | User answers OQ in chat; `skip` → one Jira comment | OQ `Answered` or `Posted` | — |
+| G1 | `/approve <feature>` (open questions allowed) | `ac.md` `Approved` | — |
+| 3 | `/gen-tc` → `gen-testcase` → validator → lint → `tc-reviewer` | `tc.md` `Draft`, OQ-dependent TCs `Blocked` | 🔔 TC ready |
+| G2 | `/approve <feature> --tc` | `tc.md` `Approved` | — |
+| 4 | `/start-run <feature> --build <b> --scope <s>` | Run file | — |
+| 5 | `test-runner` on staging, per role (Mode B) | Results in the run file | 🔔 Run paused |
+| 5b | `/design-check` side flow (planned, `plan-ui-interaction.md`) | Design report | — |
+| 6 | `/end-run` | HTML report | 🔔 Run failed (≥ 1 ❌) |
+| 7 | Fail → `log-ticket` draft → user confirms → Jira; retest scope later | `BUG-<key>.md` | — |
+
+- Side loop: `/resolve-oq` → AC and TC updated, blocked TCs `Active`, both files back to `Draft` → G1 and G2 again.
+- Change request: `/impact` → affected AC and TC.
 
 ## Work items
 
@@ -65,7 +70,7 @@ OQ answered → /resolve-oq → update AC → TC Blocked → Active → 🔔
 | 3.2 | `test-runner` agent (Mode B): log in per role on the staging URL only, run steps, compare with expected, record `Pass` · `Fail` · `Blocked` · `Skip` | `.claude/agents/test-runner.md` | Stops and notifies on OTP or an unknown URL |
 | 3.3 | Screenshot on Fail only, saved under the run's `evidence/` | `test-runner.md` | No screenshots for non-failed TCs |
 | 3.4 | Fail → `log-ticket` drafts the bug. User verifies before Jira. | `log-ticket/SKILL.md` | Bug draft links TC, AC, run and evidence |
-| 3.5 | `/end-run`: summary, HTML report (fail screenshots embedded, P1 passes listed as optional re-check), notification | `.claude/commands/`, report script | One self-contained HTML file per run |
+| 3.5 | `/end-run`: summary, HTML report (fail screenshots embedded, 🔴 passes listed as optional re-check), notification | `.claude/commands/`, report script | One self-contained HTML file per run |
 
 ### Phase 4 · Enforcement
 
@@ -77,7 +82,7 @@ OQ answered → /resolve-oq → update AC → TC Blocked → Active → 🔔
 
 ### Pilot
 - After phases 1–3, run one real ticket end to end.
-- Record: lint hits, false positives, reviewer findings, agent Pass/Fail accuracy (from optional P1 re-checks), time spent.
+- Record: lint hits, false positives, reviewer findings, agent Pass/Fail accuracy (from optional 🔴 re-checks), time spent.
 - Adjust rules and vocabulary from the results before phase 4.
 
 ## Backlog (later)
