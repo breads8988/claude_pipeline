@@ -25,7 +25,7 @@ Method: `references/test-design-techniques.md`. Format: `qa/_templates/tc.md`. R
    - Combine valid partitions in one TC; one invalid partition per TC; one invalid transition per TC.
    - No two TCs for the same coverage item and characteristic.
    - Steps run as the TC's `Role`. Element names (buttons, fields, menus) come from `project.md` › Design sources or screenshots the user attached. No source → write `TBD (UI): <element>` and list it in the notification. Never invent a name.
-8. Fill every field of `qa/_templates/tc.md`, including `Technique` and `Coverage items` (notation §4).
+8. Fill every field of `qa/_templates/tc.md`, including `Technique`, `Coverage items` (notation §4) and `Screens` (`SCR-` IDs from `qa/traceability/model.md`; a missing screen → propose the row, add it after the user confirms).
 9. Set `Priority` per `.claude/rules/naming.md` › Criticality and priority.
 10. Content that depends on an open question → write the TC anyway with `TBD (<OQ-ID>): <unknown part>`, `Status: Blocked`, `Blocked by: <OQ-ID>`. TCs that do not depend on it stay `Active`.
 11. Set `Automation`: `Candidate` for stable, high-value or data-driven flows; else `Not yet`. `Type: Non-functional` TCs run only when they can be checked manually on staging.
@@ -34,7 +34,7 @@ Method: `references/test-design-techniques.md`. Format: `qa/_templates/tc.md`. R
     - `python3 .claude/skills/gen-testcase/scripts/coverage.py qa/specs/<feature>/ac.md qa/testcases/<feature>/tc.md --summary`
 14. Run the lint; fix and re-run, max 3 attempts. Errors left → list them in the notification: `python3 .claude/skills/comment-style/scripts/lint.py qa/testcases/<feature>/tc.md`
 15. Run the `tc-reviewer` agent. Fix its findings, then re-run steps 13–14.
-16. In `qa/traceability/matrix.md`, fill the TC and Automation cells of each AC row (rules in the file header).
+16. Run `graph.py check`, fix its errors, then `graph.py matrix --write` (`CLAUDE.md` › Commands).
 17. Last: send the **TC ready for review** notification: TC count by priority, coverage % per technique, blocked count, reviewer findings left open.
 
 ## Do not

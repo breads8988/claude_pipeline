@@ -51,6 +51,7 @@ Pairwise (optional, 3+ parameters; output of `pairwise.py`; adds a `Pairwise` su
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-<CODE>-001 |
+| Screens | <SCR-<name>, … from `model.md`, or —> |
 | Technique | <one or more: Scenario, EP, BVA, Decision table, State transition, Checklist, Error guessing> |
 | Coverage items | <each in backticks: `AC-<CODE>-001`, `FLD-<CODE>-01 EP: <partition>`, `FLD-<CODE>-01 BVA: max+1 = 255`, `DT-<CODE>-01.R2`, `ST-<CODE>-01.T4`, `EG: <idea>`> |
 | Role | <role from project.md> |

@@ -53,6 +53,7 @@ BVA values (depth 🟠 → 3-value, step 1 character):
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-001 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | Scenario, Decision table, State transition, EP |
 | Coverage items | `AC-USR-001`, `DT-USR-01.R1`, `ST-USR-01.T1`, `FLD-USR-01 EP: valid` |
 | Role | Admin |
@@ -84,6 +85,7 @@ BVA values (depth 🟠 → 3-value, step 1 character):
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-001 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | BVA |
 | Coverage items | `FLD-USR-01 BVA: min = 6`, `FLD-USR-01 BVA: min+1 = 7`, `FLD-USR-01 BVA: max-1 = 253`, `FLD-USR-01 BVA: max = 254` |
 | Role | Admin |
@@ -120,6 +122,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | EP |
 | Coverage items | `AC-USR-002`, `FLD-USR-01 EP: empty` |
 | Role | Admin |
@@ -151,6 +154,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | EP |
 | Coverage items | `FLD-USR-01 EP: whitespace only` |
 | Role | Admin |
@@ -182,6 +186,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | EP |
 | Coverage items | `FLD-USR-01 EP: no @` |
 | Role | Admin |
@@ -213,6 +218,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | EP |
 | Coverage items | `FLD-USR-01 EP: two @` |
 | Role | Admin |
@@ -244,6 +250,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | EP |
 | Coverage items | `FLD-USR-01 EP: contains space` |
 | Role | Admin |
@@ -275,6 +282,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | EP |
 | Coverage items | `FLD-USR-01 EP: local part over 64 characters` |
 | Role | Admin |
@@ -306,6 +314,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | BVA |
 | Coverage items | `FLD-USR-01 BVA: min-1 = 5` |
 | Role | Admin |
@@ -339,6 +348,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | BVA |
 | Coverage items | `FLD-USR-01 BVA: max+1 = 255` |
 | Role | Admin |
@@ -370,6 +380,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-003 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | Decision table, State transition |
 | Coverage items | `AC-USR-003`, `BR-USR-002`, `DT-USR-01.R2`, `ST-USR-01.T7` |
 | Role | Admin |
@@ -401,6 +412,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-004 |
+| Screens | SCR-users |
 | Technique | Decision table |
 | Coverage items | `AC-USR-004`, `BR-USR-001`, `DT-USR-01.R3` |
 | Role | Viewer |
@@ -430,6 +442,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-005 |
+| Screens | SCR-users |
 | Technique | State transition |
 | Coverage items | `AC-USR-005`, `ST-USR-01.T3` |
 | Role | Admin |
@@ -459,6 +472,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-011 |
+| Screens | SCR-users |
 | Technique | State transition |
 | Coverage items | `AC-USR-011`, `ST-USR-01.T5` |
 | Role | Admin |
@@ -489,6 +503,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-006 |
+| Screens | SCR-accept-invite |
 | Technique | State transition |
 | Coverage items | `AC-USR-006`, `ST-USR-01.T2` |
 | Role | Anonymous |
@@ -519,6 +534,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-007 |
+| Screens | SCR-users |
 | Technique | Scenario |
 | Coverage items | `AC-USR-007` |
 | Role | Viewer |
@@ -546,6 +562,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-008 |
+| Screens | SCR-accept-invite |
 | Technique | State transition |
 | Coverage items | `AC-USR-008`, `BR-USR-004`, `ST-USR-01.T6` |
 | Role | Anonymous |
@@ -576,6 +593,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-008 |
+| Screens | SCR-accept-invite |
 | Technique | State transition |
 | Coverage items | `ST-USR-01.T4` |
 | Role | Anonymous |
@@ -606,6 +624,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-009 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | Scenario, Error guessing |
 | Coverage items | `AC-USR-009`, `BR-USR-003`, `EG: double submission` |
 | Role | Admin |
@@ -636,6 +655,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-010 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | State transition |
 | Coverage items | `AC-USR-010`, `ST-USR-01.T8` |
 | Role | Admin |
@@ -667,6 +687,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-010 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | State transition |
 | Coverage items | `ST-USR-01.T9` |
 | Role | Admin |
@@ -698,6 +719,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | EP |
 | Coverage items | `FLD-USR-01 EP: empty local part` |
 | Role | Admin |
@@ -729,6 +751,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | EP |
 | Coverage items | `FLD-USR-01 EP: missing domain` |
 | Role | Admin |
@@ -760,6 +783,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | EP |
 | Coverage items | `FLD-USR-01 EP: missing TLD` |
 | Role | Admin |
@@ -791,6 +815,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-002 |
+| Screens | SCR-users, SCR-invite-dialog |
 | Technique | EP |
 | Coverage items | `FLD-USR-01 EP: domain label over 63 characters` |
 | Role | Admin |
@@ -822,6 +847,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-004 |
+| Screens | SCR-users |
 | Technique | Decision table |
 | Coverage items | `AC-USR-004`, `DT-USR-01.R4` |
 | Role | Viewer |
@@ -852,6 +878,7 @@ Data-driven: run the steps once per test data row. Each row is one execution.
 | Field | Value |
 | --- | --- |
 | Covers AC | AC-USR-011 |
+| Screens | SCR-users |
 | Technique | State transition |
 | Coverage items | `AC-USR-011`, `ST-USR-01.T10` |
 | Role | Admin |

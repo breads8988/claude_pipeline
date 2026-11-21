@@ -9,12 +9,9 @@ Replace the generic checklist with domain terms, limits, states and compliance i
 - Key business rules: <fill in>
 - Compliance or regulation: <fill in>
 
-## Entities
-| Entity | Meaning | Features that use it |
-| --- | --- | --- |
-| <entity> | <one line> | <feature codes> |
-
-- `write-ac` searches other features by entity to find impacted existing behaviour.
+## Entities and impact links
+- Business entities, shared rules, impact hubs and screens live in `qa/traceability/model.md`.
+- `write-ac` uses them to find impacted existing behaviour. `impact-analysis` walks them.
 
 ## Glossary
 | Term | Meaning |
@@ -63,3 +60,8 @@ Replace the generic checklist with domain terms, limits, states and compliance i
 ## Examples of domain additions
 - Payments: FX rate lock and its expiry, fees, limits, corridors, KYC, sanctions screening, ledger; pairwise over corridor × currency × method × channel; reconciliation (UI = API = ledger).
 - E-commerce: cart, stock, promo rules, tax, shipping, refunds.
+
+## Examples of impact hubs (`model.md` › Impact hubs)
+- Payments: `HUB-screening`, `HUB-money-math` (FX, fees, rounding), `HUB-limits`, `HUB-ledger-recon`, `HUB-partner-messages`.
+- E-commerce: `HUB-stock`, `HUB-promo`, `HUB-tax`, `HUB-refund`.
+- SaaS: `HUB-access-control`, `HUB-tenant-isolation`, `HUB-billing`.

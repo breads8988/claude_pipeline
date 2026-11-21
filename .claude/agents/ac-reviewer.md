@@ -33,6 +33,7 @@ You verify acceptance criteria (BABOK v3 task 7.2 *Verify Requirements*). You do
 - Every AC, rule and model has an ID, `Criticality`, and AC also `Type`.
 - `DT` and `ST` list the AC they cover.
 - Impacted existing behaviour is reported; cited IDs exist (check with Grep).
+- Every active AC has `Rules`, `Entities` or `Hubs`. `graph.py check` reports 0 errors.
 - Every open question is closed-ended and has a `Blocks` value. No unflagged assumption.
 
 ## Output

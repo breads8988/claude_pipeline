@@ -28,6 +28,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🔴 Critical
 - Likelihood: Normal
 - Status: Active
+- Entities: Invitation
 - Given: an Admin and no user with the email
 - When: the Admin sends an invitation to the email
 - Then: an invitation is created with status = `Invited` and the confirmation `Invitation sent.` is displayed
@@ -37,6 +38,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🟠 High
 - Likelihood: Normal
 - Status: Active
+- Entities: Invitation
 - Given: an Admin
 - When: the Admin sends an invitation to an email that breaks `FLD-USR-01`
 - Then: rejected with ERR-USR-02: `Enter a valid email.`; no side effects: no invitation created
@@ -46,6 +48,8 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🔴 Critical
 - Likelihood: Normal
 - Status: Active
+- Rules: RULE-ACC-001
+- Entities: Invitation, User
 - Given: a user with the email exists, in any letter case (`BR-USR-002`)
 - When: the Admin sends an invitation to that email
 - Then: rejected with ERR-USR-01: `This email is already in use.`; no side effects: no invitation created
@@ -55,6 +59,8 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🔴 Critical
 - Likelihood: Normal
 - Status: Active
+- Entities: Invitation
+- Hubs: HUB-access-control
 - Given: a Viewer (`BR-USR-001`)
 - When: the Viewer submits an invitation
 - Then: rejected with ERR-USR-03: `You do not have permission to invite users.`; no side effects: no invitation created
@@ -64,6 +70,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🟠 High
 - Likelihood: High
 - Status: Active
+- Entities: Invitation
 - Given: an invitation with status = `Invited`
 - When: the expiry time passes (OQ-USR-001)
 - Then: status transitions to `Expired`
@@ -73,6 +80,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🔴 Critical
 - Likelihood: Normal
 - Status: Active
+- Entities: Invitation, Account
 - Given: an invitation with status = `Invited`
 - When: the invitee completes acceptance with a password
 - Then: status transitions to `Accepted` and the invitee's account is active
@@ -82,6 +90,8 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🟠 High
 - Likelihood: Normal
 - Status: Active
+- Entities: Invitation
+- Hubs: HUB-access-control
 - Given: a Viewer
 - When: the user list is displayed
 - Then: the invite action is not available
@@ -91,6 +101,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🔴 Critical
 - Likelihood: Normal
 - Status: Active
+- Entities: Invitation
 - Given: an invitation with status = `Expired` or `Accepted` (`BR-USR-004`)
 - When: the invitee attempts to accept it
 - Then: rejected with copy `This invitation is no longer valid.`; no side effects: status unchanged
@@ -100,6 +111,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🔴 Critical
 - Likelihood: Normal
 - Status: Active
+- Entities: Invitation
 - Given: an Admin and no user with the email
 - When: the same invitation is submitted again before the first submission returns (`BR-USR-003`)
 - Then: one invitation is created
@@ -109,6 +121,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🟠 High
 - Likelihood: Normal
 - Status: Active
+- Entities: Invitation
 - Given: an invitation for the email with status = `Invited` or `Expired`
 - When: the Admin sends an invitation to the same email
 - Then: TBD (OQ-USR-002)
@@ -118,6 +131,7 @@ Golden example: the reference for level of detail. Not a real feature.
 - Criticality: 🟠 High
 - Likelihood: Normal
 - Status: Active
+- Entities: Invitation
 - Given: an invitation with status = `Accepted` or `Expired`
 - When: the expiry time passes (any value of OQ-USR-001)
 - Then: status unchanged

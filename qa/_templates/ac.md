@@ -26,6 +26,9 @@
 - Criticality: 🔴 Critical | 🟠 High | 🟡 Medium | ⚪ Low
 - Likelihood: Normal | High
 - Status: Active | Deprecated
+- Rules: <RULE-<AREA>-NNN, … or —>
+- Entities: <business entities from `model.md`, or —>
+- Hubs: <HUB-<name>, … or —>
 - Given: <context already true>
 - When: <one action or event>
 - Then: <observable result: status, error code, copy, value, record>

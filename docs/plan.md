@@ -89,7 +89,8 @@ Status: agreed 2026-11-07 · Phases 1–3 built · `docs/plan-test-design.md` bu
 
 | Item | Trigger |
 |---|---|
-| Generate `matrix.md` from IDs; base for the traceability graph | After pilot |
+| Generate `matrix.md` from IDs; base for the traceability graph | Done: business impact graph (`graph.py`) |
+| API and DB layer of the impact graph: `stored_in` (entity → table), OpenAPI and schema generators | After the business graph pilot |
 | `VERSION` + sync script; plugin at 3+ projects | Second project starts |
 | Move the domain checklist out of always-on rules | `domain.md` grows |
 | Jira as AC source of record (mode `jira`) | A project needs it |

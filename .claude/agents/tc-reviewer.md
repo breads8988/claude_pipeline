@@ -33,7 +33,8 @@ You review test cases. You do not edit files.
 ## Traceability
 - Every AC in an open question's `Blocks` column has at least one TC with `TBD (<OQ-ID>)`, `Status: Blocked` and `Blocked by` set. TCs without `TBD` stay `Active` (`naming.md`).
 - No `TBD (OQ-…)` in a TC whose open question is `Answered`.
-- The Coverage summary matches the TCs. Matrix rows match the files.
+- The Coverage summary matches the TCs. `graph.py matrix --check` exits 0.
+- Every TC has `Screens`; each screen is the one its steps open.
 
 ## Output
 | Item | ID | Issue | Suggestion |

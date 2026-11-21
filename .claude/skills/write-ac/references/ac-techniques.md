@@ -79,8 +79,8 @@ Keep business rules out of GWT. GWT only shows the observable behaviour when a r
 
 ## 6. Impacted existing behaviour
 
-1. Find the entities this requirement touches in the `Entities` table of `domain.md`.
-2. Search other features for the same entities: `grep -rl "<entity>" qa/specs`.
+1. Find the entities, shared rules and hubs this requirement touches in `qa/traceability/model.md`.
+2. List the AC of other features linked to them: `python3 .claude/skills/impact-analysis/scripts/graph.py view <entity or RULE-ID>`.
 3. Read their Business rules, Decision tables and State models.
 4. Cite real IDs only. Never invent an ID.
 5. A contradiction you cannot resolve becomes an open question. Never pick a winner silently.

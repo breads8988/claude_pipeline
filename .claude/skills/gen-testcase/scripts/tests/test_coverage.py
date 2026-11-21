@@ -192,8 +192,8 @@ class CoverageTest(unittest.TestCase):
     def test_bva_two_value_at_medium(self):
         # FLD 🟡 cited only by a 🟡 AC: min+1 and max-1 are not required.
         ac = sub(AC, 'domain labels 1–63 characters | 🟠 |', 'domain labels 1–63 characters | 🟡 |')
-        ac = sub(ac, '- Criticality: 🟠 High\n- Likelihood: Normal\n- Status: Active\n- Given: an Admin\n- When: the Admin sends an invitation to an email that breaks',
-                 '- Criticality: 🟡 Medium\n- Likelihood: Normal\n- Status: Active\n- Given: an Admin\n- When: the Admin sends an invitation to an email that breaks')
+        ac = sub(ac, '- Criticality: 🟠 High\n- Likelihood: Normal\n- Status: Active\n- Entities: Invitation\n- Given: an Admin\n- When: the Admin sends an invitation to an email that breaks',
+                 '- Criticality: 🟡 Medium\n- Likelihood: Normal\n- Status: Active\n- Entities: Invitation\n- Given: an Admin\n- When: the Admin sends an invitation to an email that breaks')
         code, out, _ = self.go(ac, TC)
         self.assertIn('BVA label "min+1" is not required for FLD-USR-01', out)
 

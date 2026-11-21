@@ -13,7 +13,7 @@ Method: `references/ac-techniques.md`. Format: `qa/_templates/ac.md`. Reference:
 - Optional: screenshots or design images to ground UI states. Never invent UI you have not seen.
 
 ## Steps
-1. Read `.claude/rules/project.md` (Jira key, Feature Codes, roles, notifications) and `.claude/rules/domain.md` (entities, glossary, checklist).
+1. Read `.claude/rules/project.md` (Jira key, Feature Codes, roles, notifications) `.claude/rules/domain.md` (glossary, checklist) and `qa/traceability/model.md` (features, entities, shared rules, hubs).
 2. Read the ticket with the Atlassian MCP: summary, description, type, comments, linked pages. An Epic → read every child issue; trace each AC to the child it came from.
 3. Read `references/ac-techniques.md` and `qa/specs/_example/ac.md`.
 4. **Analyse** (§1): fill the analysis items, write the user story, check INVEST.
@@ -21,13 +21,15 @@ Method: `references/ac-techniques.md`. Format: `qa/_templates/ac.md`. Reference:
 6. Read existing `qa/specs/<feature>/ac.md` if present. Continue every numbering (AC, BR, FLD, DT, ST, OQ). A Feature Code missing from `project.md`: propose the row (code, feature, folder) and add it after the user confirms.
 7. **Model**: write data constraints, decision tables (including role × action) and state models wherever the requirement has them (§3, §4). A state model lists every state × event pair.
 8. **Scenarios**: write GWT AC for each scenario class that applies (§4, §5). Set `Type`, `Criticality`, `Likelihood` (§2, §7).
+   - Fill `Rules`, `Entities`, `Hubs` of each AC (`naming.md` › Impact graph). Use only nodes in `model.md`.
+   - A needed node is missing, or a `BR-` is now used by a second feature → propose the `model.md` row; add it after the user confirms.
 9. **Business rules**: one row per rule, with an example value.
 10. **Open questions** (§8): every assumption and ambiguity, closed-ended, with `Blocks`.
 11. **Gate**: run the BABOK quality gate and final checklist (§9, §11). Fix every miss. Fill `## Coverage notes` (checklist items not applicable, scenario classes skipped and why).
 12. Set the header: `Status: Draft`, `Open questions: <n>`, `Last updated`. Save to `qa/specs/<feature>/ac.md`.
 13. Run the `comment-style` lint on the saved file; fix and re-run, max 3 attempts. Errors left → list them in the notification.
 14. Run the `ac-reviewer` agent. Fix its findings, then re-run the lint.
-15. Add one row per AC to `qa/traceability/matrix.md` (Ticket, Feature, AC, Criticality; TC `—`).
+15. Run `graph.py check`, fix its errors, then `graph.py matrix --write` (`CLAUDE.md` › Commands).
 16. Last: send the **AC ready for review** notification (`comment-style` › `references/notifications.md`). Add one line each for: impacted behaviour result, counts by type and criticality, reviewer findings left open.
 
 ## Open questions: answer first, then Jira
